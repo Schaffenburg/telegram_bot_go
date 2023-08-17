@@ -5,11 +5,11 @@ import (
 	gs "github.com/rocketlaunchr/google-search"
 	tele "gopkg.in/tucnak/telebot.v2"
 
-	"git.schaffenburg.org/nyu/schaffenbot/config"
-	db "git.schaffenburg.org/nyu/schaffenbot/database"
-	"git.schaffenburg.org/nyu/schaffenbot/help"
-	"git.schaffenburg.org/nyu/schaffenbot/nyu"
-	"git.schaffenburg.org/nyu/schaffenbot/util"
+	"github.com/Schaffenburg/telegram_bot_go/config"
+	db "github.com/Schaffenburg/telegram_bot_go/database"
+	"github.com/Schaffenburg/telegram_bot_go/help"
+	"github.com/Schaffenburg/telegram_bot_go/nyu"
+	"github.com/Schaffenburg/telegram_bot_go/util"
 
 	"context"
 	"fmt"

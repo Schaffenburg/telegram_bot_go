@@ -2,7 +2,7 @@
 package help
 
 import (
-	"git.schaffenburg.org/nyu/schaffenbot/nyu"
+	"github.com/Schaffenburg/telegram_bot_go/nyu"
 
 	tele "gopkg.in/tucnak/telebot.v2"
 	"log"

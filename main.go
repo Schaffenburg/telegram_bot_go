@@ -1,16 +1,16 @@
 package main
 
 import (
-	"git.schaffenburg.org/nyu/schaffenbot/nyu"
+	"github.com/Schaffenburg/telegram_bot_go/nyu"
 
-	_ "git.schaffenburg.org/nyu/schaffenbot/debug"
-	_ "git.schaffenburg.org/nyu/schaffenbot/food"
-	_ "git.schaffenburg.org/nyu/schaffenbot/help"
-	_ "git.schaffenburg.org/nyu/schaffenbot/misc"
-	_ "git.schaffenburg.org/nyu/schaffenbot/nyu"
-	_ "git.schaffenburg.org/nyu/schaffenbot/spaceinteract"
-	_ "git.schaffenburg.org/nyu/schaffenbot/stalk"
-	_ "git.schaffenburg.org/nyu/schaffenbot/status"
+	_ "github.com/Schaffenburg/telegram_bot_go/debug"
+	_ "github.com/Schaffenburg/telegram_bot_go/food"
+	_ "github.com/Schaffenburg/telegram_bot_go/help"
+	_ "github.com/Schaffenburg/telegram_bot_go/misc"
+	_ "github.com/Schaffenburg/telegram_bot_go/nyu"
+	_ "github.com/Schaffenburg/telegram_bot_go/spaceinteract"
+	_ "github.com/Schaffenburg/telegram_bot_go/stalk"
+	_ "github.com/Schaffenburg/telegram_bot_go/status"
 )
 
 func main() {

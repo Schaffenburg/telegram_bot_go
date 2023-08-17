@@ -4,9 +4,9 @@ import (
 	tele "gopkg.in/tucnak/telebot.v2"
 	"log"
 
-	db "git.schaffenburg.org/nyu/schaffenbot/database"
-	"git.schaffenburg.org/nyu/schaffenbot/nyu"
-	"git.schaffenburg.org/nyu/schaffenbot/stalk"
+	db "github.com/Schaffenburg/telegram_bot_go/database"
+	"github.com/Schaffenburg/telegram_bot_go/nyu"
+	"github.com/Schaffenburg/telegram_bot_go/stalk"
 )
 
 type PermissionTag struct {

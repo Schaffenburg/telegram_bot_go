@@ -1,4 +1,4 @@
-module git.schaffenburg.org/nyu/schaffenbot
+module github.com/Schaffenburg/telegram_bot_go
 
 go 1.20
 

@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"git.schaffenburg.org/nyu/schaffenbot/util"
+	"github.com/Schaffenburg/telegram_bot_go/util"
 )
 
 // tododo: cron stuffs

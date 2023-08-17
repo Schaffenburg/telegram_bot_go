@@ -3,11 +3,11 @@ package debug
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
-	db "git.schaffenburg.org/nyu/schaffenbot/database"
-	"git.schaffenburg.org/nyu/schaffenbot/nyu"
-	"git.schaffenburg.org/nyu/schaffenbot/perms"
-	"git.schaffenburg.org/nyu/schaffenbot/stalk"
-	"git.schaffenburg.org/nyu/schaffenbot/util"
+	db "github.com/Schaffenburg/telegram_bot_go/database"
+	"github.com/Schaffenburg/telegram_bot_go/nyu"
+	"github.com/Schaffenburg/telegram_bot_go/perms"
+	"github.com/Schaffenburg/telegram_bot_go/stalk"
+	"github.com/Schaffenburg/telegram_bot_go/util"
 
 	"log"
 	"strconv"

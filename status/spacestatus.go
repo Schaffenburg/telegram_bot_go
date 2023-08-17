@@ -3,9 +3,9 @@ package status
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
-	db "git.schaffenburg.org/nyu/schaffenbot/database"
-	"git.schaffenburg.org/nyu/schaffenbot/help"
-	"git.schaffenburg.org/nyu/schaffenbot/nyu"
+	db "github.com/Schaffenburg/telegram_bot_go/database"
+	"github.com/Schaffenburg/telegram_bot_go/help"
+	"github.com/Schaffenburg/telegram_bot_go/nyu"
 
 	"log"
 	"time"

@@ -6,7 +6,7 @@ package stalk
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
-	"git.schaffenburg.org/nyu/schaffenbot/nyu"
+	"github.com/Schaffenburg/telegram_bot_go/nyu"
 )
 
 func init() {

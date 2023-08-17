@@ -3,8 +3,8 @@ package nyu
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
-	"git.schaffenburg.org/nyu/schaffenbot/config"
-	"git.schaffenburg.org/nyu/schaffenbot/database"
+	"github.com/Schaffenburg/telegram_bot_go/config"
+	"github.com/Schaffenburg/telegram_bot_go/database"
 
 	"log"
 	"sync"

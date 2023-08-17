@@ -4,7 +4,7 @@ this tries to keep an up2date version of all users
 package stalk
 
 import (
-	db "git.schaffenburg.org/nyu/schaffenbot/database"
+	db "github.com/Schaffenburg/telegram_bot_go/database"
 
 	tele "gopkg.in/tucnak/telebot.v2"
 

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"git.schaffenburg.org/nyu/schaffenbot/config"
-	"git.schaffenburg.org/nyu/schaffenbot/util"
+	"github.com/Schaffenburg/telegram_bot_go/config"
+	"github.com/Schaffenburg/telegram_bot_go/util"
 
 	_ "github.com/go-sql-driver/mysql"
 )
