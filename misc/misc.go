@@ -256,7 +256,7 @@ func handleDiceRoll(m *tele.Message) {
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) == 2 {
 		s, err := strconv.ParseInt(args[1], 10, 32)
-		if err == nil {
+		if err == nil && s >= 2 { // >= 2? -> otherwise \infty loop when generating intn in number() as != lastone
 			Sides = int(s)
 		}
 	}
