@@ -12,17 +12,17 @@ import (
 )
 
 func init() {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	AddCommand(tele.Command{
 		Text:        "help",
 		Description: "Zeigt eine list an befehlen an.",
 	})
 
-	bot.Handle("/help", handleHelp)
-	bot.Handle("/hilfe", handleHelp)
-	bot.Handle("/hilfe!", handleHelp)
-	bot.Handle("/?", handleHelp)
+	bot.Command("help", handleHelp)
+	bot.Command("hilfe", handleHelp)
+	bot.Command("hilfe!", handleHelp)
+	bot.Command("?", handleHelp)
 
 	nyu.OnRun(func() {
 		helpEntriesMu.Lock()
@@ -36,7 +36,7 @@ func init() {
 }
 
 func handleHelp(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	bot.Send(m.Chat, "*Command List*:\n"+HelpText(), tele.ModeMarkdown)
 }

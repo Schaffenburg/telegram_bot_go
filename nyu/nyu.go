@@ -5,15 +5,73 @@ import (
 
 	"github.com/Schaffenburg/telegram_bot_go/config"
 	"github.com/Schaffenburg/telegram_bot_go/database"
+	"github.com/Schaffenburg/telegram_bot_go/util"
 
+	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 )
 
+type Bot struct {
+	*tele.Bot
+}
+
+func (bot *Bot) GetCurrentPFP(u *tele.User) (*tele.Photo, error) {
+	p, err := bot.ProfilePhotosOf(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return &p[0], nil
+}
+
+func (b *Bot) Command(command string, h func(m *tele.Message), perms ...Permission) {
+	b.Bot.Handle("/"+command, handlePermit(h, perms...))
+}
+
+// should not be used for Commands! please also try to use OnText/OnVideo/etc. functions instead!
+func (b *Bot) Handle(command string, h func(m *tele.Message), perms ...Permission) {
+	b.Bot.Handle(command, handlePermit(h, perms...))
+}
+
+//func (b *Bot) Send(destination tele.Recipient, text string) (*tele.Message, error) {
+//	return b.Bot.Send(destination, text)
+//}
+
+// options can be nil
+func (b *Bot) Sendf(destination tele.Recipient, format string, args ...any) (*tele.Message, error) {
+	return b.Bot.Send(destination, fmt.Sprintf(format, args...))
+}
+
+func (b *Bot) Replyf(to *tele.Message, format string, args ...any) (*tele.Message, error) {
+	return b.Bot.Reply(to, fmt.Sprintf(format, args...))
+}
+
+func (b *Bot) AnswerCommand(command, text string, perms ...Permission) {
+	b.Command(command, func(m *tele.Message) {
+		bot.Send(m.Chat, util.ReplaceMulti(map[string]string{
+			"%u": m.Sender.FirstName,
+			"%t": m.Text,
+			"%h": m.Sender.Username,
+		}, text))
+	}, perms...)
+}
+
+func (b *Bot) ReplyCommand(command, text string, perms ...Permission) {
+	b.Command(command, func(m *tele.Message) {
+		bot.Reply(m, util.ReplaceMulti(map[string]string{
+			"%u": m.Sender.FirstName,
+			"%t": m.Text,
+			"%h": m.Sender.Username,
+		}, text))
+	}, perms...)
+}
+
 var (
 	poller  *ProxyPoller
-	bot     *tele.Bot
+	bot     *Bot
 	botOnce sync.Once
 )
 
@@ -23,7 +81,7 @@ func Poller() *ProxyPoller {
 	return poller
 }
 
-func Bot() *tele.Bot {
+func GetBot() *Bot {
 	botOnce.Do(makeBot)
 
 	return bot
@@ -45,11 +103,12 @@ func makeBot() {
 		Poller: poller,
 	}
 
-	var err error
-	bot, err = tele.NewBot(s)
+	b, err := tele.NewBot(s)
 	if err != nil {
 		log.Fatalf("Error adding bot: %s\n", err)
 	}
+
+	bot = &Bot{b}
 }
 
 type ProxyPoller struct {
@@ -96,13 +155,14 @@ func (p *ProxyPoller) Poll(b *tele.Bot, updates chan tele.Update, stop chan stru
 func Run() {
 	log.SetFlags(log.Flags() | log.Lshortfile)
 
-	bot := Bot()
+	bot := GetBot()
 
 	database.DB()
 
 	log.Printf("starting telebot")
 	handleRun()
-	bot.Start()
+
+	bot.Bot.Start()
 }
 
 var (
@@ -124,4 +184,50 @@ func handleRun() {
 	for i := 0; i < len(runFuncs); i++ {
 		runFuncs[i]()
 	}
+}
+
+func (bot *Bot) NewEditStreamer(chat *tele.Chat, text string) (*EditStreamer, error) {
+	return NewEditStreamer(bot, chat, text)
+}
+
+func NewEditStreamer(bot *Bot, chat *tele.Chat, text string) (*EditStreamer, error) {
+	es := new(EditStreamer)
+	es.buf = &strings.Builder{}
+	es.bot = bot
+
+	var err error
+	es.Message, err = es.bot.Send(chat, text)
+	if err != nil {
+		return nil, err
+	}
+
+	es.buf.WriteString(text)
+
+	return es, nil
+}
+
+type EditStreamer struct {
+	*tele.Message
+	sync.Mutex
+
+	bot *Bot
+
+	buf *strings.Builder
+}
+
+func (es *EditStreamer) Append(s string) error {
+	es.Lock()
+	defer es.Unlock()
+
+	es.buf.WriteString(s)
+
+	// send update
+	m, err := es.bot.Edit(es.Message, es.buf.String())
+	if err != nil {
+		return err
+	}
+
+	es.Message = m
+
+	return nil
 }

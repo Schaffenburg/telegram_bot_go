@@ -27,7 +27,7 @@ func IsMember(user, group int64) (bool, error) {
 
 // returns if user is member of group
 func IsTaggedGroupMember(user int64, tag string) (bool, error) {
-	r, err := db.StmtQuery("SELECT count(0) FROM memberships WHERE group_id = (SELECT group_id FROM group_tags WHERE tag = ?) AND user = ?",
+	r, err := db.StmtQuery("SELECT 1 FROM memberships WHERE group_id = (SELECT group_id FROM group_tags WHERE tag = ?) AND user = ?",
 		tag, user,
 	)
 	if err != nil {

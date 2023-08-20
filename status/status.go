@@ -38,79 +38,80 @@ func init() {
 		return
 	}
 
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
-	bot.Handle("/ichkommeheute", handleSetArrival)
+	bot.Command("ichkommeheute", handleSetArrival)
 	help.AddCommand(tele.Command{
 		Text:        "ichkommeheute",
 		Description: "kündigt an, dass du heute im Space sein wirst.",
 	})
-	bot.Handle("/ichkommdochnicht", handleReviseArrival)
+	bot.Command("ichkommdochnicht", handleReviseArrival)
 	help.AddCommand(tele.Command{
 		Text:        "ichkommdochnicht",
 		Description: "Revidiere deine Ankündung zu kommen.",
 	})
 
-	bot.Handle("/werkommtheute", handleListArrival)
+	bot.Command("werkommtheute", handleListArrival)
 	help.AddCommand(tele.Command{
 		Text:        "werkommtheute",
 		Description: "listet auf, wer heute im space sein will.",
 	})
 
-	bot.Handle("/weristda", handleWhoThere)
+	bot.Command("weristda", handleWhoThere)
 	help.AddCommand(tele.Command{
 		Text:        "weristda",
 		Description: "listet auf, wer grade im space ist.",
 	})
 
-	bot.Handle("/ichbinda", handleArrival)
+	bot.Command("ichbinda", handleArrival)
 	help.AddCommand(tele.Command{
 		Text:        "ichbinda",
 		Description: "bestaetigt, dass du im space bist.",
 	})
 
-	bot.Handle("/ichbinweg", handleDepart)
+	bot.Command("ichbinweg", handleDepart)
 	help.AddCommand(tele.Command{
 		Text:        "ichbinweg",
 		Description: "bestaetigt, dass du den space verlassen hast.",
 	})
-	bot.Handle("/ichgehjetzt", handleDepart)
+	bot.Command("ichgehjetzt", handleDepart)
 	help.AddCommand(tele.Command{
 		Text:        "ichgehjetzt",
 		Description: "bestaetigt, dass du den space verlassen hast.",
 	})
 
-	bot.Handle("/brb", handleBeRightBack)
+	bot.Command("brb", handleBeRightBack)
 	help.AddCommand(tele.Command{
 		Text:        "brb",
 		Description: "sag bescheid, dass du kurz weg bist.",
 	})
-	bot.Handle("/wiederda", handleAmRightBack)
+	bot.Command("wiederda", handleAmRightBack)
 	help.AddCommand(tele.Command{
 		Text:        "wiederda",
 		Description: "sag bescheid, dass wieder da bist.",
 	})
 
-	bot.Handle("/forceclean", perms.Require(handleClean,
+	bot.Command("forceclean", handleClean,
 		&perms.PermissionGroupTag{GroupTag: "perm_ev"},
-	))
+	)
 	help.AddCommand(tele.Command{
 		Text:        "forceclean",
 		Description: "raeumt die datenbank auf.",
 	})
 
-	bot.Handle("/forceevict", perms.Require(func(m *tele.Message) {
-		bot := nyu.Bot()
-		if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
-			bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist erlaubt leute rauszuschmeissen.")
-			return
+	bot.Command("forceevict",
+		func(m *tele.Message) {
+			bot := nyu.GetBot()
+			if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
+				bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist erlaubt leute rauszuschmeissen.")
+				return
 
-		}
+			}
 
-		everyoneDepart()
-	}, // permissions:
+			everyoneDepart()
+		},
 		&perms.PermissionGroupTag{GroupTag: "perm_ev"},
-	))
+	)
 	help.AddCommand(tele.Command{
 		Text:        "forceevict",
 		Description: "schmeisst alle aus dem space.",
@@ -128,7 +129,7 @@ func init() {
 }
 
 func handleListArrival(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
 		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist es erlaubt die liste an ankuendigungen zu lesen.")
 		return
@@ -166,7 +167,7 @@ func handleListArrival(m *tele.Message) {
 }
 
 func handleSetArrival(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 	// is allowed to set own arrival
 	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
 		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist es erlaubt den Space zu betreten.\nFrage doch einfach mal, ob dich jemand enlaed.")
@@ -201,13 +202,13 @@ func handleSetArrival(m *tele.Message) {
 }
 
 func handleClean(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
 		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist erlaubt aufzuraeumen.")
 		return
 	}
 
-	streamer, err := util.NewEditStreamer(bot, m.Chat, "Cleaning...")
+	streamer, err := bot.NewEditStreamer(m.Chat, "Cleaning...")
 	if err != nil {
 		log.Printf("handleClean: failed to initialize EditSteamer: %s", err)
 		return
@@ -233,7 +234,7 @@ func handleClean(m *tele.Message) {
 }
 
 func handleWhoThere(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
 		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist es erlaubt menschen im space zu ueberwachen.")
 		return
@@ -287,7 +288,7 @@ func everyoneDepart() (int64, error) {
 }
 
 func handleDepart(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	ok, err := db.SetLocationDepart(m.Sender.ID)
 	if err != nil {
@@ -302,7 +303,7 @@ func handleDepart(m *tele.Message) {
 }
 
 func handleArrival(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.Split(m.Text, " ")
 	var note string
@@ -320,7 +321,7 @@ func handleArrival(m *tele.Message) {
 }
 
 func handleBeRightBack(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	err := db.SetLocation(m.Sender.ID, time.Now().Unix(), "brb")
 	if err != nil {
@@ -331,7 +332,7 @@ func handleBeRightBack(m *tele.Message) {
 }
 
 func handleAmRightBack(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	err := db.SetLocation(m.Sender.ID, time.Now().Unix(), "")
 	if err != nil {
@@ -342,7 +343,7 @@ func handleAmRightBack(m *tele.Message) {
 }
 
 func handleReviseArrival(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	ch, err := db.RmArrival(m.Sender.ID)
 	if err != nil {

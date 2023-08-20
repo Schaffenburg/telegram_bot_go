@@ -1,11 +1,12 @@
+/*
+Implementation
+*/
 package perms
 
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
-	"log"
 
 	db "github.com/Schaffenburg/telegram_bot_go/database"
-	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/stalk"
 )
 
@@ -31,37 +32,4 @@ func (p *PermissionGroupTag) Check(m *tele.Message) (bool, error) {
 
 func (p *PermissionGroupTag) String() string {
 	return "Member of group with GroupTag(" + p.GroupTag + ")"
-}
-
-type Permission interface {
-	Check(*tele.Message) (bool, error)
-
-	String() string
-}
-
-func Require(f func(*tele.Message), perms ...Permission) func(*tele.Message) {
-	return func(m *tele.Message) {
-		bot := nyu.Bot()
-
-		var ok bool
-		var err error
-
-		for _, perm := range perms {
-			ok, err = perm.Check(m)
-			if err != nil {
-				log.Printf("Permission check failed: %s", err)
-				bot.Send(m.Chat, "Rechte ueberpruefung fehlgeschlagen!")
-
-				return
-			}
-
-			if !ok {
-				bot.Send(m.Chat, "Folgende Anforderung wird nicht erfuellt: "+perm.String())
-
-				return
-			}
-		}
-
-		f(m)
-	}
 }

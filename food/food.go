@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	err := db.StartDB()
 	if err != nil {
@@ -28,16 +28,16 @@ func init() {
 	}
 
 	// Set
-	bot.Handle("/ichmag", handleSetFavFood)
-	bot.Handle("/ichmagnicht", handleRmFavFood)
+	bot.Command("/ichmag", handleSetFavFood)
+	bot.Command("/ichmagnicht", handleRmFavFood)
 
 	// query
-	bot.Handle("/wasmag", handleWhatLikes)
-	bot.Handle("/wasmagich", handleWhatDoILike)
+	bot.Command("/wasmag", handleWhatLikes)
+	bot.Command("/wasmagich", handleWhatDoILike)
 }
 
 func handleSetFavFood(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.Split(m.Text, " ")
 	if len(args) < 3 {
@@ -58,7 +58,7 @@ func handleSetFavFood(m *tele.Message) {
 }
 
 func handleRmFavFood(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.Split(m.Text, " ")
 	if len(args) < 2 {
@@ -131,7 +131,7 @@ func RmFavFood(u int64, food string) (err error, changed bool) {
 func handleWhatLikes(m *tele.Message) {
 	const usage = "Usage: /wasmag @mention [food]"
 
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.Split(m.Text, " ")
 	if len(args) < 2 {
@@ -198,7 +198,7 @@ func handleWhatLikes(m *tele.Message) {
 }
 
 func handleWhatDoILike(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	f, err := GetFavFoods(m.Sender.ID)
 	if err != nil {
