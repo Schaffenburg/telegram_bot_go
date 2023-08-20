@@ -1,4 +1,4 @@
-package status
+package misc
 
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
