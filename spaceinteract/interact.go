@@ -8,11 +8,11 @@ import (
 )
 
 func init() {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
-	bot.Handle("/beep", handleRing)
-	bot.Handle("/gong", handleRing)
-	bot.Handle("/ring", handleRing)
+	bot.Command("beep", handleRing)
+	bot.Command("gong", handleRing)
+	bot.Command("ring", handleRing)
 	help.AddCommand(tele.Command{
 		Text:        "beep",
 		Description: "Loese einen akkustischen Ton im Space aus.",
@@ -26,18 +26,18 @@ func init() {
 		Description: "Manuell die Türklingel von Schaffenburg e.V. auslösen.",
 	})
 
-	bot.Handle("/heitzungan", handleHeatingOn)
+	bot.Command("heitzungan", handleHeatingOn)
 	help.AddCommand(tele.Command{
 		Text:        "heitzungan",
 		Description: "Manuell die Heizung im Space anmachen.",
 	})
-	bot.Handle("/heizungaus", handleHeatingOff)
+	bot.Command("heizungaus", handleHeatingOff)
 	help.AddCommand(tele.Command{
 		Text:        "heizungaus",
 		Description: "Manuell die Heizung im Space ausmachen.",
 	})
 
-	bot.Handle("/wiewarmistes", handleGetTemperature)
+	bot.Command("wiewarmistes", handleGetTemperature)
 	help.AddCommand(tele.Command{
 		Text:        "wiewarmistes",
 		Description: "Zeigt die Temperatur im Hackspace Gebaeude.",
@@ -45,17 +45,17 @@ func init() {
 }
 
 func handleRing(m *tele.Message) {
-	nyu.Bot().Send(m.Chat, "TODO: actually do gong")
+	nyu.GetBot().Send(m.Chat, "TODO: actually do gong")
 }
 
 func handleHeatingOn(m *tele.Message) {
-	nyu.Bot().Send(m.Chat, "TODO: actually interact with heating")
+	nyu.GetBot().Send(m.Chat, "TODO: actually interact with heating")
 }
 func handleHeatingOff(m *tele.Message) {
-	nyu.Bot().Send(m.Chat, "TODO: actually interact with heating")
+	nyu.GetBot().Send(m.Chat, "TODO: actually interact with heating")
 }
 
 func handleGetTemperature(m *tele.Message) {
-	nyu.Bot().Send(m.Chat, "TODO: actually interact with sensor")
+	nyu.GetBot().Send(m.Chat, "TODO: actually interact with sensor")
 
 }

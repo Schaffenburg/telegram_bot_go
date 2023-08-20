@@ -15,33 +15,33 @@ import (
 )
 
 func init() {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
-	bot.Handle("/debug_settagself", perms.Require(handleSetTagSelf,
+	bot.Command("debug_settagself", handleSetTagSelf,
 		&perms.PermissionTag{"debug"},
 		&perms.PermissionGroupTag{"perm_ev"},
-	))
-	bot.Handle("/debug_rmtagself", perms.Require(handleRmTagSelf,
+	)
+	bot.Command("debug_rmtagself", handleRmTagSelf,
 		&perms.PermissionTag{"debug"},
 		&perms.PermissionGroupTag{"perm_ev"},
-	))
+	)
 
-	bot.Handle("/debug_setgrouptagcurrent", perms.Require(handleSetGroupTagCurrent,
+	bot.Command("debug_setgrouptagcurrent", handleSetGroupTagCurrent,
 		&perms.PermissionTag{"debug"},
 		&perms.PermissionGroupTag{"perm_ev"},
-	))
+	)
 
-	bot.Handle("/debug_isgroupmemberself", perms.Require(handleIsGroupMemberSelf,
+	bot.Command("debug_isgroupmemberself", handleIsGroupMemberSelf,
 		&perms.PermissionTag{"debug"},
 		&perms.PermissionGroupTag{"perm_ev"},
-	))
-	bot.Handle("/debug_istaggedgroupmemberself", perms.Require(handleIsTaggedGroupMemberSelf,
+	)
+	bot.Command("debug_istaggedgroupmemberself", handleIsTaggedGroupMemberSelf,
 		&perms.PermissionTag{"debug"},
 		&perms.PermissionGroupTag{"perm_ev"},
-	))
+	)
 
-	bot.Handle("/hi", util.AnswerHandler(bot, "Hi to you too, %u!"))
-	bot.Handle("nya", util.ReplyHandler(bot, "nya"))
+	bot.AnswerCommand("hi", "Hi to you too, %u!")
+	bot.ReplyCommand("nya", "nya")
 
 	poller := nyu.Poller()
 
@@ -64,6 +64,7 @@ func init() {
 		}
 	}()
 
+	// check for any unhandled commands
 	bot.Handle(tele.OnText, func(m *tele.Message) {
 		if len(m.Text) > 0 && m.Text[0] == '/' {
 			bot.Send(m.Chat, "Invalid Command!")
@@ -72,7 +73,7 @@ func init() {
 }
 
 func handleRmTagSelf(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) < 2 {
@@ -97,7 +98,7 @@ func handleRmTagSelf(m *tele.Message) {
 }
 
 func handleSetTagSelf(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) < 2 {
@@ -118,7 +119,7 @@ func handleSetTagSelf(m *tele.Message) {
 }
 
 func handleIsGroupMemberSelf(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) < 2 {
@@ -142,7 +143,7 @@ func handleIsGroupMemberSelf(m *tele.Message) {
 }
 
 func handleSetGroupTagCurrent(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	if m.Chat.Type != tele.ChatGroup {
 		bot.Send(m.Chat, "grouptags are only available for Chat.Type \"ChatGroup\".")
@@ -168,7 +169,7 @@ func handleSetGroupTagCurrent(m *tele.Message) {
 }
 
 func handleIsTaggedGroupMemberSelf(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) < 2 {
@@ -179,7 +180,7 @@ func handleIsTaggedGroupMemberSelf(m *tele.Message) {
 
 	tag := args[1]
 
-	status, err := stalk.IsTaggedGroupMember(m.Chat.ID, tag)
+	status, err := stalk.IsTaggedGroupMember(m.Sender.ID, tag)
 	if err != nil {
 		log.Printf("Error getting membership status of tagged group: %s", err)
 		bot.Send(m.Chat, "Ohno, "+err.Error())

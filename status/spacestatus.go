@@ -27,35 +27,35 @@ func init() {
 		return
 	}
 
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
-	bot.Handle("/spaceopen", handleOpen)
-	bot.Handle("/openspace", handleOpen)
+	bot.Command("spaceopen", handleOpen)
+	bot.Command("openspace", handleOpen)
 	help.AddCommand(tele.Command{
 		Text:        "openspace",
 		Description: "oeffnet den space.",
 	})
 
-	bot.Handle("/spaceclose", handleClose)
-	bot.Handle("/closespace", handleClose)
+	bot.Command("spaceclose", handleClose)
+	bot.Command("closespace", handleClose)
 	help.AddCommand(tele.Command{
 		Text:        "closespace",
 		Description: "schliesst den space.",
 	})
 
-	bot.Handle("/spacestatus", handleGetStatus)
+	bot.Command("spacestatus", handleGetStatus)
 	help.AddCommand(tele.Command{
 		Text:        "spacestatus",
 		Description: "zeigt den status des spaces an.",
 	})
 
 	// subscription services:
-	bot.Handle("/abonnieren", handleSubscribe)
+	bot.Command("abonnieren", handleSubscribe)
 	help.AddCommand(tele.Command{
 		Text:        "abonnieren",
 		Description: "Abonniere den spacestatus als private push nachricht.",
 	})
-	bot.Handle("/abobeenden", handleUnsubscribe)
+	bot.Command("abobeenden", handleUnsubscribe)
 	help.AddCommand(tele.Command{
 		Text:        "abobeenden",
 		Description: "Kündige das Abonnement für private Benachrichtigungen über den Spacestatus.",
@@ -63,7 +63,7 @@ func init() {
 }
 
 func handleOpen(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 	// TODO: perms
 
 	err := SetStatus("open")
@@ -75,7 +75,7 @@ func handleOpen(m *tele.Message) {
 }
 
 func handleClose(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 	// TODO: perms
 
 	err := SetStatus("closed")
@@ -107,7 +107,7 @@ func GetStatus(when time.Time) (status string, err error) {
 }
 
 func updateStatus(now time.Time, status string) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	var msg string
 	switch status {
@@ -145,7 +145,7 @@ func SetStatus(status string) error {
 }
 
 func handleGetStatus(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	status, err := GetStatus(time.Now())
 	if err != nil {
@@ -158,7 +158,7 @@ func handleGetStatus(m *tele.Message) {
 }
 
 func handleSubscribe(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	err := db.SetUserTag(m.Sender.ID, SpaceStatusSubTag)
 	if err != nil {
@@ -170,7 +170,7 @@ func handleSubscribe(m *tele.Message) {
 }
 
 func handleUnsubscribe(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	ch, err := db.RmUserTag(m.Sender.ID, SpaceStatusSubTag)
 	if err != nil {

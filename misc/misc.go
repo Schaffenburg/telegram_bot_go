@@ -22,61 +22,62 @@ import (
 )
 
 func init() {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
-	bot.Handle("/datum", util.AnswerHandler(bot, "Es scheint so als gäbe es in Aschaffenburg kein Konzept für Zeitrechnung."))
+	//func (b *Bot) AnswerCommand(command, text string, perms ...Permission) {
+	bot.AnswerCommand("datum", "Es scheint so als gäbe es in Aschaffenburg kein Konzept für Zeitrechnung.")
 	help.AddCommand(tele.Command{
 		Text:        "datum",
 		Description: "zeigt Uhrzeit/Datum abhängig vom Standort.",
 	})
-	bot.Handle("/hallo", util.AnswerHandler(bot, "Hallo @%h!"))
+	bot.AnswerCommand("hallo", "Hallo @%h!")
 	help.AddCommand(tele.Command{
 		Text:        "hallo",
 		Description: "sagt dem Bot hallo.",
 	})
-	bot.Handle("/lol", util.AnswerHandler(bot, "rofl @%h hat lol gesagt!"))
+	bot.AnswerCommand("lol", "rofl @%h hat lol gesagt!")
 	help.AddCommand(tele.Command{
 		Text:        "lol",
 		Description: "Einfach nur lol",
 	})
-	bot.Handle("/rofl", util.AnswerHandler(bot, "lol @%h hat rofl gesagt!"))
+	bot.AnswerCommand("/rofl", "lol @%h hat rofl gesagt!")
 	help.AddCommand(tele.Command{
 		Text:        "rofl",
 		Description: "Einfach rofl",
 	})
 
-	bot.Handle("/schleudern", handleSlap("@sender schleudert @argument ein bisschen herum mit einer großen Forelle"))
+	bot.Command("schleudern", handleSlap("@sender schleudert @argument ein bisschen herum mit einer großen Forelle"))
 	help.AddCommand(tele.Command{
 		Text:        "schleudern",
 		Description: "schleudert jemanden herum über seinen usernamen",
 	})
-	bot.Handle("/slap", handleSlap("@sender slaps @argument around a bit with a large trout"))
+	bot.Command("slap", handleSlap("@sender slaps @argument around a bit with a large trout"))
 	help.AddCommand(tele.Command{
 		Text:        "slap",
 		Description: "slaps someone",
 	})
-	bot.Handle("/forelliere", handleSlap("@sender schlägt @argument eine große Forelle um die Ohren"))
+	bot.Command("forelliere", handleSlap("@sender schlägt @argument eine große Forelle um die Ohren"))
 	help.AddCommand(tele.Command{
 		Text:        "forelliere",
 		Description: "forelliert jemanden",
 	})
-	bot.Handle("/batsche", handleSlap("@sender batscht @argument mithilfe eines Barsches"))
+	bot.Command("batsche", handleSlap("@sender batscht @argument mithilfe eines Barsches"))
 	help.AddCommand(tele.Command{
 		Text:        "batsche",
 		Description: "batsche jemanden ein Barsch ins Gesicht",
 	})
 
-	bot.Handle("/mussichhaben", util.AnswerHandler(bot, "*nicht!"))
+	bot.AnswerCommand("mussichhaben", "*nicht!")
 	help.AddCommand(tele.Command{
 		Text:        "mussichhaben",
 		Description: "muss ich haben",
 	})
-	bot.Handle("/ping", util.ReplyHandler(bot, "pong"))
+	bot.ReplyCommand("ping", "pong")
 	help.AddCommand(tele.Command{
 		Text:        "ping",
 		Description: "Einfach ping",
 	})
-	bot.Handle("/wielautetdieantwort", func(m *tele.Message) {
+	bot.Command("wielautetdieantwort", func(m *tele.Message) {
 		bot.Send(m.Chat, "Die Antwort auf die endgültige Frage nach dem Leben, dem Universum und dem ganzen Rest lautet..")
 		time.Sleep(time.Second * 3)
 
@@ -87,7 +88,7 @@ func init() {
 		Description: "Stellt DIE eine entgültige Frage, nach dem Leben, dem Universum und dem ganzen Rest.",
 	})
 
-	bot.Handle("/echo", func(m *tele.Message) {
+	bot.Command("echo", func(m *tele.Message) {
 		if len(m.Text) > 5 {
 			bot.Send(m.Chat, m.Text[5:])
 		} else {
@@ -99,33 +100,33 @@ func init() {
 		Description: "zeigt text an",
 	})
 
-	bot.Handle("/gidf", handleGoogle)
+	bot.Command("gidf", handleGoogle) // TODO perms_cix
 	help.AddCommand(tele.Command{
 		Text:        "gidf",
 		Description: "[Google ist dein Freund](https://gidf.at)",
 	})
 
-	bot.Handle("/wecker", handleTimer)
+	bot.Command("wecker", handleTimer)
 	help.AddCommand(tele.Command{
 		Text:        "wecker",
 		Description: "sagt nyu, dass du in X Zeit erinnert werden willst.",
 	})
-	bot.Handle("/werbinich", handleWhoAmI)
+	bot.Command("werbinich", handleWhoAmI)
 	help.AddCommand(tele.Command{
 		Text:        "werbinich",
 		Description: "zeigt deine ID, Name, Username und Profilbild an.",
 	})
-	bot.Handle("/wuerfeln", handleDiceRoll)
+	bot.Command("wuerfeln", handleDiceRoll)
 	help.AddCommand(tele.Command{
 		Text:        "wuerfeln",
 		Description: "würfelt.",
 	})
-	bot.Handle("/featurerequest", handleAddFeatureRequest)
+	bot.Command("featurerequest", handleAddFeatureRequest)
 	help.AddCommand(tele.Command{
 		Text:        "featurerequest",
 		Description: "ein neues Feature fuer den Bot anfragen.",
 	})
-	bot.Handle("/wetter", handleWeather)
+	bot.Command("wetter", handleWeather)
 	help.AddCommand(tele.Command{
 		Text:        "wetter",
 		Description: "zeigt das wetter im space.",
@@ -133,7 +134,7 @@ func init() {
 }
 
 func handleGoogle(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	var query string
 
@@ -190,7 +191,7 @@ func handleGoogle(m *tele.Message) {
 }
 
 func handleTimer(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) != 2 {
@@ -228,9 +229,9 @@ func handleTimer(m *tele.Message) {
 var utctime, _ = time.LoadLocation("UTC")
 
 func handleWhoAmI(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
-	photo, err := util.GetCurrentPFP(bot, m.Sender)
+	photo, err := bot.GetCurrentPFP(m.Sender)
 	if err != nil {
 		log.Printf("Faield to get current PFP of %s: %s", m.Sender.ID, err)
 		bot.Send(m.Chat, "Ohno, "+err.Error())
@@ -249,7 +250,7 @@ var RSource = rand.New(rand.NewSource(time.Now().UnixNano() + 42))
 
 func handleDiceRoll(m *tele.Message) {
 	const Text = "Wuerfeln... "
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	var Sides = 6
 	// alt num of sides:
@@ -300,7 +301,7 @@ func handleDiceRoll(m *tele.Message) {
 }
 
 func handleAddFeatureRequest(m *tele.Message) {
-	bot := nyu.Bot()
+	bot := nyu.GetBot()
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) != 2 {
@@ -320,7 +321,7 @@ func handleAddFeatureRequest(m *tele.Message) {
 
 func handleSlap(text string) func(m *tele.Message) {
 	return func(m *tele.Message) {
-		bot := nyu.Bot()
+		bot := nyu.GetBot()
 
 		args := strings.SplitN(m.Text, " ", 2)
 		if len(args) != 2 {
@@ -366,5 +367,5 @@ func handleWeather(m *tele.Message) {
 		doComma = true
 	}
 
-	nyu.Bot().Send(m.Chat, s.String())
+	nyu.GetBot().Send(m.Chat, s.String())
 }
