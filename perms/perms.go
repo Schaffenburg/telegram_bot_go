@@ -8,7 +8,50 @@ import (
 
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/stalk"
+
+	"strings"
 )
+
+var (
+	// if member of any space releated group
+	MemberSpaceGroup = &PermissionOr{
+		&PermissionGroupTag{"perm_ev"},
+		&PermissionGroupTag{"perm_cix"},
+	}
+)
+
+// specifies permission of which one must be satisfied
+type PermissionOr []Permission
+
+func (p PermissionOr) Check(m *tele.Message) (ok bool, err error) {
+	for _, p := range p {
+		ok, err = p.Check(m)
+		if ok {
+			return true, nil
+		}
+	}
+
+	return ok, nil
+}
+
+func (p PermissionOr) String() string {
+	b := &strings.Builder{}
+
+	b.WriteString("(")
+
+	notFirst := false
+	for _, p := range p {
+		if notFirst {
+			b.WriteString(" or ")
+		}
+
+		b.WriteString(p.String())
+	}
+
+	b.WriteString(")")
+
+	return b.String()
+}
 
 type PermissionTag struct {
 	Tag string
@@ -32,4 +75,10 @@ func (p *PermissionGroupTag) Check(m *tele.Message) (bool, error) {
 
 func (p *PermissionGroupTag) String() string {
 	return "Member of group with GroupTag(" + p.GroupTag + ")"
+}
+
+type Permission interface {
+	Check(*tele.Message) (bool, error)
+
+	String() string
 }

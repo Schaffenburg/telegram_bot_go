@@ -9,6 +9,7 @@ import (
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/help"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
+	"github.com/Schaffenburg/telegram_bot_go/perms"
 	"github.com/Schaffenburg/telegram_bot_go/util"
 
 	"context"
@@ -21,7 +22,22 @@ import (
 	"time"
 )
 
+var (
+	PermsDB = &nyu.PermissionFailText{
+		Perm: perms.MemberSpaceGroup,
+
+		Text: "Um misc Befehle, die dinge in einer Datenbank speichern musst du Mitglied einer Spaceeigenen Gruppe sein",
+	}
+
+	PermsInternet = &nyu.PermissionFailText{
+		Perm: perms.MemberSpaceGroup,
+
+		Text: "Um misc Befehle, die mit dem Internet interaggieren, musst du mitglied in der e.V. oder CIX gruppe sein.",
+	}
+)
+
 func init() {
+
 	bot := nyu.GetBot()
 
 	//func (b *Bot) AnswerCommand(command, text string, perms ...Permission) {
@@ -100,7 +116,7 @@ func init() {
 		Description: "zeigt text an",
 	})
 
-	bot.Command("gidf", handleGoogle) // TODO perms_cix
+	bot.Command("gidf", handleGoogle, PermsInternet)
 	help.AddCommand(tele.Command{
 		Text:        "gidf",
 		Description: "[Google ist dein Freund](https://gidf.at)",
@@ -121,7 +137,7 @@ func init() {
 		Text:        "wuerfeln",
 		Description: "würfelt.",
 	})
-	bot.Command("featurerequest", handleAddFeatureRequest)
+	bot.Command("featurerequest", handleAddFeatureRequest, PermsDB)
 	help.AddCommand(tele.Command{
 		Text:        "featurerequest",
 		Description: "ein neues Feature fuer den Bot anfragen.",

@@ -28,12 +28,12 @@ func init() {
 	}
 
 	// Set
-	bot.Command("/ichmag", handleSetFavFood)
-	bot.Command("/ichmagnicht", handleRmFavFood)
+	bot.Command("/ichmag", handleSetFavFood, PermsDB)
+	bot.Command("/ichmagnicht", handleRmFavFood, PermsDB)
 
 	// query
-	bot.Command("/wasmag", handleWhatLikes)
-	bot.Command("/wasmagich", handleWhatDoILike)
+	bot.Command("/wasmag", handleWhatLikes, PermsDB)
+	bot.Command("/wasmagich", handleWhatDoILike, PermsDB)
 }
 
 func handleSetFavFood(m *tele.Message) {

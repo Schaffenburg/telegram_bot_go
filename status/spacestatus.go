@@ -6,12 +6,21 @@ import (
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/help"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
+	"github.com/Schaffenburg/telegram_bot_go/perms"
 
 	"log"
 	"time"
 )
 
 const SpaceStatusSubTag = "status_info"
+
+var (
+	PermsSetStatus = &nyu.PermissionFailText{
+		Perm: &perms.PermissionGroupTag{"perm_ev"},
+
+		Text: "Um Befehle, die den Spacestatus setzen du benutzen, musst du Mitglied der e.V. Gruppe sein",
+	}
+)
 
 func init() {
 	err := db.StartDB()
@@ -29,15 +38,15 @@ func init() {
 
 	bot := nyu.GetBot()
 
-	bot.Command("spaceopen", handleOpen)
-	bot.Command("openspace", handleOpen)
+	bot.Command("spaceopen", handleOpen, PermsSetStatus)
+	bot.Command("openspace", handleOpen, PermsSetStatus)
 	help.AddCommand(tele.Command{
 		Text:        "openspace",
 		Description: "oeffnet den space.",
 	})
 
-	bot.Command("spaceclose", handleClose)
-	bot.Command("closespace", handleClose)
+	bot.Command("spaceclose", handleClose, PermsSetStatus)
+	bot.Command("closespace", handleClose, PermsSetStatus)
 	help.AddCommand(tele.Command{
 		Text:        "closespace",
 		Description: "schliesst den space.",

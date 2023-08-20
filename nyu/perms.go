@@ -20,18 +20,18 @@ type CustomPermission interface {
 }
 
 // Wraps a Permission to include a ErrorText function returning Text
-type PermissionFixedText struct {
+type PermissionFailText struct {
 	Perm Permission
 
 	Text string
 }
 
-func (p *PermissionFixedText) FailText() string {
+func (p *PermissionFailText) FailText() string {
 	return p.Text
 }
 
-func (p *PermissionFixedText) Check(m *tele.Message) (bool, error) { return p.Perm.Check(m) }
-func (p *PermissionFixedText) String() string                      { return p.Perm.String() }
+func (p *PermissionFailText) Check(m *tele.Message) (bool, error) { return p.Perm.Check(m) }
+func (p *PermissionFailText) String() string                      { return p.Perm.String() }
 
 func handlePermit(f func(*tele.Message), perms ...Permission) func(*tele.Message) {
 	return func(m *tele.Message) {

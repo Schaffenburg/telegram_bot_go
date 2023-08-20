@@ -17,28 +17,20 @@ import (
 func init() {
 	bot := nyu.GetBot()
 
-	bot.Command("debug_settagself", handleSetTagSelf,
-		&perms.PermissionTag{"debug"},
-		&perms.PermissionGroupTag{"perm_ev"},
-	)
-	bot.Command("debug_rmtagself", handleRmTagSelf,
-		&perms.PermissionTag{"debug"},
-		&perms.PermissionGroupTag{"perm_ev"},
-	)
+	// permissions required for debug commands:
+	const permFailText = "Debugging Befehle benoetigen sowohl das debug Tag als auch eine Mitgliedschaft in der e.V. gruppe"
+	perms := []nyu.Permission{
+		&nyu.PermissionFailText{Perm: &perms.PermissionTag{"debug"}, Text: permFailText},
+		&nyu.PermissionFailText{Perm: &perms.PermissionGroupTag{"perm_ev"}, Text: permFailText},
+	}
 
-	bot.Command("debug_setgrouptagcurrent", handleSetGroupTagCurrent,
-		&perms.PermissionTag{"debug"},
-		&perms.PermissionGroupTag{"perm_ev"},
-	)
+	bot.Command("debug_settagself", handleSetTagSelf, perms...)
+	bot.Command("debug_rmtagself", handleRmTagSelf, perms...)
 
-	bot.Command("debug_isgroupmemberself", handleIsGroupMemberSelf,
-		&perms.PermissionTag{"debug"},
-		&perms.PermissionGroupTag{"perm_ev"},
-	)
-	bot.Command("debug_istaggedgroupmemberself", handleIsTaggedGroupMemberSelf,
-		&perms.PermissionTag{"debug"},
-		&perms.PermissionGroupTag{"perm_ev"},
-	)
+	bot.Command("debug_setgrouptagcurrent", handleSetGroupTagCurrent, perms...)
+
+	bot.Command("debug_isgroupmemberself", handleIsGroupMemberSelf, perms...)
+	bot.Command("debug_istaggedgroupmemberself", handleIsTaggedGroupMemberSelf, perms...)
 
 	bot.AnswerCommand("hi", "Hi to you too, %u!")
 	bot.ReplyCommand("nya", "nya")
