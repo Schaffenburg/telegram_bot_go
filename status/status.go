@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	PermsLocation = &nyu.PermissionFailText{
+	PermsEV = &nyu.PermissionFailText{
 		Perm: &perms.PermissionGroupTag{"perm_ev"},
 
 		Text: "Fuer diesen Befehl musst du leider in der e.V. gruppe sein",
@@ -48,36 +48,36 @@ func init() {
 
 	bot := nyu.GetBot()
 
-	bot.Command("ichkommeheute", handleSetArrival, PermsLocation)
+	bot.Command("ichkommeheute", handleSetArrival, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "ichkommeheute",
 		Description: "kündigt an, dass du heute im Space sein wirst.",
 	})
-	bot.Command("ichkommdochnicht", handleReviseArrival, PermsLocation)
+	bot.Command("ichkommdochnicht", handleReviseArrival, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "ichkommdochnicht",
 		Description: "Revidiere deine Ankündung zu kommen.",
 	})
 
-	bot.Command("werkommtheute", handleListArrival, PermsLocation)
+	bot.Command("werkommtheute", handleListArrival, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "werkommtheute",
 		Description: "listet auf, wer heute im space sein will.",
 	})
 
-	bot.Command("weristda", handleWhoThere, PermsLocation)
+	bot.Command("weristda", handleWhoThere, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "weristda",
 		Description: "listet auf, wer grade im space ist.",
 	})
 
-	bot.Command("ichbinda", handleArrival, PermsLocation)
+	bot.Command("ichbinda", handleArrival, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "ichbinda",
 		Description: "bestaetigt, dass du im space bist.",
 	})
 
-	bot.Command("ichbinweg", handleDepart, PermsLocation)
+	bot.Command("ichbinweg", handleDepart, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "ichbinweg",
 		Description: "bestaetigt, dass du den space verlassen hast.",
@@ -88,12 +88,12 @@ func init() {
 		Description: "bestaetigt, dass du den space verlassen hast.",
 	})
 
-	bot.Command("brb", handleBeRightBack, PermsLocation)
+	bot.Command("brb", handleBeRightBack, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "brb",
 		Description: "sag bescheid, dass du kurz weg bist.",
 	})
-	bot.Command("wiederda", handleAmRightBack, PermsLocation)
+	bot.Command("wiederda", handleAmRightBack, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "wiederda",
 		Description: "sag bescheid, dass wieder da bist.",
@@ -114,7 +114,7 @@ func init() {
 			everyoneDepart()
 			bot.Send(m.Chat, "alle weg.")
 		},
-		PermsLocation)
+		PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "forceevict",
 		Description: "schmeisst alle aus dem space.",
