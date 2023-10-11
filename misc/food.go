@@ -4,12 +4,15 @@ import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
 	db "github.com/Schaffenburg/telegram_bot_go/database"
+	"github.com/Schaffenburg/telegram_bot_go/help"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/stalk"
 
 	"log"
 	"strings"
 )
+
+const TagGetFood = "get_food"
 
 func init() {
 	bot := nyu.GetBot()
@@ -19,210 +22,102 @@ func init() {
 		log.Fatalf("Failed to open DB: %s", err)
 	}
 
-	database := db.DB()
-
-	_, err = database.Exec("CREATE TABLE IF NOT EXISTS `foods` ( `user` BIGINT, `food` VARCHAR(50), `preferance` TEXT, PRIMARY KEY (user, food));")
-	if err != nil {
-		log.Printf("error creating table foods: %s", err)
-		return
-	}
-
-	// Set
-	bot.Command("/ichmag", handleSetFavFood, PermsDB)
-	bot.Command("/ichmagnicht", handleRmFavFood, PermsDB)
-
-	// query
-	bot.Command("/wasmag", handleWhatLikes, PermsDB)
-	bot.Command("/wasmagich", handleWhatDoILike, PermsDB)
+	bot.Command("werholtessen", handleWhoGetsFood, PermsDB)
+	help.AddCommand(tele.Command{
+		Text:        "werholtessen",
+		Description: "Zeigt an, wer essen holt.",
+	})
+	bot.Command("ichholeessen", handleIGetFood, PermsDB)
+	help.AddCommand(tele.Command{
+		Text:        "ichholeessen",
+		Description: "sag bescheid, dass du essen holst.",
+	})
+	bot.Command("ichholdochkeinessen", handleIDontGetFood, PermsDB)
+	help.AddCommand(tele.Command{
+		Text:        "ichholdochkeinessen",
+		Description: "sag bescheid, dass du doch kein essen holst.",
+	})
 }
 
-func handleSetFavFood(m *tele.Message) {
+func handleWhoGetsFood(m *tele.Message) {
 	bot := nyu.GetBot()
 
-	args := strings.Split(m.Text, " ")
-	if len(args) < 3 {
-		bot.Send(m.Chat, "Usage: /ichmag <food> <desc...>")
+	u, err := db.GetUsersWithTag(TagGetFood)
+	if err != nil {
+		log.Printf("Failed to get uses with '%s'-tag: %s", TagGetFood, err)
+		bot.Send(m.Chat, "Ohno, ein fehler!")
+
 		return
 	}
 
-	food := args[1]
-	desc := strings.Join(args[2:], " ")
+	if len(u) == 0 {
+		bot.Send(m.Chat, "Sieht so aus, als wuerde niemand etwas holen :(")
 
-	err := SetFavFood(m.Sender.ID, food, desc)
-	if err != nil {
-		log.Printf("failed to set fav food for %d: %s", m.Sender.ID, err)
-		bot.Send(m.Chat, "Ohno, es gab einen Fehler: "+err.Error())
-	} else {
-		bot.Send(m.Chat, "Noted.")
-	}
-}
-
-func handleRmFavFood(m *tele.Message) {
-	bot := nyu.GetBot()
-
-	args := strings.Split(m.Text, " ")
-	if len(args) < 2 {
-		bot.Send(m.Chat, "Usage: /ichmagnicht <food>")
 		return
 	}
 
-	food := args[1]
+	var user tele.User
+	b := strings.Builder{}
+	printAnd := false
 
-	err, changed := RmFavFood(m.Sender.ID, food)
-	if err != nil {
-		log.Printf("failed to remove fav food for %d: %s", m.Sender.ID, err)
-		bot.Send(m.Chat, "Ohno, es gab einen Fehler: "+err.Error())
-	} else {
-		if changed {
-			bot.Send(m.Chat, "Noted.")
-		} else {
-			bot.Send(m.Chat, "Wusste ich gar, dass du das mochtest o.O.")
-		}
-	}
-}
-
-type Food struct {
-	Food, Preferance string
-}
-
-func GetFavFoods(u int64) ([]Food, error) {
-	d, err := db.StmtQuery("SELECT food, preferance FROM foods WHERE user = ?", u)
-	if err != nil {
-		return nil, err
-	}
-
-	f := make([]Food, 0)
-	var food, pref string
-
-	for d.Next() {
-		err := d.Scan(&food, &pref)
+	for i := 0; i < len(u); i++ {
+		user, err = stalk.GetUserByID(u[i])
 		if err != nil {
-			return nil, err
+			log.Printf("Failed to get user with id '%d': %s", u[i], err)
+			bot.Send(m.Chat, "Ohno, ein fehler!")
+
+			return
 		}
 
-		f = append(f, Food{food, pref})
-	}
-
-	return f, nil
-}
-
-func SetFavFood(u int64, food, desc string) error {
-	_, err := db.StmtExec("INSERT INTO foods (user, food, preferance) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE preferance = VALUES(preferance);",
-		u, food, desc,
-	)
-
-	return err
-}
-
-func RmFavFood(u int64, food string) (err error, changed bool) {
-	r, err := db.StmtExec("DELETE FROM foods WHERE (user = ?) AND (food = ?);",
-		u, food,
-	)
-
-	if err != nil {
-		return
-	}
-
-	num, err := r.RowsAffected()
-
-	return err, num > 0
-}
-
-func handleWhatLikes(m *tele.Message) {
-	const usage = "Usage: /wasmag @mention [food]"
-
-	bot := nyu.GetBot()
-
-	args := strings.Split(m.Text, " ")
-	if len(args) < 2 {
-		bot.Send(m.Chat, usage)
-		return
-	}
-
-	user, ok := stalk.GetUser(args[1])
-	if !ok {
-		bot.Send(m.Chat, ""+args[1]+" konnte nicht gefunden werden :(")
-		return
-	}
-
-	f, err := GetFavFoods(user.ID)
-	if err != nil {
-		log.Printf("Failed to get Likes of %d: %s", user.ID, err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
-		return
-	}
-
-	if len(f) <= 0 {
-		bot.Send(m.Chat, user.FirstName+" hat (noch) keine Vorlieben eingetragen.")
-		return
-	}
-
-	b := &strings.Builder{}
-
-	b.WriteString(user.FirstName)
-	b.WriteString(" (")
-	b.WriteString(user.Username)
-	b.WriteString(") mag")
-
-	if len(args) == 3 {
-		fnd := false
-		b.WriteString(" ")
-		b.WriteString(args[2])
-
-		for _, f := range f {
-			if f.Food == args[2] {
-				fnd = true
-
-				b.WriteString(" (")
-				b.WriteString(f.Preferance)
-				b.WriteString(")")
-			}
+		if printAnd {
+			b.WriteString(" & ")
 		}
 
-		if !fnd {
-			b.WriteString(" nicht, das ist mobbing!")
+		b.WriteString(user.FirstName)
+		if len(user.LastName) > 0 {
+			b.WriteString(" ")
+			b.WriteString(user.LastName)
 		}
-	} else {
-		b.WriteString(":")
-
-		for _, f := range f {
-			b.WriteString("\n - ")
-			b.WriteString(f.Food)
-			b.WriteString(" (")
-			b.WriteString(f.Preferance)
-			b.WriteString(")")
-		}
-	}
-
-	bot.Send(m.Chat, b.String())
-}
-
-func handleWhatDoILike(m *tele.Message) {
-	bot := nyu.GetBot()
-
-	f, err := GetFavFoods(m.Sender.ID)
-	if err != nil {
-		log.Printf("Failed to get Likes of %d: %s", m.Sender.ID, err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
-		return
-	}
-
-	if len(f) <= 0 {
-		bot.Send(m.Chat, "Du mochtest doch gar nichts o.O")
-		return
-	}
-
-	b := &strings.Builder{}
-
-	b.WriteString("Do magst:")
-
-	for _, f := range f {
-		b.WriteString("\n - ")
-		b.WriteString(f.Food)
 		b.WriteString(" (")
-		b.WriteString(f.Preferance)
+		b.WriteString(user.Username)
 		b.WriteString(")")
+
+		printAnd = true
 	}
 
+	b.WriteString(" will/wollen was holen")
+
 	bot.Send(m.Chat, b.String())
+}
+
+func handleIGetFood(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	err := db.SetUserTag(m.Sender.ID, TagGetFood)
+	if err != nil {
+		log.Printf("Failed to set tag '%s' for user %d: %s", TagGetFood, m.Sender.ID, err)
+		bot.Send(m.Chat, "Ohno, es gab einen Fehler :(")
+
+		return
+	}
+
+	bot.Send(m.Chat, "Ok, merke ich mir :D")
+}
+
+func handleIDontGetFood(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	ch, err := db.RmUserTag(m.Sender.ID, TagGetFood)
+	if err != nil {
+		log.Printf("Failed to rm tag '%s' for user %d: %s", TagGetFood, m.Sender.ID, err)
+		bot.Send(m.Chat, "Ohno, es gab einen Fehler :(")
+
+		return
+	}
+
+	if ch {
+		bot.Send(m.Chat, "Ok, dann halt nicht")
+	} else {
+		bot.Send(m.Chat, "Ok, wusste gar nicht, dass du das vor hattest o.O")
+	}
 }

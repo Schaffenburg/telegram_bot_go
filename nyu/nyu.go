@@ -9,10 +9,17 @@ import (
 
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
+
+type Recipient int64
+
+func (r Recipient) Recipient() string {
+	return strconv.FormatInt(int64(r), 10)
+}
 
 type Bot struct {
 	*tele.Bot

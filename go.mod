@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/briandowns/openweathermap v0.19.0
+	github.com/derzombiiie/emessage v0.0.0-20230717125507-e944c82a4824
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gookit/color v1.5.4
 	github.com/rocketlaunchr/google-search v1.1.6
@@ -32,4 +33,5 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
+	gopkg.in/resty.v1 v1.12.0 // indirect
 )

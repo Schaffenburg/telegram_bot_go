@@ -9,6 +9,7 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/perms"
 
 	"log"
+	"sync"
 	"time"
 )
 
@@ -57,6 +58,11 @@ func init() {
 		Text:        "spacestatus",
 		Description: "zeigt den status des spaces an.",
 	})
+	bot.Command("status", handleGetStatus, PermsEV)
+	help.AddCommand(tele.Command{
+		Text:        "status",
+		Description: "zeigt den status des spaces an.",
+	})
 
 	// subscription services:
 	bot.Command("abonnieren", handleSubscribe)
@@ -96,7 +102,8 @@ func handleClose(m *tele.Message) {
 }
 
 // returns newest status entry closest to when
-func GetStatus(when time.Time) (status string, err error) {
+func GetStatus(when time.Time) (status SpaceStatus, err error) {
+	println("query")
 	r, err := db.StmtQuery(`SELECT status FROM spacestatus
 	WHERE time < ?
 	ORDER BY time DESC
@@ -104,6 +111,7 @@ func GetStatus(when time.Time) (status string, err error) {
 		when.Unix(),
 	)
 
+	println("err != nil")
 	if err != nil {
 		return
 	}
@@ -115,33 +123,89 @@ func GetStatus(when time.Time) (status string, err error) {
 	return status, r.Scan(&status)
 }
 
-func updateStatus(now time.Time, status string) {
-	bot := nyu.GetBot()
+type UserArrival struct {
+	User int64
+	When time.Time
+}
 
-	var msg string
-	switch status {
+// returns list of people who want to arrive today who have a Tag
+func ListUsersWithTagArrivingToday(key string) (s []UserArrival, err error) {
+	res, err := db.StmtQuery(`SELECT tags.user, at.time
+	FROM tags as tags
+	INNER JOIN arrivalTimes AS at ON tags.user = at.user
+	WHERE tags.tag = ?;`, key)
+	_ = res
+	if err != nil {
+		return nil, err
+	}
+
+	s = make([]UserArrival, 0)
+	var user, arrival int64
+
+	for res.Next() {
+		err = res.Scan(&user, &arrival)
+		if err != nil {
+			return nil, err
+		}
+
+		s = append(s, UserArrival{
+			User: user,
+			When: time.Unix(arrival, 0),
+		})
+	}
+
+	return s, nil
+}
+
+type SpaceStatus string
+
+func (s SpaceStatus) Text() string {
+	switch string(s) {
 	case "open":
-		msg = "Der space ist jetzt geoeffnet!"
+		return "Der space ist jetzt geoeffnet!"
 	case "closed":
-		msg = "Der space ist jetzt geschlossen!"
+		return "Der space ist jetzt geschlossen!"
 
 	default:
-		msg = "Space status: " + status
+		return "Space status: " + string(s)
 	}
+}
+
+var (
+	statusUpdateChsMu sync.RWMutex
+	statusUpdateChs   []chan SpaceStatus
+)
+
+func AddStatusCh(ch chan SpaceStatus) {
+	statusUpdateChsMu.Lock()
+	defer statusUpdateChsMu.Unlock()
+
+	statusUpdateChs = append(statusUpdateChs, ch)
+}
+
+func updateStatus(now time.Time, status SpaceStatus) {
+	bot := nyu.GetBot()
 
 	// send stuff (everyone with tag status_info gets the info)
 	users, err := db.GetUsersWithTag(SpaceStatusSubTag)
 	for _, u := range users {
-		bot.Send(&tele.User{ID: u}, msg)
+		bot.Send(&tele.User{ID: u}, status.Text())
 	}
 	if err != nil {
 		log.Printf("Failed to broadcast spacestatus update: %s", err)
 	}
 
+	// broadcast to channels
+	statusUpdateChsMu.RLock()
+	for i := 0; i < len(statusUpdateChs); i++ {
+		statusUpdateChs[i] <- status
+	}
+	statusUpdateChsMu.RUnlock()
+
 	// boadcast to groups
 }
 
-func SetStatus(status string) error {
+func SetStatus(status SpaceStatus) error {
 	now := time.Now()
 
 	updateStatus(now, status)
@@ -156,14 +220,17 @@ func SetStatus(status string) error {
 func handleGetStatus(m *tele.Message) {
 	bot := nyu.GetBot()
 
+	println("Get status now")
 	status, err := GetStatus(time.Now())
 	if err != nil {
+		println("err")
 		log.Printf("Failed to get status: %s", err)
 		bot.Send(m.Chat, "Ohno, "+err.Error())
 		return
 	}
 
-	bot.Send(m.Chat, "Space status: "+status)
+	println("send status")
+	bot.Sendf(m.Chat, "Space status: %s", status)
 }
 
 func handleSubscribe(m *tele.Message) {

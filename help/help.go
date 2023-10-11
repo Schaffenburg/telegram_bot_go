@@ -30,7 +30,7 @@ func init() {
 
 		err := bot.SetCommands(helpEntries)
 		if err != nil {
-			log.Printf("Error setting commands(%d): %s", len(helpEntries), err)
+			log.Printf("Error setting commands.len(%d): %s", len(helpEntries), err)
 		}
 	})
 }

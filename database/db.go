@@ -146,6 +146,25 @@ func SetGroupTag(group int64, tag string) error {
 	return err
 }
 
+// on len(0) returns nil []
+func GetTaggedGroups(tag string) (groups []int64, err error) {
+	r, err := StmtQuery("SELECT group_id FROM group_tags WHERE tag = ?;",
+		tag,
+	)
+
+	var buf int64
+	for r.Next() {
+		err = r.Scan(&buf)
+		if err != nil {
+			return
+		}
+
+		groups = append(groups, buf)
+	}
+
+	return
+}
+
 // removes tag from user, bool is true if tag was present, false if it was not set
 func RmUserTag(user int64, tag string) (bool, error) {
 	r, err := StmtExec("DELETE FROM tags WHERE user = ? AND tag = ?;",

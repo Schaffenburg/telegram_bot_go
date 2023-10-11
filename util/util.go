@@ -4,6 +4,7 @@ import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -104,4 +105,19 @@ func ReplaceMulti(m map[string]string, txt string) string {
 
 func OneOf[K any](r *rand.Rand, of []K) K {
 	return of[r.Intn(len(of))]
+}
+
+func Join[K any](s []K, delim string) (str string) {
+	notFirst := false
+	for i := 0; i < len(s); i++ {
+		if notFirst {
+			str += delim
+		}
+
+		str += fmt.Sprintf("%v", s[i])
+
+		notFirst = true
+	}
+
+	return
 }

@@ -48,6 +48,8 @@ func init() {
 
 	bot := nyu.GetBot()
 
+	bot.Command("heikomaas", handleSetArrival, PermsEV)
+	bot.Command("eta", handleSetArrival, PermsEV)
 	bot.Command("ichkommeheute", handleSetArrival, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "ichkommeheute",
@@ -88,6 +90,7 @@ func init() {
 		Description: "bestaetigt, dass du den space verlassen hast.",
 	})
 
+	bot.Command("afk", handleBeRightBack, PermsEV) // alias
 	bot.Command("brb", handleBeRightBack, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "brb",

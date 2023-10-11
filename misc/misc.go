@@ -23,6 +23,12 @@ import (
 )
 
 var (
+	PermsGroupEV = &nyu.PermissionFailText{
+		Perm: perms.GroupEV,
+
+		Text: "Um Befehle, die den Bot nachtichten schreiben lassen musst du Mitglied der e.V. Gruppe sein",
+	}
+
 	PermsDB = &nyu.PermissionFailText{
 		Perm: perms.MemberSpaceGroup,
 
@@ -32,7 +38,7 @@ var (
 	PermsInternet = &nyu.PermissionFailText{
 		Perm: perms.MemberSpaceGroup,
 
-		Text: "Um misc Befehle, die mit dem Internet interaggieren, musst du mitglied in der e.V. oder CIX gruppe sein.",
+		Text: "Um misc Befehle, die mit dem Internet interaggieren, musst du mitglied in der e.V. oder CIX gruppe sein",
 	}
 )
 
@@ -60,6 +66,17 @@ func init() {
 	help.AddCommand(tele.Command{
 		Text:        "rofl",
 		Description: "Einfach rofl",
+	})
+
+	bot.AnswerCommand("/hallo", "Hallo @%h!")
+	help.AddCommand(tele.Command{
+		Text:        "hallo",
+		Description: "Sag dem Bot hallo",
+	})
+	bot.AnswerCommand("/hello", "Hello @%h!")
+	help.AddCommand(tele.Command{
+		Text:        "hello",
+		Description: "Sag dem Bot hallo",
 	})
 
 	bot.Command("schleudern", handleSlap("@sender schleudert @argument ein bisschen herum mit einer großen Forelle"))
@@ -147,6 +164,47 @@ func init() {
 		Text:        "wetter",
 		Description: "zeigt das wetter im space.",
 	})
+
+	bot.Command("cix", handleBroadcastCIX, PermsGroupEV)
+	bot.Command("nyusletter", handleBroadcastCIX, PermsGroupEV)
+	help.AddCommand(tele.Command{
+		Text:        "nyusletter",
+		Description: "Broadcast <text> to e.V. gruppe",
+	})
+}
+
+func handleBroadcastCIX(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	args := strings.SplitN(m.Text, " ", 2)
+	if len(args) != 2 {
+		bot.Send(m.Chat, "Usage: /nyusletter <text>")
+
+		return
+	}
+
+	text := args[1]
+
+	g, err := db.GetTaggedGroups("perm_cix") // get ev group
+	if err != nil {
+		log.Printf("Failed to determin ev group: %s", err)
+		bot.Send(m.Chat, "Ohno, es gab einen Fehler")
+
+		return
+	}
+
+	if len(g) == 0 {
+		log.Printf("Failed to determin ev group: no gropus")
+		bot.Send(m.Chat, "Ohno, es gab einen Fehler")
+
+		return
+	}
+
+	bot.Sendf(m.Chat, "Ok, broadcased to group(s): %v", g)
+
+	for i := 0; i < len(g); i++ {
+		bot.Send(nyu.Recipient(g[i]), text)
+	}
 }
 
 func handleGoogle(m *tele.Message) {
@@ -171,7 +229,7 @@ func handleGoogle(m *tele.Message) {
 		CountryCode:  "de",
 		LanguageCode: "de",
 
-		Limit: 5,
+		Limit: 10,
 	})
 	if err != nil {
 		log.Printf("Error searching google for '%s': %s", query, err)
@@ -180,6 +238,8 @@ func handleGoogle(m *tele.Message) {
 		// doesnt return as the link and "Google ist dein Freund!" text is still better that just errors
 		// return
 	}
+
+	log.Printf("Google results for '%s': %v", query, r)
 
 	b := &strings.Builder{}
 	b.WriteString("[Google](")
@@ -249,7 +309,7 @@ func handleWhoAmI(m *tele.Message) {
 
 	photo, err := bot.GetCurrentPFP(m.Sender)
 	if err != nil {
-		log.Printf("Faield to get current PFP of %s: %s", m.Sender.ID, err)
+		log.Printf("Faield to get current PFP of %d: %s", m.Sender.ID, err)
 		bot.Send(m.Chat, "Ohno, "+err.Error())
 		return
 	}
@@ -355,13 +415,21 @@ func handleSlap(text string) func(m *tele.Message) {
 func handleWeather(m *tele.Message) {
 	conf := config.Get()
 
+	args := strings.Split(m.Text, " ")
+
 	w, err := owm.NewCurrent("c", "de", conf.WeatherToken)
 	if err != nil {
 		log.Printf("Error creating current owm: %s", err)
 		return
 	}
 
-	w.CurrentByName(conf.WeatherLocation)
+	var location = conf.WeatherLocation
+
+	if len(args) > 1 {
+		location = args[1]
+	}
+
+	w.CurrentByName(location)
 
 	s := &strings.Builder{}
 
