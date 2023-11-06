@@ -1,10 +1,13 @@
 module github.com/Schaffenburg/telegram_bot_go
 
-go 1.20
+go 1.21.2
+
+toolchain go1.21.3
 
 require (
 	github.com/briandowns/openweathermap v0.19.0
 	github.com/derzombiiie/emessage v0.0.0-20230717125507-e944c82a4824
+	github.com/derzombiiie/timeanddate v0.0.0-20231106133002-9f93050b1305
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gookit/color v1.5.4
 	github.com/rocketlaunchr/google-search v1.1.6
@@ -27,9 +30,9 @@ require (
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/net v0.15.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect

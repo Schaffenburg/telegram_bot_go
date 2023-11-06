@@ -2,6 +2,7 @@ package misc
 
 import (
 	owm "github.com/briandowns/openweathermap"
+	tad "github.com/derzombiiie/timeanddate"
 	gs "github.com/rocketlaunchr/google-search"
 	tele "gopkg.in/tucnak/telebot.v2"
 
@@ -47,7 +48,8 @@ func init() {
 	bot := nyu.GetBot()
 
 	//func (b *Bot) AnswerCommand(command, text string, perms ...Permission) {
-	bot.AnswerCommand("datum", "Es scheint so als gäbe es in Aschaffenburg kein Konzept für Zeitrechnung.")
+	//bot.AnswerCommand("datum", "Es scheint so als gäbe es in Aschaffenburg kein Konzept für Zeitrechnung.")
+	bot.Command("datum", handleGetTime)
 	help.AddCommand(tele.Command{
 		Text:        "datum",
 		Description: "zeigt Uhrzeit/Datum abhängig vom Standort.",
@@ -171,6 +173,49 @@ func init() {
 		Text:        "nyusletter",
 		Description: "Broadcast <text> to e.V. gruppe",
 	})
+}
+
+func handleGetTime(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	args := strings.SplitN(m.Text, " ", 2)
+	var query string
+
+	if len(args) != 2 {
+		query = config.Get().DefafultTimeLocation
+	} else {
+		query = args[1]
+
+	}
+
+	var ErrText = "Es scheint so als gäbe es in " + query + " kein Konzept für Zeitrechnung."
+
+	res, err := tad.Search(query)
+	if err != nil {
+		log.Printf("TAD: Failed to search '%s': %s", query, err)
+
+		bot.Send(m.Chat, ErrText)
+		return
+	}
+
+	if len(res) == 0 {
+		bot.Send(m.Chat, ErrText)
+		return
+	}
+
+	data, err := tad.Get(res[0].Path)
+	if err != nil {
+		log.Printf("TAD: Failed to get: %s", err)
+
+		bot.Send(m.Chat, ErrText)
+		return
+	}
+
+	bot.Sendf(m.Chat, "Die Zeit in %s (%s) betaegt grade %s\nEs ist der %d. %s %d",
+		res[0].City, data.Country,
+		data.Time,
+		data.Date.Day, data.Date.Month, data.Date.Year,
+	)
 }
 
 func handleBroadcastCIX(m *tele.Message) {
