@@ -39,22 +39,13 @@ func init() {
 	bot := nyu.GetBot()
 
 	bot.Command("pagerhinzufuegen", handleAddPager)
-	help.AddCommand(tele.Command{
-		Text:        "pagerhinzufuegen",
-		Description: "Fuege einen Pager hinzu",
-	})
+	help.AddCommand("pagerhinzufuegen")
 
 	bot.Command("pagerentfernen", handleRmPager)
-	help.AddCommand(tele.Command{
-		Text:        "pagerentfernen",
-		Description: "Entfernt einen Pager",
-	})
+	help.AddCommand("pagerentfernen")
 
 	bot.Command("listpagers", handleListPager)
-	help.AddCommand(tele.Command{
-		Text:        "listpagers",
-		Description: "Listet einen pager",
-	})
+	help.AddCommand("listpagers")
 
 	go func() {
 		var status status.SpaceStatus

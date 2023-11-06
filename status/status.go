@@ -6,6 +6,7 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/cron"
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/help"
+	loc "github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
 	"github.com/Schaffenburg/telegram_bot_go/stalk"
@@ -22,7 +23,7 @@ var (
 	PermsEV = &nyu.PermissionFailText{
 		Perm: &perms.PermissionGroupTag{"perm_ev"},
 
-		Text: "Fuer diesen Befehl musst du leider in der e.V. gruppe sein",
+		Text: loc.MustTrans("perms.FailGroupEV"), //,
 	}
 )
 
@@ -51,64 +52,34 @@ func init() {
 	bot.Command("heikomaas", handleSetArrival, PermsEV)
 	bot.Command("eta", handleSetArrival, PermsEV)
 	bot.Command("ichkommeheute", handleSetArrival, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "ichkommeheute",
-		Description: "kündigt an, dass du heute im Space sein wirst.",
-	})
+	help.AddCommand("ichkommeheute")
 	bot.Command("ichkommdochnicht", handleReviseArrival, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "ichkommdochnicht",
-		Description: "Revidiere deine Ankündung zu kommen.",
-	})
+	help.AddCommand("ichkommdochnicht")
 
 	bot.Command("werkommtheute", handleListArrival, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "werkommtheute",
-		Description: "listet auf, wer heute im space sein will.",
-	})
+	help.AddCommand("werkommtheute")
 
 	bot.Command("weristda", handleWhoThere, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "weristda",
-		Description: "listet auf, wer grade im space ist.",
-	})
+	help.AddCommand("weristda")
 
 	bot.Command("ichbinda", handleArrival, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "ichbinda",
-		Description: "bestaetigt, dass du im space bist.",
-	})
+	help.AddCommand("ichbinda")
 
 	bot.Command("ichbinweg", handleDepart, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "ichbinweg",
-		Description: "bestaetigt, dass du den space verlassen hast.",
-	})
+	help.AddCommand("ichbinweg")
 	bot.Command("ichgehjetzt", handleDepart)
-	help.AddCommand(tele.Command{
-		Text:        "ichgehjetzt",
-		Description: "bestaetigt, dass du den space verlassen hast.",
-	})
+	help.AddCommand("ichgehjetzt")
 
 	bot.Command("afk", handleBeRightBack, PermsEV) // alias
 	bot.Command("brb", handleBeRightBack, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "brb",
-		Description: "sag bescheid, dass du kurz weg bist.",
-	})
+	help.AddCommand("brb")
 	bot.Command("wiederda", handleAmRightBack, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "wiederda",
-		Description: "sag bescheid, dass wieder da bist.",
-	})
+	help.AddCommand("wiederda")
 
 	bot.Command("forceclean", handleClean,
 		&perms.PermissionGroupTag{GroupTag: "perm_ev"},
 	)
-	help.AddCommand(tele.Command{
-		Text:        "forceclean",
-		Description: "raeumt die datenbank auf.",
-	})
+	help.AddCommand("forceclean")
 
 	bot.Command("forceevict",
 		func(m *tele.Message) {
@@ -118,10 +89,7 @@ func init() {
 			bot.Send(m.Chat, "alle weg.")
 		},
 		PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "forceevict",
-		Description: "schmeisst alle aus dem space.",
-	})
+	help.AddCommand("forceevict")
 
 	// Clean space at 4:00 o Clock
 	cron.Daily(func() {

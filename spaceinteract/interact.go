@@ -4,6 +4,7 @@ import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
 	"github.com/Schaffenburg/telegram_bot_go/help"
+	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
 )
@@ -12,7 +13,7 @@ var (
 	PermsInteract = &nyu.PermissionFailText{
 		Perm: perms.MemberSpaceGroup,
 
-		Text: "Um Befehle, die dinge im Space bewirken musst du Mitglied in der e.V. Gruppe sein",
+		Text: loc.MustTrans("perms.FailDoSpaceEV"),
 	}
 )
 
@@ -22,35 +23,17 @@ func init() {
 	bot.Command("beep", handleRing, PermsInteract)
 	bot.Command("gong", handleRing, PermsInteract)
 	bot.Command("ring", handleRing, PermsInteract)
-	help.AddCommand(tele.Command{
-		Text:        "beep",
-		Description: "Loese einen akkustischen Ton im Space aus.",
-	})
-	help.AddCommand(tele.Command{
-		Text:        "gong",
-		Description: "Manuell die Türklingel von Schaffenburg e.V. auslösen.",
-	})
-	help.AddCommand(tele.Command{
-		Text:        "ring",
-		Description: "Manuell die Türklingel von Schaffenburg e.V. auslösen.",
-	})
+	help.AddCommand("beep")
+	help.AddCommand("gong")
+	help.AddCommand("ring")
 
 	bot.Command("heitzungan", handleHeatingOn, PermsInteract)
-	help.AddCommand(tele.Command{
-		Text:        "heitzungan",
-		Description: "Manuell die Heizung im Space anmachen.",
-	})
+	help.AddCommand("heitzungan")
 	bot.Command("heizungaus", handleHeatingOff, PermsInteract)
-	help.AddCommand(tele.Command{
-		Text:        "heizungaus",
-		Description: "Manuell die Heizung im Space ausmachen.",
-	})
+	help.AddCommand("heizungaus")
 
 	bot.Command("wiewarmistes", handleGetTemperature, PermsInteract)
-	help.AddCommand(tele.Command{
-		Text:        "wiewarmistes",
-		Description: "Zeigt die Temperatur im Hackspace Gebaeude.",
-	})
+	help.AddCommand("wiewarmistes")
 }
 
 func handleRing(m *tele.Message) {

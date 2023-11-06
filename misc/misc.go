@@ -9,6 +9,7 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/config"
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/help"
+	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
 	"github.com/Schaffenburg/telegram_bot_go/util"
@@ -27,19 +28,19 @@ var (
 	PermsGroupEV = &nyu.PermissionFailText{
 		Perm: perms.GroupEV,
 
-		Text: "Um Befehle, die den Bot nachtichten schreiben lassen musst du Mitglied der e.V. Gruppe sein",
+		Text: loc.MustTrans("perms.FailGroupEV"), //"Um Befehle, die den Bot nachtichten schreiben lassen musst du Mitglied der e.V. Gruppe sein",
 	}
 
 	PermsDB = &nyu.PermissionFailText{
 		Perm: perms.MemberSpaceGroup,
 
-		Text: "Um misc Befehle, die dinge in einer Datenbank speichern musst du Mitglied einer Spaceeigenen Gruppe sein",
+		Text: loc.MustTrans("perms.FailDB"),
 	}
 
 	PermsInternet = &nyu.PermissionFailText{
 		Perm: perms.MemberSpaceGroup,
 
-		Text: "Um misc Befehle, die mit dem Internet interaggieren, musst du mitglied in der e.V. oder CIX gruppe sein",
+		Text: loc.MustTrans("perms.FailInternet"),
 	}
 )
 
@@ -50,78 +51,39 @@ func init() {
 	//func (b *Bot) AnswerCommand(command, text string, perms ...Permission) {
 	//bot.AnswerCommand("datum", "Es scheint so als gäbe es in Aschaffenburg kein Konzept für Zeitrechnung.")
 	bot.Command("datum", handleGetTime)
-	help.AddCommand(tele.Command{
-		Text:        "datum",
-		Description: "zeigt Uhrzeit/Datum abhängig vom Standort.",
-	})
+	help.AddCommand("datum")
 	bot.AnswerCommand("hallo", "Hallo @%h!")
-	help.AddCommand(tele.Command{
-		Text:        "hallo",
-		Description: "sagt dem Bot hallo.",
-	})
+	help.AddCommand("hallo")
 	bot.AnswerCommand("lol", "rofl @%h hat lol gesagt!")
-	help.AddCommand(tele.Command{
-		Text:        "lol",
-		Description: "Einfach nur lol",
-	})
+	help.AddCommand("lol")
 	bot.AnswerCommand("/rofl", "lol @%h hat rofl gesagt!")
-	help.AddCommand(tele.Command{
-		Text:        "rofl",
-		Description: "Einfach rofl",
-	})
+	help.AddCommand("rofl")
 
 	bot.AnswerCommand("/hallo", "Hallo @%h!")
-	help.AddCommand(tele.Command{
-		Text:        "hallo",
-		Description: "Sag dem Bot hallo",
-	})
+	help.AddCommand("hallo")
 	bot.AnswerCommand("/hello", "Hello @%h!")
-	help.AddCommand(tele.Command{
-		Text:        "hello",
-		Description: "Sag dem Bot hallo",
-	})
+	help.AddCommand("hello")
 
 	bot.Command("schleudern", handleSlap("@sender schleudert @argument ein bisschen herum mit einer großen Forelle"))
-	help.AddCommand(tele.Command{
-		Text:        "schleudern",
-		Description: "schleudert jemanden herum über seinen usernamen",
-	})
+	help.AddCommand("schleudern")
 	bot.Command("slap", handleSlap("@sender slaps @argument around a bit with a large trout"))
-	help.AddCommand(tele.Command{
-		Text:        "slap",
-		Description: "slaps someone",
-	})
+	help.AddCommand("slap")
 	bot.Command("forelliere", handleSlap("@sender schlägt @argument eine große Forelle um die Ohren"))
-	help.AddCommand(tele.Command{
-		Text:        "forelliere",
-		Description: "forelliert jemanden",
-	})
+	help.AddCommand("forelliere")
 	bot.Command("batsche", handleSlap("@sender batscht @argument mithilfe eines Barsches"))
-	help.AddCommand(tele.Command{
-		Text:        "batsche",
-		Description: "batsche jemanden ein Barsch ins Gesicht",
-	})
+	help.AddCommand("batsche")
 
 	bot.AnswerCommand("mussichhaben", "*nicht!")
-	help.AddCommand(tele.Command{
-		Text:        "mussichhaben",
-		Description: "muss ich haben",
-	})
+	help.AddCommand("mussichhaben")
 	bot.ReplyCommand("ping", "pong")
-	help.AddCommand(tele.Command{
-		Text:        "ping",
-		Description: "Einfach ping",
-	})
+	help.AddCommand("ping")
 	bot.Command("wielautetdieantwort", func(m *tele.Message) {
 		bot.Send(m.Chat, "Die Antwort auf die endgültige Frage nach dem Leben, dem Universum und dem ganzen Rest lautet..")
 		time.Sleep(time.Second * 3)
 
 		bot.Send(m.Chat, "*42*!", tele.ModeMarkdown)
 	})
-	help.AddCommand(tele.Command{
-		Text:        "wielautetdieantwort",
-		Description: "Stellt DIE eine entgültige Frage, nach dem Leben, dem Universum und dem ganzen Rest.",
-	})
+	help.AddCommand("wielautetdieantwort")
 
 	bot.Command("echo", func(m *tele.Message) {
 		if len(m.Text) > 5 {
@@ -130,49 +92,24 @@ func init() {
 			bot.Send(m.Chat, "Usage: /echo <text>")
 		}
 	})
-	help.AddCommand(tele.Command{
-		Text:        "echo",
-		Description: "zeigt text an",
-	})
+	help.AddCommand("echo")
 
 	bot.Command("gidf", handleGoogle, PermsInternet)
-	help.AddCommand(tele.Command{
-		Text:        "gidf",
-		Description: "[Google ist dein Freund](https://gidf.at)",
-	})
+	help.AddCommand("gidf")
 
 	bot.Command("wecker", handleTimer)
-	help.AddCommand(tele.Command{
-		Text:        "wecker",
-		Description: "sagt nyu, dass du in X Zeit erinnert werden willst.",
-	})
+	help.AddCommand("wecker")
 	bot.Command("werbinich", handleWhoAmI)
-	help.AddCommand(tele.Command{
-		Text:        "werbinich",
-		Description: "zeigt deine ID, Name, Username und Profilbild an.",
-	})
+	help.AddCommand("werbinich")
 	bot.Command("wuerfeln", handleDiceRoll)
-	help.AddCommand(tele.Command{
-		Text:        "wuerfeln",
-		Description: "würfelt.",
-	})
+	help.AddCommand("wuerfeln")
 	bot.Command("featurerequest", handleAddFeatureRequest, PermsDB)
-	help.AddCommand(tele.Command{
-		Text:        "featurerequest",
-		Description: "ein neues Feature fuer den Bot anfragen.",
-	})
+	help.AddCommand("featurerequest")
 	bot.Command("wetter", handleWeather)
-	help.AddCommand(tele.Command{
-		Text:        "wetter",
-		Description: "zeigt das wetter im space.",
-	})
+	help.AddCommand("wetter")
 
 	bot.Command("cix", handleBroadcastCIX, PermsGroupEV)
 	bot.Command("nyusletter", handleBroadcastCIX, PermsGroupEV)
-	help.AddCommand(tele.Command{
-		Text:        "nyusletter",
-		Description: "Broadcast <text> to e.V. gruppe",
-	})
 }
 
 func handleGetTime(m *tele.Message) {

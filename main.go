@@ -5,6 +5,7 @@ import (
 
 	_ "github.com/Schaffenburg/telegram_bot_go/debug"
 	_ "github.com/Schaffenburg/telegram_bot_go/help"
+	_ "github.com/Schaffenburg/telegram_bot_go/localize"
 	_ "github.com/Schaffenburg/telegram_bot_go/misc"
 	_ "github.com/Schaffenburg/telegram_bot_go/nyu"
 	_ "github.com/Schaffenburg/telegram_bot_go/pager"

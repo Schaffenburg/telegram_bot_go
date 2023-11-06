@@ -23,22 +23,13 @@ func init() {
 	bot := nyu.GetBot()
 
 	bot.Command("ichhabeinenschluessel", handleHaveKey, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "ichhabeinenschluessel",
-		Description: "sag bescheid, dass du einen space schluessel hast.",
-	})
+	help.AddCommand("ichhabeinenschluessel")
 
 	bot.Command("ichhabkeinenschluessel", handleDontHaveKey, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "ichhabkeinenschluessel",
-		Description: "sag bescheid, dass du keinen space schluessel hast.",
-	})
+	help.AddCommand("ichhabkeinenschluessel")
 
 	bot.Command("kommtwermitschluessel", handleListArrivalWKey, perms.MemberSpaceGroup) // no keys
-	help.AddCommand(tele.Command{
-		Text:        "kommtwermitschluessel",
-		Description: "zeigt auf, ob jemand mit schluessel heute kommt.",
-	})
+	help.AddCommand("kommtwermitschluessel")
 }
 
 func handleHaveKey(m *tele.Message) {

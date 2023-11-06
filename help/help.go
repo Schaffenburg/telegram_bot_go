@@ -2,6 +2,7 @@
 package help
 
 import (
+	loc "github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 
 	tele "gopkg.in/tucnak/telebot.v2"
@@ -11,13 +12,15 @@ import (
 	"sync"
 )
 
+type Command struct {
+	Text        string // command w/o slash
+	Description loc.Translation
+}
+
 func init() {
 	bot := nyu.GetBot()
 
-	AddCommand(tele.Command{
-		Text:        "help",
-		Description: "Zeigt eine list an befehlen an.",
-	})
+	AddCommand("help")
 
 	bot.Command("help", handleHelp)
 	bot.Command("hilfe", handleHelp)
@@ -41,11 +44,14 @@ func handleHelp(m *tele.Message) {
 	bot.Send(m.Chat, "*Command List*:\n"+HelpText(), tele.ModeMarkdown)
 }
 
-func AddCommand(c tele.Command) {
+func AddCommand(c string) {
 	helpEntriesMu.Lock()
 	defer helpEntriesMu.Unlock()
 
-	helpEntries = append(helpEntries, c)
+	helpEntries = append(helpEntries, tele.Command{
+		Text:        c,
+		Description: loc.MustTrans("help." + c).Get(loc.DefaultLang()),
+	})
 }
 
 type Commands []tele.Command

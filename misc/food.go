@@ -23,20 +23,11 @@ func init() {
 	}
 
 	bot.Command("werholtessen", handleWhoGetsFood, PermsDB)
-	help.AddCommand(tele.Command{
-		Text:        "werholtessen",
-		Description: "Zeigt an, wer essen holt.",
-	})
+	help.AddCommand("werholtessen")
 	bot.Command("ichholeessen", handleIGetFood, PermsDB)
-	help.AddCommand(tele.Command{
-		Text:        "ichholeessen",
-		Description: "sag bescheid, dass du essen holst.",
-	})
+	help.AddCommand("ichholeessen")
 	bot.Command("ichholdochkeinessen", handleIDontGetFood, PermsDB)
-	help.AddCommand(tele.Command{
-		Text:        "ichholdochkeinessen",
-		Description: "sag bescheid, dass du doch kein essen holst.",
-	})
+	help.AddCommand("ichholdochkeinessen")
 }
 
 func handleWhoGetsFood(m *tele.Message) {

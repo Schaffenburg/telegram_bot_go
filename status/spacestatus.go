@@ -5,6 +5,7 @@ import (
 
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/help"
+	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
 
@@ -19,7 +20,7 @@ var (
 	PermsSetStatus = &nyu.PermissionFailText{
 		Perm: &perms.PermissionGroupTag{"perm_ev"},
 
-		Text: "Um Befehle, die den Spacestatus setzen du benutzen, musst du Mitglied der e.V. Gruppe sein",
+		Text: loc.MustTrans("perms.FailSpaceStatusEV"),
 	}
 )
 
@@ -41,40 +42,22 @@ func init() {
 
 	bot.Command("spaceopen", handleOpen, PermsSetStatus)
 	bot.Command("openspace", handleOpen, PermsSetStatus)
-	help.AddCommand(tele.Command{
-		Text:        "openspace",
-		Description: "oeffnet den space.",
-	})
+	help.AddCommand("openspace")
 
 	bot.Command("spaceclose", handleClose, PermsSetStatus)
 	bot.Command("closespace", handleClose, PermsSetStatus)
-	help.AddCommand(tele.Command{
-		Text:        "closespace",
-		Description: "schliesst den space.",
-	})
+	help.AddCommand("closespace")
 
 	bot.Command("spacestatus", handleGetStatus)
-	help.AddCommand(tele.Command{
-		Text:        "spacestatus",
-		Description: "zeigt den status des spaces an.",
-	})
+	help.AddCommand("spacestatus")
 	bot.Command("status", handleGetStatus, PermsEV)
-	help.AddCommand(tele.Command{
-		Text:        "status",
-		Description: "zeigt den status des spaces an.",
-	})
+	help.AddCommand("status")
 
 	// subscription services:
 	bot.Command("abonnieren", handleSubscribe)
-	help.AddCommand(tele.Command{
-		Text:        "abonnieren",
-		Description: "Abonniere den spacestatus als private push nachricht.",
-	})
+	help.AddCommand("abonnieren")
 	bot.Command("abobeenden", handleUnsubscribe)
-	help.AddCommand(tele.Command{
-		Text:        "abobeenden",
-		Description: "Kündige das Abonnement für private Benachrichtigungen über den Spacestatus.",
-	})
+	help.AddCommand("abobeenden")
 }
 
 func handleOpen(m *tele.Message) {

@@ -4,6 +4,7 @@ import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
 	db "github.com/Schaffenburg/telegram_bot_go/database"
+	loc "github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
 	"github.com/Schaffenburg/telegram_bot_go/stalk"
@@ -18,7 +19,7 @@ func init() {
 	bot := nyu.GetBot()
 
 	// permissions required for debug commands:
-	const permFailText = "Debugging Befehle benoetigen sowohl das debug Tag als auch eine Mitgliedschaft in der e.V. gruppe"
+	permFailText := loc.MustTrans("parms.FailDebug")
 	perms := []nyu.Permission{
 		&nyu.PermissionFailText{Perm: &perms.PermissionTag{"debug"}, Text: permFailText},
 		&nyu.PermissionFailText{Perm: &perms.PermissionGroupTag{"perm_ev"}, Text: permFailText},

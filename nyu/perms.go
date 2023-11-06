@@ -1,6 +1,7 @@
 package nyu
 
 import (
+	"github.com/Schaffenburg/telegram_bot_go/localize"
 	tele "gopkg.in/tucnak/telebot.v2"
 	"log"
 )
@@ -23,11 +24,11 @@ type CustomPermission interface {
 type PermissionFailText struct {
 	Perm Permission
 
-	Text string
+	Text loc.Translation
 }
 
-func (p *PermissionFailText) FailText() string {
-	return p.Text
+func (p *PermissionFailText) FailText(u *tele.User) string {
+	return p.Text.Get(loc.GetUserLanguage(u))
 }
 
 func (p *PermissionFailText) Check(m *tele.Message) (bool, error) { return p.Perm.Check(m) }
