@@ -179,6 +179,20 @@ func RmUserTag(user int64, tag string) (bool, error) {
 	return changed > 0, err
 }
 
+// removes given tag from all users, bool is true if tag was present at all, false if it was not set anywhere
+func RmAllUserTag(tag string) (bool, error) {
+	r, err := StmtExec("DELETE FROM tags WHERE tag = ?;",
+		tag,
+	)
+	if err != nil {
+		return false, err
+	}
+
+	changed, err := r.RowsAffected()
+
+	return changed > 0, err
+}
+
 func GetUsersWithTag(tag string) (s []int64, err error) {
 	r, err := StmtQuery("SELECT user FROM tags WHERE (tag = ?);",
 		tag,

@@ -18,6 +18,8 @@ import (
 	"time"
 )
 
+const TagWantBeThere = "want_be_here"
+
 var (
 	PermsEV = &nyu.PermissionFailText{
 		Perm: &perms.PermissionGroupTag{"perm_ev"},
@@ -77,6 +79,16 @@ func init() {
 	help.AddCommand(tele.Command{
 		Text:        "ichbinda",
 		Description: "bestaetigt, dass du im space bist.",
+	})
+	bot.Command("ichwaeregernda", handleWantArrival)
+	help.AddCommand(tele.Command{
+		Text:        "ichwaeregernda",
+		Description: "sei in Gedanken dabei.",
+	})
+	bot.Command("ichwaeredochnichtgernda", handleDontWantArrival)
+	help.AddCommand(tele.Command{
+		Text:        "ichwaeredochnichtgernda",
+		Description: "sei nicht mehr in Gedanken dabei.",
 	})
 
 	bot.Command("ichbinweg", handleDepart, PermsEV)
@@ -278,6 +290,24 @@ func handleWhoThere(m *tele.Message) {
 		}
 	}
 
+	// in gedanken da sind
+	users, err := db.GetUsersWithTag(TagWantBeThere)
+	if err == nil && len(users) > 0 {
+		b.WriteString("\n\nIn Gedanken sind ausserdem da:")
+
+		for _, u := range users {
+			u, err := stalk.GetUserByID(u)
+			if err != nil {
+				bot.Send(m.Chat, "Ohno, "+err.Error())
+				return
+			}
+
+			b.WriteString("\n - ")
+			b.WriteString(u.FirstName)
+		}
+
+	}
+
 	bot.Send(m.Chat, b.String())
 }
 
@@ -285,6 +315,11 @@ func everyoneDepart() (int64, error) {
 	log.Printf("everyone departs now!")
 
 	r, err := db.StmtExec("DELETE FROM location")
+	if err != nil {
+		log.Printf("Error making everyone depart: %s", err)
+	}
+
+	_, err = db.RmAllUserTag(TagWantBeThere)
 	if err != nil {
 		log.Printf("Error making everyone depart: %s", err)
 	}
@@ -323,6 +358,35 @@ func handleArrival(m *tele.Message) {
 		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
 	} else {
 		bot.Send(m.Chat, "Hi, schoen, dass du da bist, "+m.Sender.FirstName+"!")
+	}
+}
+
+func handleWantArrival(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	err := db.SetUserTag(m.Sender.ID, TagWantBeThere)
+	if err != nil {
+		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		return
+	}
+
+	bot.Sendf(m.Chat, "Du bist jetzt in gedanken dabei, %s!", m.Sender.FirstName)
+}
+
+func handleDontWantArrival(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	changed, err := db.RmUserTag(m.Sender.ID, TagWantBeThere)
+	if err != nil {
+		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		return
+	}
+
+	if changed {
+		bot.Sendf(m.Chat, "Du bist nun nicht mehr in Gedanken dabei.")
+	} else {
+		bot.Sendf(m.Chat, "Du warst gar nicht da o.O")
+
 	}
 }
 
