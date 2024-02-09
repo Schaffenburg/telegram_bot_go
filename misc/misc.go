@@ -141,6 +141,20 @@ func init() {
 		Description: "[Google ist dein Freund](https://gidf.at)",
 	})
 
+	bot.Command("lmgt", handleLetMeXThat(	"lmgt",
+	"Let Me Google That", "https://letmegooglethat.com/?q=")) // no need internet so no privs
+	help.AddCommand(tele.Command{
+		Text:        "lmgt",
+		Description: "[Let Me Google That](https://letmegooglethat.com/) For you",
+	})
+
+	bot.Command("lmgpt", handleLetMeXThat("lmgpt", 
+	"Let Me ChatGPT That" ,"https://letmegpt.com/?q=")) // no need internet so no privs
+	help.AddCommand(tele.Command{
+		Text:        "lmgpt",
+		Description: "[Let Me ChatGPT That](https://letmegpt.com/) For you",
+	})
+
 	bot.Command("wecker", handleTimer)
 	help.AddCommand(tele.Command{
 		Text:        "wecker",
@@ -309,6 +323,45 @@ func handleGoogle(m *tele.Message) {
 			ParseMode: tele.ModeMarkdown,
 		})
 	}
+}
+
+func handleLetMeXThat(cmd, thing, qurl string) func(m *tele.Message) {
+return func (m *tele.Message) {
+	bot := nyu.GetBot()
+
+	var query string
+
+	args := strings.SplitN(m.Text, " ", 2)
+	if len(args) != 2 {
+		// if this is a reply use text of message replied to
+		if m.ReplyTo == nil || len(m.ReplyTo.Text) <= 0 {
+			bot.Send(m.Chat, "Usage: /"+cmd+" <text>")
+			return
+		}
+
+		query = m.ReplyTo.Text
+	} else {
+		query = args[1]
+	}
+
+	b := &strings.Builder{}
+	b.WriteString("[")
+	b.WriteString(thing)
+	b.WriteString("](")
+	b.WriteString(qurl)
+	b.WriteString(url.QueryEscape(query))
+	b.WriteString(") for you")
+
+	if m.ReplyTo != nil {
+	bot.Reply(m.ReplyTo,b.String(), &tele.SendOptions{
+			ParseMode: tele.ModeMarkdown,
+		})	
+	} else {
+	bot.Send(m.Chat, b.String(), &tele.SendOptions{
+			ParseMode: tele.ModeMarkdown,
+		})			
+	}
+}
 }
 
 func handleTimer(m *tele.Message) {

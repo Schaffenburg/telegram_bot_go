@@ -1,8 +1,6 @@
 module github.com/Schaffenburg/telegram_bot_go
 
-go 1.21.2
-
-toolchain go1.21.3
+go 1.23
 
 require (
 	github.com/briandowns/openweathermap v0.19.0
