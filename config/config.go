@@ -11,6 +11,8 @@ import (
 type Config struct {
 	Token string `yaml:"token"`
 
+	SetupAdmin int64 `yaml:"setup.admin"`
+
 	DBDriver string `yaml:"db.driver"`
 	DBSource string `yaml:"db.source"`
 

@@ -1,7 +1,10 @@
 package nyu
 
 import (
+	"github.com/Schaffenburg/telegram_bot_go/config"
+
 	tele "gopkg.in/tucnak/telebot.v2"
+	
 	"log"
 )
 
@@ -36,6 +39,14 @@ func (p *PermissionFailText) String() string                      { return p.Per
 func handlePermit(f func(*tele.Message), perms ...Permission) func(*tele.Message) {
 	return func(m *tele.Message) {
 		bot := GetBot()
+
+		// admin super powers!1!!
+		conf := config.Get()
+		if conf.SetupAdmin == m.Sender.ID {
+			f(m)
+			
+			return
+		}
 
 		var ok bool
 		var err error
