@@ -1,0 +1,3 @@
+CREATE USER 'nyla'@'localhost' IDENTIFIED BY 'pass';
+CREATE DATABASE nyla;
+GRANT ALL PRIVILEGES ON nyla.* TO 'nyla'@'localhost';
