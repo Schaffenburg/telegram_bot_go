@@ -202,6 +202,11 @@ func handleListArrival(m *tele.Message) {
 		fmt.Fprintf(b, "\n - %s um %s", u.FirstName, time.Unix(a[i].Time, 0).Format("15:04"))
 	}
 
+	uas, err := ListUsersWithTagArrivingToday(TagHasKey)
+	if uas == nil || len(uas) < 1 {
+		b.WriteString("\n\n**Noch hat sich niemand mit schluessel bereit erklaert zu kommen**")
+	}
+
 	bot.Send(m.Chat, b.String())
 }
 
