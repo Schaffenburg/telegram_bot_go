@@ -7,6 +7,7 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
 	"github.com/Schaffenburg/telegram_bot_go/stalk"
+	"github.com/Schaffenburg/telegram_bot_go/status"
 	"github.com/Schaffenburg/telegram_bot_go/util"
 
 	"log"
@@ -32,6 +33,19 @@ func init() {
 	bot.Command("debug_isgroupmemberself", handleIsGroupMemberSelf, perms...)
 	bot.Command("debug_istaggedgroupmemberself", handleIsTaggedGroupMemberSelf, perms...)
 
+	bot.Command("debug_testinlinebtn", handleTestInline, perms...)
+
+	bot.Command("debug_teststatusinline", handleTestStatusInline, perms...)
+
+	bot.Command("debug_leave", handleLeave, perms...)
+
+	debugcallback := func(c *tele.Callback) {
+		nyu.GetBot().Reply(c.Message, strconv.Quote(c.Data))
+	}
+
+	bot.HandleInlineCallback("testinline_ok", debugcallback)
+	bot.HandleInlineCallback("testinline_nu", debugcallback)
+
 	bot.AnswerCommand("hi", "Hi to you too, %u!")
 	bot.ReplyCommand("nya", "nya")
 
@@ -51,7 +65,11 @@ func init() {
 			}
 
 			if u.Message != nil {
-				nyu.LogMessage("rec <-", u.Message)
+				nyu.LogMessage("msg <-", u.Message)
+			}
+
+			if u.Callback != nil {
+				nyu.LogCallback("cb <-", u.Callback)
 			}
 		}
 	}()
@@ -87,6 +105,14 @@ func handleRmTagSelf(m *tele.Message) {
 			bot.Send(m.Sender, "Tag was not present.")
 		}
 	}
+}
+
+func handleLeave(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	bot.Send(m.Chat, "Goodbye!")
+
+	bot.Leave(m.Chat)
 }
 
 func handleSetTagSelf(m *tele.Message) {
@@ -158,6 +184,36 @@ func handleSetGroupTagCurrent(m *tele.Message) {
 	} else {
 		bot.Send(m.Chat, "Set tag.")
 	}
+}
+
+func handleTestInline(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	// this is very löng
+	bot.Send(m.Chat, "asdf",
+		&tele.SendOptions{
+			ReplyMarkup: &tele.ReplyMarkup{
+				InlineKeyboard: [][]tele.InlineButton{
+					[]tele.InlineButton{
+						tele.InlineButton{
+							Unique: "testinline_ok",
+
+							Text: "ok",
+						},
+						tele.InlineButton{
+							Unique: "testinline_nu",
+
+							Text: "nuu",
+						},
+					},
+				},
+			},
+		},
+	)
+}
+
+func handleTestStatusInline(m *tele.Message) {
+	status.AskUserIfArrived(m.Sender.ID)
 }
 
 func handleIsTaggedGroupMemberSelf(m *tele.Message) {

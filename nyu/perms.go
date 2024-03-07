@@ -4,7 +4,7 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/config"
 
 	tele "gopkg.in/tucnak/telebot.v2"
-	
+
 	"log"
 )
 
@@ -43,8 +43,8 @@ func handlePermit(f func(*tele.Message), perms ...Permission) func(*tele.Message
 		// admin super powers!1!!
 		conf := config.Get()
 		if conf.SetupAdmin == m.Sender.ID {
-			f(m)
-			
+			f(m) // permit
+
 			return
 		}
 
@@ -65,10 +65,9 @@ func handlePermit(f func(*tele.Message), perms ...Permission) func(*tele.Message
 				custom, ok := perm.(CustomPermission)
 				if !ok {
 					bot.Send(m.Chat, "Folgende Anforderung wird nicht erfuellt: "+perm.String())
-					return
+				} else {
+					bot.Send(m.Chat, custom.FailText())
 				}
-
-				bot.Send(m.Chat, custom.FailText())
 
 				return
 			}

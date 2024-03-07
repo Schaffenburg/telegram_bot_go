@@ -225,6 +225,22 @@ func SetArrival(user int64, time int64) error {
 	return err
 }
 
+// moves users arrival time by time in s
+func MoveArrival(user int64, time int64) (bool, error) {
+	r, err := StmtExec("UPDATE arrivalTimes SET time = time + ? WHERE user = ?",
+		time, user,
+	)
+
+	if err != nil {
+		log.Printf("Error Moving Arrival Time: %s", err)
+
+		return false, err
+	}
+
+	i, err := r.RowsAffected()
+	return i > 0, err
+}
+
 func RmArrival(user int64) (bool, error) {
 	r, err := StmtExec("DELETE FROM arrivalTimes WHERE user = ?;",
 		user,

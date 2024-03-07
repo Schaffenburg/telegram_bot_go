@@ -20,6 +20,16 @@ import (
 
 const TagWantBeThere = "want_be_here"
 
+const (
+	CallbackAmHere      = "status_am_here"
+	CallbackDelay15Mins = "status_stb_here"
+	CallbackWontCome    = "status_wont_come"
+
+	CallbackDepart = "status_depart"
+	CallbackBRB    = "status_be_right_back"
+	CallbackReturn = "status_return"
+)
+
 var (
 	PermsEV = &nyu.PermissionFailText{
 		Perm: &perms.PermissionGroupTag{"perm_ev"},
@@ -49,6 +59,15 @@ func init() {
 	}
 
 	bot := nyu.GetBot()
+
+	// message sent automagically
+	bot.HandleInlineCallback(CallbackAmHere, handleArrivalCallback)
+	bot.HandleInlineCallback(CallbackDelay15Mins, handleMoveArrivalCallback)
+	bot.HandleInlineCallback(CallbackWontCome, handleWontComeCallback)
+
+	bot.HandleInlineCallback(CallbackDepart, handleDepartCallback)
+	bot.HandleInlineCallback(CallbackBRB, handleBRBCallback)
+	bot.HandleInlineCallback(CallbackReturn, handleReturnCallback)
 
 	bot.Command("heikomaas", handleSetArrival, PermsEV)
 	bot.Command("eta", handleSetArrival, PermsEV)
@@ -108,7 +127,7 @@ func init() {
 		Text:        "brb",
 		Description: "sag bescheid, dass du kurz weg bist.",
 	})
-	bot.Command("wiederda", handleAmRightBack, PermsEV)
+	bot.Command("wiederda", handleReturn, PermsEV)
 	help.AddCommand(tele.Command{
 		Text:        "wiederda",
 		Description: "sag bescheid, dass wieder da bist.",
@@ -144,6 +163,8 @@ func init() {
 			log.Printf("Cleaned %d location entries", i)
 		}
 	}, time.Hour*4)
+
+	cron.Every(updateArrivalTimers, time.Minute*15) // TODO CRON WORKING PLSPLSPLS
 }
 
 func handleListArrival(m *tele.Message) {
@@ -215,6 +236,19 @@ func handleSetArrival(m *tele.Message) {
 			bot.Send(m.Chat, "Ok, bis dann!")
 		} else {
 			bot.Send(m.Chat, "Ok, bis um "+t.Format("15:04")+"!")
+		}
+	}
+}
+
+func updateArrivalTimers() {
+	as, err := db.GetArrivals()
+	if err != nil {
+		log.Printf("Error getting arrivals: %s", err)
+	}
+
+	for _, a := range as {
+		if time.Now().Unix() >= a.Time { // if time is in past
+			AskUserIfArrived(a.User)
 		}
 	}
 }
@@ -328,6 +362,45 @@ func everyoneDepart() (int64, error) {
 	return i, err
 }
 
+func handleDepartCallback(c *tele.Callback) {
+	bot := nyu.GetBot()
+
+	ok, err := db.SetLocationDepart(c.Sender.ID)
+	if err != nil {
+		bot.RespondText(c, "Ohno, ging nicht "+err.Error())
+	}
+
+	if !ok {
+		bot.RespondText(c, "Wusste gar nicht, dass du da wars O.o, naja trotzdem noch einen schoenen Tag!")
+	} else {
+		bot.RespondText(c, "Sad to see you go, have a nice day :(")
+	}
+}
+
+func handleBRBCallback(c *tele.Callback) {
+	bot := nyu.GetBot()
+
+	err := db.SetLocation(c.Sender.ID, time.Now().Unix(), "brb")
+	if err != nil {
+		bot.RespondText(c, "Ohno, ging nicht "+err.Error())
+	} else {
+		bot.RespondText(c, "Ok, bis gleich!\n\nWieder da? bitte mit /wiederda bestaetigen :)")
+
+		SendReminderReturn(c.Sender.ID)
+	}
+}
+
+func handleReturnCallback(c *tele.Callback) {
+	bot := nyu.GetBot()
+
+	err := db.SetLocation(c.Sender.ID, time.Now().Unix(), "")
+	if err != nil {
+		bot.RespondText(c, "Ohno, ging nicht "+err.Error())
+	} else {
+		bot.RespondText(c, "Schoen dass du (wieder) da bist, "+c.Sender.FirstName+"!")
+	}
+}
+
 func handleDepart(m *tele.Message) {
 	bot := nyu.GetBot()
 
@@ -343,6 +416,55 @@ func handleDepart(m *tele.Message) {
 	}
 }
 
+func Arrive(u int64, note string) error {
+	SendArrivalMessage(u)
+
+	return db.SetLocation(u, time.Now().Unix(), note)
+}
+
+func handleArrivalCallback(m *tele.Callback) {
+	bot := nyu.GetBot()
+
+	err := Arrive(m.Sender.ID, "")
+	if err != nil {
+		bot.RespondText(m, "Ohno, ging nicht "+err.Error())
+	} else {
+		bot.RespondText(m, "Hi, schoen, dass du da bist, "+m.Sender.FirstName+"!")
+	}
+}
+
+func handleMoveArrivalCallback(m *tele.Callback) {
+	bot := nyu.GetBot()
+
+	ok, err := db.MoveArrival(m.Sender.ID, 60*15) // 60s * 15min
+	if err != nil {
+		bot.RespondText(m, "Ohno, ging nicht "+err.Error())
+		return
+	}
+
+	if ok {
+		bot.RespondText(m, "Ok, ich informiere die anderen")
+	} else {
+		bot.RespondText(m, "Wusse nicht das du kommen wolltest o.O")
+	}
+}
+
+func handleWontComeCallback(m *tele.Callback) {
+	bot := nyu.GetBot()
+
+	ok, err := db.RmArrival(m.Sender.ID) // 60s * 15min
+	if err != nil {
+		bot.RespondText(m, "Ohno, ging nicht "+err.Error())
+		return
+	}
+
+	if ok {
+		bot.RespondText(m, "Ok, ich informiere die anderen")
+	} else {
+		bot.RespondText(m, "Wusse nicht das du kommen wolltest o.O")
+	}
+}
+
 func handleArrival(m *tele.Message) {
 	bot := nyu.GetBot()
 
@@ -353,7 +475,7 @@ func handleArrival(m *tele.Message) {
 		note = strings.Join(args[1:], " ")
 	}
 
-	err := db.SetLocation(m.Sender.ID, time.Now().Unix(), note)
+	err := Arrive(m.Sender.ID, note)
 	if err != nil {
 		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
 	} else {
@@ -401,7 +523,7 @@ func handleBeRightBack(m *tele.Message) {
 	}
 }
 
-func handleAmRightBack(m *tele.Message) {
+func handleReturn(m *tele.Message) {
 	bot := nyu.GetBot()
 
 	err := db.SetLocation(m.Sender.ID, time.Now().Unix(), "")

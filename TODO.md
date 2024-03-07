@@ -1,3 +1,7 @@
+neues zeug:
+inline buttons
+ - wenn da ne autopush um wieder zu gehen; kurz weg zu sein und so
+
 => https://www.stwab.de/aschaffenburgGips/Gips?SessionMandant=Aschaffenburg&Anwendung=CMSWEBPAGE&Methode=RefreshHTMLAusgabe&RessourceID=710554&Container.Children:0.BezirkId=1648&Container.Children:0.Strasse=Dorfstra%26szlig%3Be
 has ics download, so just parse that
 CommandsDE/MuellPlanCommand.php:    protected $name = 'muellplan';

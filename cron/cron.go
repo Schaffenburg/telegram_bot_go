@@ -7,7 +7,7 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/util"
 )
 
-// tododo: cron stuffs
+// TODO: cron stuffs
 
 // executes f once every t
 func Every(f func(), t time.Duration) {
