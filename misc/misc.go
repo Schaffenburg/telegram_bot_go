@@ -412,9 +412,16 @@ func handleWhoAmI(m *tele.Message) {
 		return
 	}
 
+	isadmin := ""
+
+	conf := config.Get()
+	if m.Sender.ID == conf.SetupAdmin {
+		isadmin = "\nYou are the Setup Admin"
+	}
+
 	photo.Caption = fmt.Sprintf("Deine ID: %d\nName: %s %s\nUsername: %s",
 		m.Sender.ID, m.Sender.FirstName, m.Sender.LastName, m.Sender.Username,
-	)
+	) + isadmin
 
 	bot.Send(m.Chat, photo)
 }
