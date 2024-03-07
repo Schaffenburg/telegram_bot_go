@@ -79,7 +79,6 @@ func init() {
 
 func handleOpen(m *tele.Message) {
 	bot := nyu.GetBot()
-	// TODO: perms
 
 	err := SetStatus("open")
 	if err != nil {
@@ -91,7 +90,6 @@ func handleOpen(m *tele.Message) {
 
 func handleClose(m *tele.Message) {
 	bot := nyu.GetBot()
-	// TODO: perms
 
 	err := SetStatus("closed")
 	if err != nil {
