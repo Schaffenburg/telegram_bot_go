@@ -19,7 +19,7 @@ type Config struct {
 	WeatherToken    string `yaml:"misc.weather.token"`
 	WeatherLocation string `yaml:"misc.weather.location"`
 
-	DefafultTimeLocation string `yaml:"misc.time.defaultlocation"`
+	DefaultTimeLocation string `yaml:"misc.time.defaultlocation"`
 }
 
 var config *Config

@@ -196,7 +196,7 @@ func handleGetTime(m *tele.Message) {
 	var query string
 
 	if len(args) != 2 {
-		query = config.Get().DefafultTimeLocation
+		query = config.Get().DefaultTimeLocation
 	} else {
 		query = args[1]
 
@@ -412,16 +412,9 @@ func handleWhoAmI(m *tele.Message) {
 		return
 	}
 
-	isadmin := ""
-
-	conf := config.Get()
-	if m.Sender.ID == conf.SetupAdmin {
-		isadmin = "\nYou are the Setup Admin"
-	}
-
 	photo.Caption = fmt.Sprintf("Deine ID: %d\nName: %s %s\nUsername: %s",
 		m.Sender.ID, m.Sender.FirstName, m.Sender.LastName, m.Sender.Username,
-	) + isadmin
+	)
 
 	bot.Send(m.Chat, photo)
 }
