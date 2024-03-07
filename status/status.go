@@ -164,7 +164,7 @@ func init() {
 		}
 	}, time.Hour*4)
 
-	cron.Every(updateArrivalTimers, time.Minute*15) // TODO CRON WORKING PLSPLSPLS
+	cron.Every(updateArrivalTimers, time.Minute*5)
 }
 
 func handleListArrival(m *tele.Message) {
