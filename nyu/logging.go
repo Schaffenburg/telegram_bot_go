@@ -35,7 +35,7 @@ func LogCallback(pre string, cb *tele.Callback) {
 			ConstColorize(strconv.FormatInt(cb.Message.Chat.ID, 10)),
 			ConstColorize(cb.Sender.Username),
 			ConstColorize(strconv.FormatInt(cb.Sender.ID, 10)),
-			strconv.Quote(cb.Data),
+			ConstColorize(strconv.Quote(cb.Data)),
 		)
 	}
 }
