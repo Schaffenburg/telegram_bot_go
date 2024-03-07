@@ -10,3 +10,5 @@ misc.weather.token: "<openweathermap token>"
 misc.weather.location: "<location>"
 
 misc.time.defaultlocation: "<location>"
+
+misc.batschigkeit: <number> // out of 100

@@ -96,7 +96,9 @@ func init() {
 		Text:        "forelliere",
 		Description: "forelliert jemanden",
 	})
-	bot.Command("batsche", handleSlap("@sender batscht @argument mithilfe eines Barsches"))
+	bot.Command("batsche", handleSlap(
+		fmt.Sprintf("@sender batscht @argument mithilfe eines Barsches (staerke: %d/100)", config.Get().Batschigkeit)),
+	)
 	help.AddCommand(tele.Command{
 		Text:        "batsche",
 		Description: "batsche jemanden ein Barsch ins Gesicht",

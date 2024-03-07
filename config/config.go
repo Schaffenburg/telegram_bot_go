@@ -20,6 +20,8 @@ type Config struct {
 	WeatherLocation string `yaml:"misc.weather.location"`
 
 	DefaultTimeLocation string `yaml:"misc.time.defaultlocation"`
+
+	Batschigkeit int `yaml:"misc.batschigkeit"`
 }
 
 var config *Config
