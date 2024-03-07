@@ -188,7 +188,7 @@ func (p *ProxyPoller) Poll(b *tele.Bot, updates chan tele.Update, stop chan stru
 }
 
 func Run() {
-	log.SetFlags(log.Flags() | log.Lshortfile)
+	log.SetFlags(log.Flags() | log.Lshortfile) // log.Llongfile) // |
 
 	bot := GetBot()
 

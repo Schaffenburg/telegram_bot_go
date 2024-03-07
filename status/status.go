@@ -228,6 +228,40 @@ func handleSetArrival(m *tele.Message) {
 		}
 	}
 
+	// check for someone with keys
+	haskey, err := db.UserHasTag(m.Sender.ID, TagHasKey)
+	if err != nil {
+		bot.Send(m.Chat, "Ohno + "+err.Error())
+
+		return
+	}
+
+	if !haskey {
+		uas, err := ListUsersWithTagArrivingToday(TagHasKey)
+		if err != nil {
+			log.Printf("Failed getting users with tag arriving today: %s", err)
+		} else {
+			var s *UserArrival
+
+			for _, ua := range uas {
+				if s == nil || ua.Arrival.Before(s.Arrival) {
+					s = &ua
+				}
+			}
+
+			if s == nil {
+				bot.Send(m.Chat, "Sieht so als als haettest du keinen schluessel und es wolle niemand mit einem heute da sein")
+			} else {
+				user, err := stalk.GetUserByID(s.User)
+				if err != nil {
+					bot.Sendf(m.Chat, "Die Person die kommen will und gleichzeitig einen schluessel hat ist mir unbekannt %d", s.User)
+				} else {
+					bot.Sendf(m.Chat, "Fruehste person mit Schluessel ist %s um %s", user.FirstName, s.Arrival.Format("15:03"))
+				}
+			}
+		}
+	}
+
 	err = db.SetArrival(m.Sender.ID, t.Unix())
 	if err != nil {
 		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())

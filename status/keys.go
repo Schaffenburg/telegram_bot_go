@@ -3,7 +3,6 @@ package status
 // TODO: keys:
 // TODO:
 // TODO: command to check who has keys and is commig today
-// TODO: werkommtheute to validate if first to arrive even has key
 
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
@@ -41,12 +40,14 @@ func init() {
 	})
 }
 
+const TagHasKey = "has_space_key"
+
 func handleHaveKey(m *tele.Message) {
 	bot := nyu.GetBot()
 
-	err := db.SetUserTag(m.Sender.ID, "has_space_key")
+	err := db.SetUserTag(m.Sender.ID, TagHasKey)
 	if err != nil {
-		log.Printf("Failed to set tag has_space_key: %s", err)
+		log.Printf("Failed to set tag %s: %s", TagHasKey, err)
 		bot.Sendf(m.Chat, "Ohno, das hat leider nicht funktioniert: %s", err)
 
 		return
@@ -58,9 +59,9 @@ func handleHaveKey(m *tele.Message) {
 func handleDontHaveKey(m *tele.Message) {
 	bot := nyu.GetBot()
 
-	ch, err := db.RmUserTag(m.Sender.ID, "has_space_key")
+	ch, err := db.RmUserTag(m.Sender.ID, TagHasKey)
 	if err != nil {
-		log.Printf("Failed to rm tag has_space_key: %s", err)
+		log.Printf("Failed to rm tag %s: %s", TagHasKey, err)
 		bot.Sendf(m.Chat, "Ohno, das hat leider nicht funktioniert: %s", err)
 
 		return
@@ -76,7 +77,7 @@ func handleDontHaveKey(m *tele.Message) {
 func handleListArrivalWKey(m *tele.Message) {
 	bot := nyu.GetBot()
 
-	users, err := ListUsersWithTagArrivingToday("has_space_key")
+	users, err := ListUsersWithTagArrivingToday(TagHasKey)
 	if err != nil {
 		log.Printf("Failed to list users with key arriving today: %s", err)
 		bot.Sendf(m.Chat, "Ohno, %s", err)
@@ -105,10 +106,10 @@ func handleListArrivalWKey(m *tele.Message) {
 			b.WriteString(user.FirstName)
 			b.WriteString(" ")
 
-			if ua.When.Equal(util.Today(0)) {
+			if ua.Arrival.Equal(util.Today(0)) {
 				b.WriteString("irgendwann")
 			} else {
-				b.WriteString(ua.When.Format("15:04"))
+				b.WriteString(ua.Arrival.Format("15:04"))
 			}
 
 		}
