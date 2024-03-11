@@ -127,6 +127,8 @@ func UserHasTag(user int64, tag string) (bool, error) {
 		return false, err
 	}
 
+	defer r.Close()
+
 	return r.Next(), nil
 }
 
