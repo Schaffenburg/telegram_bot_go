@@ -41,10 +41,7 @@ func init() {
 	bot := nyu.GetBot()
 
 	bot.Command("dtmf", ShowDTMF)
-	help.AddCommand(tele.Command{
-		Text:        "dtmf",
-		Description: "show DTMF keyboard",
-	})
+	help.AddCommand("dtmf")
 
 	bot.HandleInlineCallback(CallbackDTMF1, callbackKeyboard("1"))
 	bot.HandleInlineCallback(CallbackDTMF2, callbackKeyboard("2"))

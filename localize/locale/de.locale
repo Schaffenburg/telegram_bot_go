@@ -28,6 +28,11 @@ help.werbinich: "zeigt deine ID, Name, Username und Profilbild an."
 help.wuerfeln: "würfelt."
 help.featurerequst: "ein neues Feature fuer den Bot anfragen."
 help.wetter: "zeigt das wetter im space."
+help.dtmf: "zeige die Telefon-Tastatur."
+help.laden: "lass den bot laden."
+
+help.lmgt: "[Let Me Google That](https://letmegooglethat.com/) For you"
+help.lmgpt: "[Let Me ChatGPT That](https://letmegpt.com/) For you"
 
 help.werholtessen: "Zeigt an, wer essen holt."
 help.ichholeessen: "sag bescheid, dass du essen holst."

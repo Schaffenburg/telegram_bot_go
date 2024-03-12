@@ -100,17 +100,11 @@ func init() {
 
 	bot.Command("lmgt", handleLetMeXThat("lmgt",
 		"Let Me Google That", "https://letmegooglethat.com/?q=")) // no need internet so no privs
-	help.AddCommand(tele.Command{
-		Text:        "lmgt",
-		Description: "[Let Me Google That](https://letmegooglethat.com/) For you",
-	})
+	help.AddCommand("lmgt")
 
 	bot.Command("lmgpt", handleLetMeXThat("lmgpt",
 		"Let Me ChatGPT That", "https://letmegpt.com/?q=")) // no need internet so no privs
-	help.AddCommand(tele.Command{
-		Text:        "lmgpt",
-		Description: "[Let Me ChatGPT That](https://letmegpt.com/) For you",
-	})
+	help.AddCommand("lmgpt")
 
 	bot.Command("wecker", handleTimer)
 	help.AddCommand("wecker")
@@ -124,10 +118,7 @@ func init() {
 	help.AddCommand("wetter")
 
 	bot.Command("laden", handleLoading)
-	help.AddCommand(tele.Command{
-		Text:        "laden",
-		Description: "laedt fuer x sekunden.",
-	})
+	help.AddCommand("laden")
 
 	bot.Command("cix", handleBroadcastCIX, PermsGroupEV)
 	bot.Command("nyusletter", handleBroadcastCIX, PermsGroupEV)

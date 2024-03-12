@@ -106,9 +106,6 @@ func init() {
 	bot.Command("wiederda", handleReturn, PermsEV)
 	help.AddCommand("wiederda")
 
-	bot.Command("wiederda", handleReturn, PermsEV)
-	help.AddCommand("wiederda")
-
 	bot.Command("forceclean", handleClean,
 		&perms.PermissionGroupTag{GroupTag: "perm_ev"},
 	)
