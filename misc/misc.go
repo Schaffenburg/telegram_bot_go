@@ -183,12 +183,63 @@ func init() {
 		Description: "zeigt das wetter im space.",
 	})
 
+	bot.Command("laden", handleLoading)
+	help.AddCommand(tele.Command{
+		Text:        "laden",
+		Description: "laedt fuer x sekunden.",
+	})
+
 	bot.Command("cix", handleBroadcastCIX, PermsGroupEV)
 	bot.Command("nyusletter", handleBroadcastCIX, PermsGroupEV)
 	help.AddCommand(tele.Command{
 		Text:        "nyusletter",
 		Description: "Broadcast <text> to e.V. gruppe",
 	})
+}
+
+func handleLoading(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	args := strings.SplitN(m.Text, " ", 2)
+	if len(args) != 2 {
+		bot.Send(m.Chat, "Usage: /laden <umdrehungen>")
+
+		return
+	}
+
+	uu, err := strconv.ParseUint(args[1], 10, 64)
+	if err != nil {
+		bot.Send(m.Chat, "Usage: /laden <umdrehungen>")
+
+		return
+	}
+
+	const alphabet = "-\\|/-|/"
+
+	go func() {
+		bot := nyu.GetBot()
+
+		msg, err := bot.Send(m.Chat, string(alphabet[len(alphabet)-1]))
+		if err != nil {
+			log.Printf("err :%s", err)
+
+			return
+		}
+
+		t := time.NewTicker(time.Second)
+
+		for i := uint64(0); i < uu; i++ {
+			<-t.C
+			msg, err = bot.Edit(msg, string(alphabet[i%uint64(len(alphabet))]))
+			if err != nil {
+				log.Printf("error editing: %s", err)
+
+				return
+			}
+		}
+
+		t.Stop()
+	}()
 }
 
 func handleGetTime(m *tele.Message) {
