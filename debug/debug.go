@@ -10,9 +10,11 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/status"
 	"github.com/Schaffenburg/telegram_bot_go/util"
 
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func init() {
@@ -38,6 +40,8 @@ func init() {
 	bot.Command("debug_teststatusinline", handleTestStatusInline, perms...)
 
 	bot.Command("debug_leave", handleLeave, perms...)
+
+	bot.Command("debug_importsubscriptions", handleImportSubscriptions, perms...)
 
 	debugcallback := func(c *tele.Callback) {
 		nyu.GetBot().Reply(c.Message, strconv.Quote(c.Data))
@@ -80,6 +84,142 @@ func init() {
 			bot.Send(m.Chat, "Invalid Command!")
 		}
 	})
+}
+
+// TODO: test RENAME old spacestatus table to spacestatus_old!!!!!!
+/*
+	CREATE TABLE `spacestatus` (
+	  `status_id` int(11) NOT NULL AUTO_INCREMENT,
+	  `status_short` tinyint(1) NOT NULL,
+	  `status_full` int(11) NOT NULL,
+	  `status_timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+	  PRIMARY KEY (`status_id`)
+	) ENGINE=InnoDB AUTO_INCREMENT=158719 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPACT;
+*/
+func handleImportStatus(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	streamer, err := bot.NewEditStreamer(m.Chat, "create editstreamer")
+	if err != nil {
+		bot.Send(m.Chat, "Ohno, failed to create editstreamer: %s", err)
+		log.Printf("Failed to create editstreamer %s", err)
+
+		return
+	}
+
+	log := func(f string, a ...any) {
+		str := fmt.Sprintf(f, a...) + "\n"
+
+		log.Printf(str)
+		streamer.Append(str)
+	}
+
+	log("Starting spacestatus import from `spacestatus_old`")
+
+	s, err := db.StmtQuery("SELECT (status_full, status_timestamp) FROM spacestatus_old ORDER BY status_timestamp ASC")
+	if err != nil {
+		log("failed to get spacestatus from DB: %s", err)
+	}
+
+	defer s.Close()
+
+	var status string
+	var timestamp time.Time
+
+	for s.Next() {
+		err = s.Scan(&status, &timestamp)
+		if err != nil {
+			log("Failed to scan: %s", err)
+
+			return
+		}
+
+		_, err := db.StmtExec("INSERT INTO spacestatus (time, status) VALUES (?, ?);",
+			timestamp.Unix(), status,
+		)
+
+		if err != nil {
+			log("Failed to insert: %s", err)
+
+			return
+		}
+
+	}
+}
+
+// TODO: test
+/*
+	CREATE TABLE `subscription` (
+	  `subscription_id` int(11) NOT NULL AUTO_INCREMENT,
+	  `user_id` bigint(20) DEFAULT NULL,
+	  `type` int(1) DEFAULT NULL,
+	  `updated` datetime DEFAULT NULL,
+	  PRIMARY KEY (`subscription_id`)
+	);
+*/
+func handleImportSubscriptions(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	streamer, err := bot.NewEditStreamer(m.Chat, "create editstreamer")
+	if err != nil {
+		bot.Send(m.Chat, "Ohno, failed to create editstreamer: %s", err)
+		log.Printf("Failed to create editstreamer %s", err)
+
+		return
+	}
+
+	log := func(f string, a ...any) {
+		str := fmt.Sprintf(f, a...) + "\n"
+
+		log.Printf(str)
+		streamer.Append(str)
+	}
+
+	log("Importing subscriptions from table `subscription`")
+	s, err := db.StmtQuery("SELECT count(1) FROM subscription")
+	if err != nil {
+		log("failed to get count of subscriptions: %s", err)
+
+		return
+	}
+
+	var count int64
+	if s.Next() {
+		err := s.Scan(&count)
+		if err != nil {
+			log("faield to get count of subs Scan: %s", err)
+
+			return
+		}
+	}
+
+	s.Close()
+
+	log("Got subscription count: %d", count)
+
+	s, err = db.StmtQuery("SELECT (user_id, type) FROM subscription")
+	if err != nil {
+		log("failed to get subscriptions: %s", err)
+
+		return
+	}
+
+	defer s.Close()
+
+	var user int64
+	var sub bool
+	for s.Next() {
+		err := s.Scan(&user, &sub)
+		if err != nil {
+			log("faield to scan; skipping this one %s", err)
+
+			return
+		}
+
+		if sub { // TODO: figure out which value is correct
+			db.SetUserTag(user, status.SpaceStatusSubTag)
+		}
+	}
 }
 
 func handleRmTagSelf(m *tele.Message) {
