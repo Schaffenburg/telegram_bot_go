@@ -197,7 +197,15 @@ func Run() {
 	log.Printf("starting telebot")
 	handleRun()
 
+	bot.Command("start", handleStart)
+
 	bot.Bot.Start()
+}
+
+func handleStart(m *tele.Message) {
+	bot := GetBot()
+
+	bot.Send(m.Sender, "Hi, ich bin nyu, der Schaffenburg bot\nmir kannst du gerne ankuendigen, wenn du vor hast in den space zu kommen.\nich kann auch viel misc zeugs, bei interesse kannst du dir gerne mein /help durchlesen ^^")
 }
 
 var (
