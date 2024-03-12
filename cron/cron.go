@@ -7,11 +7,17 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/util"
 )
 
-// tododo: cron stuffs
-
-// executes f once every t
+// executes f once every t ; uses timeTicker so is not aligned
 func Every(f func(), t time.Duration) {
+	go func() {
+		last := time.NewTicker(t)
 
+		for {
+			<-last.C
+
+			f()
+		}
+	}()
 }
 
 // executes f at hour:min o Clock

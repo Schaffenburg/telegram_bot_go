@@ -19,6 +19,18 @@ import (
 	"time"
 )
 
+const TagWantBeThere = "want_be_here"
+
+const (
+	CallbackAmHere      = "status_am_here"
+	CallbackDelay15Mins = "status_stb_here"
+	CallbackWontCome    = "status_wont_come"
+
+	CallbackDepart = "status_depart"
+	CallbackBRB    = "status_be_right_back"
+	CallbackReturn = "status_return"
+)
+
 var (
 	PermsEV = &nyu.PermissionFailText{
 		Perm: &perms.PermissionGroupTag{"perm_ev"},
@@ -49,6 +61,15 @@ func init() {
 
 	bot := nyu.GetBot()
 
+	// message sent automagically
+	bot.HandleInlineCallback(CallbackAmHere, handleArrivalCallback)
+	bot.HandleInlineCallback(CallbackDelay15Mins, handleMoveArrivalCallback)
+	bot.HandleInlineCallback(CallbackWontCome, handleWontComeCallback)
+
+	bot.HandleInlineCallback(CallbackDepart, handleDepartCallback)
+	bot.HandleInlineCallback(CallbackBRB, handleBRBCallback)
+	bot.HandleInlineCallback(CallbackReturn, handleReturnCallback)
+
 	bot.Command("heikomaas", handleSetArrival, PermsEV)
 	bot.Command("eta", handleSetArrival, PermsEV)
 	bot.Command("ichkommeheute", handleSetArrival, PermsEV)
@@ -65,15 +86,27 @@ func init() {
 	bot.Command("ichbinda", handleArrival, PermsEV)
 	help.AddCommand("ichbinda")
 
+	bot.Command("ichwaeregernda", handleWantArrival)
+	help.AddCommand("ichwaeregernda")
+
+	bot.Command("ichwaeredochnichtgernda", handleDontWantArrival)
+	help.AddCommand("ichwaeredochnichtgernda")
+
 	bot.Command("ichbinweg", handleDepart, PermsEV)
 	help.AddCommand("ichbinweg")
 	bot.Command("ichgehjetzt", handleDepart)
 	help.AddCommand("ichgehjetzt")
 
 	bot.Command("afk", handleBeRightBack, PermsEV) // alias
+	help.AddCommand("afk")
+
 	bot.Command("brb", handleBeRightBack, PermsEV)
 	help.AddCommand("brb")
-	bot.Command("wiederda", handleAmRightBack, PermsEV)
+
+	bot.Command("wiederda", handleReturn, PermsEV)
+	help.AddCommand("wiederda")
+
+	bot.Command("wiederda", handleReturn, PermsEV)
 	help.AddCommand("wiederda")
 
 	bot.Command("forceclean", handleClean,
@@ -100,6 +133,8 @@ func init() {
 			log.Printf("Cleaned %d location entries", i)
 		}
 	}, time.Hour*4)
+
+	cron.Every(updateArrivalTimers, time.Minute*5)
 }
 
 func handleListArrival(m *tele.Message) {
@@ -137,6 +172,11 @@ func handleListArrival(m *tele.Message) {
 		fmt.Fprintf(b, "\n - %s um %s", u.FirstName, time.Unix(a[i].Time, 0).Format("15:04"))
 	}
 
+	uas, err := ListUsersWithTagArrivingToday(TagHasKey)
+	if uas == nil || len(uas) < 1 {
+		b.WriteString("\n\n**Noch hat sich niemand mit schluessel bereit erklaert zu kommen**")
+	}
+
 	bot.Send(m.Chat, b.String())
 }
 
@@ -163,6 +203,40 @@ func handleSetArrival(m *tele.Message) {
 		}
 	}
 
+	// check for someone with keys
+	haskey, err := db.UserHasTag(m.Sender.ID, TagHasKey)
+	if err != nil {
+		bot.Send(m.Chat, "Ohno + "+err.Error())
+
+		return
+	}
+
+	if !haskey {
+		uas, err := ListUsersWithTagArrivingToday(TagHasKey)
+		if err != nil {
+			log.Printf("Failed getting users with tag arriving today: %s", err)
+		} else {
+			var s *UserArrival
+
+			for _, ua := range uas {
+				if s == nil || ua.Arrival.Before(s.Arrival) {
+					s = &ua
+				}
+			}
+
+			if s == nil {
+				bot.Send(m.Chat, "Sieht so als als haettest du keinen schluessel und es wolle niemand mit einem heute da sein")
+			} else {
+				user, err := stalk.GetUserByID(s.User)
+				if err != nil {
+					bot.Sendf(m.Chat, "Die Person die kommen will und gleichzeitig einen schluessel hat ist mir unbekannt %d", s.User)
+				} else {
+					bot.Sendf(m.Chat, "Fruehste person mit Schluessel ist %s um %s", user.FirstName, s.Arrival.Format("15:03"))
+				}
+			}
+		}
+	}
+
 	err = db.SetArrival(m.Sender.ID, t.Unix())
 	if err != nil {
 		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
@@ -171,6 +245,19 @@ func handleSetArrival(m *tele.Message) {
 			bot.Send(m.Chat, "Ok, bis dann!")
 		} else {
 			bot.Send(m.Chat, "Ok, bis um "+t.Format("15:04")+"!")
+		}
+	}
+}
+
+func updateArrivalTimers() {
+	as, err := db.GetArrivals()
+	if err != nil {
+		log.Printf("Error getting arrivals: %s", err)
+	}
+
+	for _, a := range as {
+		if time.Now().Unix() >= a.Time { // if time is in past
+			AskUserIfArrived(a.User)
 		}
 	}
 }
@@ -246,6 +333,24 @@ func handleWhoThere(m *tele.Message) {
 		}
 	}
 
+	// in gedanken da sind
+	users, err := db.GetUsersWithTag(TagWantBeThere)
+	if err == nil && len(users) > 0 {
+		b.WriteString("\n\nIn Gedanken sind ausserdem da:")
+
+		for _, u := range users {
+			u, err := stalk.GetUserByID(u)
+			if err != nil {
+				bot.Send(m.Chat, "Ohno, "+err.Error())
+				return
+			}
+
+			b.WriteString("\n - ")
+			b.WriteString(u.FirstName)
+		}
+
+	}
+
 	bot.Send(m.Chat, b.String())
 }
 
@@ -257,8 +362,52 @@ func everyoneDepart() (int64, error) {
 		log.Printf("Error making everyone depart: %s", err)
 	}
 
+	_, err = db.RmAllUserTag(TagWantBeThere)
+	if err != nil {
+		log.Printf("Error making everyone depart: %s", err)
+	}
+
 	i, err := r.RowsAffected()
 	return i, err
+}
+
+func handleDepartCallback(c *tele.Callback) {
+	bot := nyu.GetBot()
+
+	ok, err := db.SetLocationDepart(c.Sender.ID)
+	if err != nil {
+		bot.RespondText(c, "Ohno, ging nicht "+err.Error())
+	}
+
+	if !ok {
+		bot.RespondText(c, "Wusste gar nicht, dass du da wars O.o, naja trotzdem noch einen schoenen Tag!")
+	} else {
+		bot.RespondText(c, "Sad to see you go, have a nice day :(")
+	}
+}
+
+func handleBRBCallback(c *tele.Callback) {
+	bot := nyu.GetBot()
+
+	err := db.SetLocation(c.Sender.ID, time.Now().Unix(), "brb")
+	if err != nil {
+		bot.RespondText(c, "Ohno, ging nicht "+err.Error())
+	} else {
+		bot.RespondText(c, "Ok, bis gleich!\n\nWieder da? bitte mit /wiederda bestaetigen :)")
+
+		SendReminderReturn(c.Sender.ID)
+	}
+}
+
+func handleReturnCallback(c *tele.Callback) {
+	bot := nyu.GetBot()
+
+	err := db.SetLocation(c.Sender.ID, time.Now().Unix(), "")
+	if err != nil {
+		bot.RespondText(c, "Ohno, ging nicht "+err.Error())
+	} else {
+		bot.RespondText(c, "Schoen dass du (wieder) da bist, "+c.Sender.FirstName+"!")
+	}
 }
 
 func handleDepart(m *tele.Message) {
@@ -276,6 +425,55 @@ func handleDepart(m *tele.Message) {
 	}
 }
 
+func Arrive(u int64, note string) error {
+	SendArrivalMessage(u)
+
+	return db.SetLocation(u, time.Now().Unix(), note)
+}
+
+func handleArrivalCallback(m *tele.Callback) {
+	bot := nyu.GetBot()
+
+	err := Arrive(m.Sender.ID, "")
+	if err != nil {
+		bot.RespondText(m, "Ohno, ging nicht "+err.Error())
+	} else {
+		bot.RespondText(m, "Hi, schoen, dass du da bist, "+m.Sender.FirstName+"!")
+	}
+}
+
+func handleMoveArrivalCallback(m *tele.Callback) {
+	bot := nyu.GetBot()
+
+	ok, err := db.MoveArrival(m.Sender.ID, 60*15) // 60s * 15min
+	if err != nil {
+		bot.RespondText(m, "Ohno, ging nicht "+err.Error())
+		return
+	}
+
+	if ok {
+		bot.RespondText(m, "Ok, ich informiere die anderen")
+	} else {
+		bot.RespondText(m, "Wusse nicht das du kommen wolltest o.O")
+	}
+}
+
+func handleWontComeCallback(m *tele.Callback) {
+	bot := nyu.GetBot()
+
+	ok, err := db.RmArrival(m.Sender.ID) // 60s * 15min
+	if err != nil {
+		bot.RespondText(m, "Ohno, ging nicht "+err.Error())
+		return
+	}
+
+	if ok {
+		bot.RespondText(m, "Ok, ich informiere die anderen")
+	} else {
+		bot.RespondText(m, "Wusse nicht das du kommen wolltest o.O")
+	}
+}
+
 func handleArrival(m *tele.Message) {
 	bot := nyu.GetBot()
 
@@ -286,11 +484,40 @@ func handleArrival(m *tele.Message) {
 		note = strings.Join(args[1:], " ")
 	}
 
-	err := db.SetLocation(m.Sender.ID, time.Now().Unix(), note)
+	err := Arrive(m.Sender.ID, note)
 	if err != nil {
 		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
 	} else {
 		bot.Send(m.Chat, "Hi, schoen, dass du da bist, "+m.Sender.FirstName+"!")
+	}
+}
+
+func handleWantArrival(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	err := db.SetUserTag(m.Sender.ID, TagWantBeThere)
+	if err != nil {
+		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		return
+	}
+
+	bot.Sendf(m.Chat, "Du bist jetzt in gedanken dabei, %s!", m.Sender.FirstName)
+}
+
+func handleDontWantArrival(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	changed, err := db.RmUserTag(m.Sender.ID, TagWantBeThere)
+	if err != nil {
+		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		return
+	}
+
+	if changed {
+		bot.Sendf(m.Chat, "Du bist nun nicht mehr in Gedanken dabei.")
+	} else {
+		bot.Sendf(m.Chat, "Du warst gar nicht da o.O")
+
 	}
 }
 
@@ -305,7 +532,7 @@ func handleBeRightBack(m *tele.Message) {
 	}
 }
 
-func handleAmRightBack(m *tele.Message) {
+func handleReturn(m *tele.Message) {
 	bot := nyu.GetBot()
 
 	err := db.SetLocation(m.Sender.ID, time.Now().Unix(), "")

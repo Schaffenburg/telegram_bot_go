@@ -23,6 +23,13 @@ func (r Recipient) Recipient() string {
 
 type Bot struct {
 	*tele.Bot
+
+	callbackLookupMu sync.RWMutex
+	callbackLookup   map[string]func(q *tele.Callback)
+}
+
+func (bot *Bot) RespondText(c *tele.Callback, text string) error {
+	return bot.Respond(c, &tele.CallbackResponse{Text: text})
 }
 
 func (bot *Bot) GetCurrentPFP(u *tele.User) (*tele.Photo, error) {
@@ -36,6 +43,17 @@ func (bot *Bot) GetCurrentPFP(u *tele.User) (*tele.Photo, error) {
 
 func (b *Bot) Command(command string, h func(m *tele.Message), perms ...Permission) {
 	b.Bot.Handle("/"+command, handlePermit(h, perms...))
+}
+
+func (b *Bot) HandleInlineCallback(unique string, f func(q *tele.Callback)) {
+	b.callbackLookupMu.Lock()
+	defer b.callbackLookupMu.Unlock()
+
+	if b.callbackLookup == nil {
+		b.callbackLookup = make(map[string]func(*tele.Callback))
+	}
+
+	b.callbackLookup["\f"+unique] = f
 }
 
 // should not be used for Commands! please also try to use OnText/OnVideo/etc. functions instead!
@@ -115,7 +133,17 @@ func makeBot() {
 		log.Fatalf("Error adding bot: %s\n", err)
 	}
 
-	bot = &Bot{b}
+	bot = &Bot{Bot: b}
+
+	bot.Bot.Handle(tele.OnCallback, func(c *tele.Callback) {
+		bot.callbackLookupMu.RLock()
+		defer bot.callbackLookupMu.RUnlock()
+
+		f, ok := bot.callbackLookup[c.Data]
+		if ok {
+			f(c)
+		}
+	})
 }
 
 type ProxyPoller struct {
@@ -160,7 +188,7 @@ func (p *ProxyPoller) Poll(b *tele.Bot, updates chan tele.Update, stop chan stru
 }
 
 func Run() {
-	log.SetFlags(log.Flags() | log.Lshortfile)
+	log.SetFlags(log.Flags() | log.Lshortfile) // log.Llongfile) // |
 
 	bot := GetBot()
 
@@ -169,7 +197,15 @@ func Run() {
 	log.Printf("starting telebot")
 	handleRun()
 
+	bot.Command("start", handleStart)
+
 	bot.Bot.Start()
+}
+
+func handleStart(m *tele.Message) {
+	bot := GetBot()
+
+	bot.Send(m.Sender, "Hi, ich bin nyu, der Schaffenburg bot\nmir kannst du gerne ankuendigen, wenn du vor hast in den space zu kommen.\nich kann auch viel misc zeugs, bei interesse kannst du dir gerne mein /help durchlesen ^^")
 }
 
 var (

@@ -1,0 +1,14 @@
+token: "<telegram bot token>"
+
+# can execute all commands
+setup.admin: <telegram id int>
+
+db.driver: "mysql"
+db.source: "<user>:<pass>@/<db>"
+
+misc.weather.token: "<openweathermap token>"
+misc.weather.location: "<location>"
+
+misc.time.defaultlocation: "<location>"
+
+misc.batschigkeit: <number> // out of 100

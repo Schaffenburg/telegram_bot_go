@@ -10,6 +10,7 @@ Ideen:
  - /dukommstheute
    - bei manchen gleichgueltig mit /ikh sonst Einladung bei nicht-eV-Menschen
 
+```
 + = fertig
 ? = nicht fertig, da unklare funktion
 - = entfernt
@@ -54,3 +55,4 @@ Ideen:
 +/wielautetdieantwort - Stelle DIE eine Frage
 */wiewarmistes - Zeigt die Temperatur im Hackerspace Gebäude
 +/wuerfeln - Einfach mal würfeln
+```

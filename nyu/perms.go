@@ -1,8 +1,11 @@
 package nyu
 
 import (
+	"github.com/Schaffenburg/telegram_bot_go/config"
 	"github.com/Schaffenburg/telegram_bot_go/localize"
+
 	tele "gopkg.in/tucnak/telebot.v2"
+
 	"log"
 )
 
@@ -38,6 +41,14 @@ func handlePermit(f func(*tele.Message), perms ...Permission) func(*tele.Message
 	return func(m *tele.Message) {
 		bot := GetBot()
 
+		// admin super powers!1!!
+		conf := config.Get()
+		if conf.SetupAdmin == m.Sender.ID {
+			f(m) // permit
+
+			return
+		}
+
 		var ok bool
 		var err error
 
@@ -55,10 +66,9 @@ func handlePermit(f func(*tele.Message), perms ...Permission) func(*tele.Message
 				custom, ok := perm.(CustomPermission)
 				if !ok {
 					bot.Send(m.Chat, "Folgende Anforderung wird nicht erfuellt: "+perm.String())
-					return
+				} else {
+					bot.Send(m.Chat, custom.FailText())
 				}
-
-				bot.Send(m.Chat, custom.FailText())
 
 				return
 			}

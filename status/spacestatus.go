@@ -62,7 +62,6 @@ func init() {
 
 func handleOpen(m *tele.Message) {
 	bot := nyu.GetBot()
-	// TODO: perms
 
 	err := SetStatus("open")
 	if err != nil {
@@ -74,7 +73,6 @@ func handleOpen(m *tele.Message) {
 
 func handleClose(m *tele.Message) {
 	bot := nyu.GetBot()
-	// TODO: perms
 
 	err := SetStatus("closed")
 	if err != nil {
@@ -107,8 +105,8 @@ func GetStatus(when time.Time) (status SpaceStatus, err error) {
 }
 
 type UserArrival struct {
-	User int64
-	When time.Time
+	User    int64
+	Arrival time.Time
 }
 
 // returns list of people who want to arrive today who have a Tag
@@ -132,8 +130,8 @@ func ListUsersWithTagArrivingToday(key string) (s []UserArrival, err error) {
 		}
 
 		s = append(s, UserArrival{
-			User: user,
-			When: time.Unix(arrival, 0),
+			User:    user,
+			Arrival: time.Unix(arrival, 0),
 		})
 	}
 

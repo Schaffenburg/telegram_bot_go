@@ -52,17 +52,19 @@ func init() {
 	//bot.AnswerCommand("datum", "Es scheint so als gäbe es in Aschaffenburg kein Konzept für Zeitrechnung.")
 	bot.Command("datum", handleGetTime)
 	help.AddCommand("datum")
+
 	bot.AnswerCommand("hallo", "Hallo @%h!")
 	help.AddCommand("hallo")
+	bot.AnswerCommand("hello", "Hello @%h!")
+	help.AddCommand("hello")
+
 	bot.AnswerCommand("lol", "rofl @%h hat lol gesagt!")
 	help.AddCommand("lol")
-	bot.AnswerCommand("/rofl", "lol @%h hat rofl gesagt!")
+	bot.AnswerCommand("rofl", "lol @%h hat rofl gesagt!")
 	help.AddCommand("rofl")
 
-	bot.AnswerCommand("/hallo", "Hallo @%h!")
-	help.AddCommand("hallo")
-	bot.AnswerCommand("/hello", "Hello @%h!")
-	help.AddCommand("hello")
+	bot.AnswerCommand("mussichhaben", "*nicht!")
+	help.AddCommand("mussichhaben")
 
 	bot.Command("schleudern", handleSlap("@sender schleudert @argument ein bisschen herum mit einer großen Forelle"))
 	help.AddCommand("schleudern")
@@ -73,10 +75,9 @@ func init() {
 	bot.Command("batsche", handleSlap("@sender batscht @argument mithilfe eines Barsches"))
 	help.AddCommand("batsche")
 
-	bot.AnswerCommand("mussichhaben", "*nicht!")
-	help.AddCommand("mussichhaben")
 	bot.ReplyCommand("ping", "pong")
 	help.AddCommand("ping")
+
 	bot.Command("wielautetdieantwort", func(m *tele.Message) {
 		bot.Send(m.Chat, "Die Antwort auf die endgültige Frage nach dem Leben, dem Universum und dem ganzen Rest lautet..")
 		time.Sleep(time.Second * 3)
@@ -97,6 +98,20 @@ func init() {
 	bot.Command("gidf", handleGoogle, PermsInternet)
 	help.AddCommand("gidf")
 
+	bot.Command("lmgt", handleLetMeXThat("lmgt",
+		"Let Me Google That", "https://letmegooglethat.com/?q=")) // no need internet so no privs
+	help.AddCommand(tele.Command{
+		Text:        "lmgt",
+		Description: "[Let Me Google That](https://letmegooglethat.com/) For you",
+	})
+
+	bot.Command("lmgpt", handleLetMeXThat("lmgpt",
+		"Let Me ChatGPT That", "https://letmegpt.com/?q=")) // no need internet so no privs
+	help.AddCommand(tele.Command{
+		Text:        "lmgpt",
+		Description: "[Let Me ChatGPT That](https://letmegpt.com/) For you",
+	})
+
 	bot.Command("wecker", handleTimer)
 	help.AddCommand("wecker")
 	bot.Command("werbinich", handleWhoAmI)
@@ -108,8 +123,59 @@ func init() {
 	bot.Command("wetter", handleWeather)
 	help.AddCommand("wetter")
 
+	bot.Command("laden", handleLoading)
+	help.AddCommand(tele.Command{
+		Text:        "laden",
+		Description: "laedt fuer x sekunden.",
+	})
+
 	bot.Command("cix", handleBroadcastCIX, PermsGroupEV)
 	bot.Command("nyusletter", handleBroadcastCIX, PermsGroupEV)
+}
+
+func handleLoading(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	args := strings.SplitN(m.Text, " ", 2)
+	if len(args) != 2 {
+		bot.Send(m.Chat, "Usage: /laden <umdrehungen>")
+
+		return
+	}
+
+	uu, err := strconv.ParseUint(args[1], 10, 64)
+	if err != nil {
+		bot.Send(m.Chat, "Usage: /laden <umdrehungen>")
+
+		return
+	}
+
+	const alphabet = "-\\|/-|/"
+
+	go func() {
+		bot := nyu.GetBot()
+
+		msg, err := bot.Send(m.Chat, string(alphabet[len(alphabet)-1]))
+		if err != nil {
+			log.Printf("err :%s", err)
+
+			return
+		}
+
+		t := time.NewTicker(time.Second)
+
+		for i := uint64(0); i < uu; i++ {
+			<-t.C
+			msg, err = bot.Edit(msg, string(alphabet[i%uint64(len(alphabet))]))
+			if err != nil {
+				log.Printf("error editing: %s", err)
+
+				return
+			}
+		}
+
+		t.Stop()
+	}()
 }
 
 func handleGetTime(m *tele.Message) {
@@ -119,7 +185,7 @@ func handleGetTime(m *tele.Message) {
 	var query string
 
 	if len(args) != 2 {
-		query = config.Get().DefafultTimeLocation
+		query = config.Get().DefaultTimeLocation
 	} else {
 		query = args[1]
 
@@ -245,6 +311,45 @@ func handleGoogle(m *tele.Message) {
 		bot.Send(m.Chat, b.String(), &tele.SendOptions{
 			ParseMode: tele.ModeMarkdown,
 		})
+	}
+}
+
+func handleLetMeXThat(cmd, thing, qurl string) func(m *tele.Message) {
+	return func(m *tele.Message) {
+		bot := nyu.GetBot()
+
+		var query string
+
+		args := strings.SplitN(m.Text, " ", 2)
+		if len(args) != 2 {
+			// if this is a reply use text of message replied to
+			if m.ReplyTo == nil || len(m.ReplyTo.Text) <= 0 {
+				bot.Send(m.Chat, "Usage: /"+cmd+" <text>")
+				return
+			}
+
+			query = m.ReplyTo.Text
+		} else {
+			query = args[1]
+		}
+
+		b := &strings.Builder{}
+		b.WriteString("[")
+		b.WriteString(thing)
+		b.WriteString("](")
+		b.WriteString(qurl)
+		b.WriteString(url.QueryEscape(query))
+		b.WriteString(") for you")
+
+		if m.ReplyTo != nil {
+			bot.Reply(m.ReplyTo, b.String(), &tele.SendOptions{
+				ParseMode: tele.ModeMarkdown,
+			})
+		} else {
+			bot.Send(m.Chat, b.String(), &tele.SendOptions{
+				ParseMode: tele.ModeMarkdown,
+			})
+		}
 	}
 }
 

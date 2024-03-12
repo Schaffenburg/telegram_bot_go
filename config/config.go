@@ -11,13 +11,17 @@ import (
 type Config struct {
 	Token string `yaml:"token"`
 
+	SetupAdmin int64 `yaml:"setup.admin"`
+
 	DBDriver string `yaml:"db.driver"`
 	DBSource string `yaml:"db.source"`
 
 	WeatherToken    string `yaml:"misc.weather.token"`
 	WeatherLocation string `yaml:"misc.weather.location"`
 
-	DefafultTimeLocation string `yaml:"misc.time.defaultlocation"`
+	DefaultTimeLocation string `yaml:"misc.time.defaultlocation"`
+
+	Batschigkeit int `yaml:"misc.batschigkeit"`
 }
 
 var config *Config

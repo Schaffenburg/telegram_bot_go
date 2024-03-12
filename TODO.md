@@ -1,3 +1,5 @@
+TODO: rewrite zeit irgendwann; heute 0 uhr ist unschoen heute 23:59 schoener aber auch nicht gut :/
+
 => https://www.stwab.de/aschaffenburgGips/Gips?SessionMandant=Aschaffenburg&Anwendung=CMSWEBPAGE&Methode=RefreshHTMLAusgabe&RessourceID=710554&Container.Children:0.BezirkId=1648&Container.Children:0.Strasse=Dorfstra%26szlig%3Be
 has ics download, so just parse that
 CommandsDE/MuellPlanCommand.php:    protected $name = 'muellplan';

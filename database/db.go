@@ -127,6 +127,8 @@ func UserHasTag(user int64, tag string) (bool, error) {
 		return false, err
 	}
 
+	defer r.Close()
+
 	return r.Next(), nil
 }
 
@@ -179,6 +181,20 @@ func RmUserTag(user int64, tag string) (bool, error) {
 	return changed > 0, err
 }
 
+// removes given tag from all users, bool is true if tag was present at all, false if it was not set anywhere
+func RmAllUserTag(tag string) (bool, error) {
+	r, err := StmtExec("DELETE FROM tags WHERE tag = ?;",
+		tag,
+	)
+	if err != nil {
+		return false, err
+	}
+
+	changed, err := r.RowsAffected()
+
+	return changed > 0, err
+}
+
 func GetUsersWithTag(tag string) (s []int64, err error) {
 	r, err := StmtQuery("SELECT user FROM tags WHERE (tag = ?);",
 		tag,
@@ -209,6 +225,22 @@ func SetArrival(user int64, time int64) error {
 	}
 
 	return err
+}
+
+// moves users arrival time by time in s
+func MoveArrival(user int64, time int64) (bool, error) {
+	r, err := StmtExec("UPDATE arrivalTimes SET time = time + ? WHERE user = ?",
+		time, user,
+	)
+
+	if err != nil {
+		log.Printf("Error Moving Arrival Time: %s", err)
+
+		return false, err
+	}
+
+	i, err := r.RowsAffected()
+	return i > 0, err
 }
 
 func RmArrival(user int64) (bool, error) {

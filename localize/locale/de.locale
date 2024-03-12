@@ -48,6 +48,8 @@ help.brb: "sag bescheid, dass du kurz weg bist."
 help.wiederda: "sag bescheid, dass wieder da bist."
 help.forceclean: "raeumt die datenbank auf."
 help.forceevict: "schmeisst alle aus dem space."
+help.ichwaeregernda: "sei in Gedanken dabei."
+help.ichwaeredochnichtgernda: "sei nicht mehr in Gedanken dabei."
 
 help.openspace: "oeffnet den space."
 help.closespace: "schliesst den space."
