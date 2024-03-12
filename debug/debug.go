@@ -43,6 +43,7 @@ func init() {
 	bot.Command("debug_leave", handleLeave, perms...)
 
 	bot.Command("debug_importsubscriptions", handleImportSubscriptions, perms...)
+	bot.Command("debug_importlangmap", handleImportLanguageMap, perms...)
 
 	debugcallback := func(c *tele.Callback) {
 		nyu.GetBot().Reply(c.Message, strconv.Quote(c.Data))
@@ -85,6 +86,65 @@ func init() {
 			bot.Send(m.Chat, "Invalid Command!")
 		}
 	})
+}
+
+func handleImportLanguageMap(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	streamer, err := bot.NewEditStreamer(m.Chat, "create editstreamer")
+	if err != nil {
+		bot.Send(m.Chat, "Ohno, failed to create editstreamer: %s", err)
+		log.Printf("Failed to create editstreamer %s", err)
+
+		return
+	}
+
+	log := func(f string, a ...any) {
+		str := fmt.Sprintf(f, a...) + "\n"
+
+		log.Printf(str)
+		streamer.Append(str)
+	}
+
+	log("Starting language import from `languagemap`")
+
+	log("NO!! language is not mapped yet, pls do that first!")
+	return
+
+	// TODO: map language
+	langmap := map[int]string{ // or vice versa idunno
+		0: "Deutsch",
+		1: "English",
+	}
+
+	s, err := db.StmtQuery("SELECT (user_id, language) FROM languagemap")
+	if err != nil {
+		log("failed to get spacestatus from DB: %s", err)
+	}
+
+	defer s.Close()
+
+	var user int64
+	var language int
+
+	for s.Next() {
+		err = s.Scan(&user, &language)
+		if err != nil {
+			log("Failed to scan: %s", err)
+
+			return
+		}
+
+		err := loc.SetUserLanguage(user,
+			*loc.GetLanguage(langmap[language]),
+		) // TODO: index lanugage
+		if err != nil {
+			log("Failed to insert: %s", err)
+
+			return
+		}
+
+	}
 }
 
 // TODO: test RENAME old spacestatus table to spacestatus_old!!!!!!
@@ -146,6 +206,8 @@ func handleImportStatus(m *tele.Message) {
 		}
 
 	}
+
+	log("Döner!")
 }
 
 // TODO: test
@@ -221,6 +283,8 @@ func handleImportSubscriptions(m *tele.Message) {
 			db.SetUserTag(user, status.SpaceStatusSubTag)
 		}
 	}
+
+	log("Döner!")
 }
 
 func handleRmTagSelf(m *tele.Message) {
