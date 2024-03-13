@@ -20,6 +20,7 @@ var localizeFS embed.FS
 const localizeFSprefix = "locale"
 
 var languagesLookup = make(map[string]*Language)
+var uniqueLanguages = make([]*Language, 0)
 var translationsLookup = make(map[string]int)
 
 // map language textid -> translation
@@ -76,6 +77,8 @@ func initLocale() {
 			for lI := 0; lI < len(languages); lI++ {
 				languagesLookup[languages[lI]] = lang // set language to outer i
 			}
+
+			uniqueLanguages = append(uniqueLanguages, lang)
 
 			for name, trans := range langmap {
 				// get translations id
@@ -162,8 +165,16 @@ func (t *Language) Name() string {
 	return t.name
 }
 
+func (t *Language) ID() int {
+	return t.id
+}
+
 // Gets the translation for a language
-func (t Translation) Get(l Language) string {
+func (t Translation) Get(l *Language) string {
+	if l == nil {
+		return t.name
+	}
+
 	lang, ok := translations[t.id]
 	if !ok {
 		return t.name
@@ -177,23 +188,67 @@ func (t Translation) Get(l Language) string {
 	return trans
 }
 
-func GetUserLanguage(u *tele.User) Language {
-	r, err := db.StmtQuery("SELECT language FROM language WHERE user = ?", u.ID)
-	if err != nil {
-		return *GetLanguage(DefaultLanguage)
+func SetUserLanguageAuto(u int64) error {
+	_, err := db.StmtExec("DELETE FROM language WHERE user = ?", u)
+
+	return err
+}
+
+func GetUserLanguage(u *tele.User) *Language {
+	l, _ := GetUserLanguageV(u)
+
+	return l
+}
+
+// verbose also returns if is auto
+func GetUserLanguageV(u *tele.User) (l *Language, auto bool) {
+	code := func() string {
+		auto = false
+		r, err := db.StmtQuery("SELECT language FROM language WHERE user = ?", u.ID)
+		if err != nil {
+			return ""
+		}
+
+		if !r.Next() {
+			return ""
+		}
+
+		var lang string
+		err = r.Scan(&lang)
+		if err != nil {
+			log.Printf("Failed to scan langauge from user %d: %s", u.ID, err)
+
+			return ""
+		}
+
+		return lang
+	}()
+
+	if code == "" && u.LanguageCode != "" {
+		auto = true
+		code = u.LanguageCode
 	}
 
-	if !r.Next() {
-		return *GetLanguage(DefaultLanguage)
+	l = GetLanguage(code)
+	if l == nil {
+		auto = false
+		l = GetLanguage(DefaultLanguage)
 	}
 
-	var lang string
-	err = r.Scan(&lang)
-	if err != nil {
-		log.Printf("Failed to scan langauge from user %d: %s", u.ID, err)
+	return
+}
 
-		return *GetLanguage(DefaultLanguage)
+func GetLanguagesS() (s []string) {
+	s = make([]string, len(uniqueLanguages))
+
+	for i, lang := range uniqueLanguages {
+		s[i] = lang.name
 	}
 
-	return *GetLanguage(lang)
+	return
+}
+
+// Returns list of all unique languages; pls treat array as read only
+func GetLanguages() []*Language {
+	return uniqueLanguages
 }
