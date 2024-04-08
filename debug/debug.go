@@ -3,6 +3,7 @@ package debug
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
+	"github.com/Schaffenburg/telegram_bot_go/config"
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
@@ -40,6 +41,8 @@ func init() {
 	bot.Command("debug_teststatusinline", handleTestStatusInline, perms...)
 
 	bot.Command("debug_leave", handleLeave, perms...)
+	bot.Command("debug_dumpgrouptags", handleDumpGroupTags, perms...)
+	bot.Command("debug_dumpusertags", handleDumpUserTags, perms...)
 
 	bot.Command("debug_importsubscriptions", handleImportSubscriptions, perms...)
 
@@ -79,11 +82,13 @@ func init() {
 	}()
 
 	// check for any unhandled commands
-	bot.Handle(tele.OnText, func(m *tele.Message) {
-		if len(m.Text) > 0 && m.Text[0] == '/' {
-			bot.Send(m.Chat, "Invalid Command!")
-		}
-	})
+	if config.Get().DebugCmd {
+		bot.Handle(tele.OnText, func(m *tele.Message) {
+			if len(m.Text) > 0 && m.Text[0] == '/' {
+				bot.Send(m.Chat, "Invalid Command!")
+			}
+		})
+	}
 }
 
 // TODO: test RENAME old spacestatus table to spacestatus_old!!!!!!
@@ -253,6 +258,92 @@ func handleLeave(m *tele.Message) {
 	bot.Send(m.Chat, "Goodbye!")
 
 	bot.Leave(m.Chat)
+}
+
+func handleDumpUserTags(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	var users []int64
+	if len(m.Entities) > 0 {
+		for _, e := range m.Entities {
+			if e.Type == tele.EntityTMention {
+				users = append(users, e.User.ID)
+			}
+		}
+	}
+
+	t := &strings.Builder{}
+
+	// only list mentioned users
+	if len(users) == 0 {
+		var err error
+		users, err = db.GetTaggedUsers()
+		if err != nil {
+			bot.Sendf(m.Chat, "failed to: %s", err)
+			return
+		}
+	}
+
+	for _, user := range users {
+		u, err := stalk.GetUserByID(user)
+		if err != nil {
+			bot.Sendf(m.Chat, "failed to: %s", err)
+			return
+		}
+
+		t.WriteString("\n")
+		t.WriteString(u.Username)
+		t.WriteString(" (")
+		t.WriteString(strconv.FormatInt(user, 10))
+		t.WriteString("):")
+
+		tags, err := db.GetUserTags(user)
+		if err != nil {
+			bot.Sendf(m.Chat, "ohno, %s", err)
+			return
+
+		}
+
+		for _, tag := range tags {
+			t.WriteString("\n - ")
+			t.WriteString(tag)
+		}
+	}
+
+	bot.Send(m.Chat, t.String())
+	return
+}
+
+func handleDumpGroupTags(m *tele.Message) {
+	bot := nyu.GetBot()
+
+	t, err := db.StmtQuery("SELECT group_id, tag FROM group_tags")
+	if err != nil {
+		bot.Sendf(m.Chat, "Failed to Query DB: %s", err)
+
+		return
+	}
+
+	var group int64
+	var tag string
+
+	b := &strings.Builder{}
+
+	for t.Next() {
+		err = t.Scan(&group, &tag)
+		if err != nil {
+			bot.Sendf(m.Chat, "Failed to Scan DB: %s", err)
+
+			return
+		}
+
+		b.WriteString(strconv.FormatInt(group, 10))
+		b.WriteString(" -> ")
+		b.WriteString(tag)
+		b.WriteString("\n")
+	}
+
+	bot.Send(m.Chat, b.String())
 }
 
 func handleSetTagSelf(m *tele.Message) {
