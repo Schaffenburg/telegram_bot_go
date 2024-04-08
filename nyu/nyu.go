@@ -178,7 +178,7 @@ func (p *ProxyPoller) Poll(b *tele.Bot, updates chan tele.Update, stop chan stru
 
 			if updat.EditedMessage != nil && updat.EditedMessage.Time().Before(time.Now().Add(-time.Minute*5)) {
 				if config.Get().DebugLog {
-					log.Printf("skipping cuz too old: %s old", updat.ChannelPost.Time().Sub(time.Now()))
+					log.Printf("skipping cuz too old: %s old", updat.EditedMessage.Time().Sub(time.Now()))
 				}
 
 				updat.EditedMessage = nil
