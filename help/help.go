@@ -38,7 +38,7 @@ func init() {
 func handleHelp(m *tele.Message) {
 	bot := nyu.GetBot()
 
-	bot.Send(m.Chat, "*Command List*:\n"+HelpText(), tele.ModeMarkdown)
+	bot.Send(m.Chat, "[Nyu](https://github.com/Schaffenburg/telegram_bot_go)-go "+nyu.Version+"\n *Command List*:\n"+HelpText(), tele.ModeMarkdown)
 }
 
 func AddCommand(c tele.Command) {

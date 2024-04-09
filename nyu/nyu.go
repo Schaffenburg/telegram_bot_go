@@ -7,6 +7,7 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/util"
 
+	_ "embed"
 	"fmt"
 	"log"
 	"strconv"
@@ -14,6 +15,8 @@ import (
 	"sync"
 	"time"
 )
+
+var Version = "b0.0.1"
 
 type Recipient int64
 
