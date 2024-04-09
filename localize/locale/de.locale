@@ -115,3 +115,8 @@ status.change.close: "Der space ist jetzt geschlossen!"
 status.subscribe.subscribe: "Gern, du wirst jetzt ueber den space status auf dem laufenden gehalten.\nWenn du keine lust mehr auf diese Nachichten hast einfach mit /abobeenden dein abonnoment beenden :)."
 status.subscribe.unsubscribe: "Gern, du wirst jetzt nichtmehr ueber den space status informiert.\nWenn du wieder nachichten bekommen willst einfach mit /abonnieren dein abonnoment erneuern :)."
 status.subscribe.unsubscribe.nochange: "o.O du warst gar nicht abonniert, naja jetzt bekommst du doppelt keine nachichten ;-)."
+
+localize.yourlanguageis: "Deine Sprache ist %s"
+localize.yourlanguageis.auto: "Deine Sprache ist %s (implizit)"
+
+localize.setlanguage.confirm: "Ok, merke ich mir"

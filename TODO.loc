@@ -1,9 +1,5 @@
-localize_cmd/localize.go:	bot.Sendf(m.Chat, "Deine Sprache ist %s%s", l.Name(), t(auto, " (auto)", ""))
 localize_cmd/localize.go:		bot.Sendf(m.Chat, "Usage: /setlanguage <language>\nlanguage := %v or auto",
-localize_cmd/localize.go:			bot.Send(m.Chat, "Ohno, "+err.Error())
-localize_cmd/localize.go:			bot.Send(m.Chat, "Ok, me remember that")
 localize_cmd/localize.go:		bot.Sendf(m.Chat, "Sprache nicht gefunden\nlanguage := %v or auto",
-localize_cmd/localize.go:	bot.Send(m.Chat, "Ok, me remember that")
 pager/pager.go:						bot.Sendf(owner, "Dein Pager %d konnte nicht benachichtigt werden: error %s", ids[i], err)
 pager/pager.go:						bot.Sendf(owner, "Dein Pager %d konnte nicht benachichtigt werden: status %s", ids[i], res.Status)
 pager/pager.go:		bot.Send(m.Chat, "Usage /pagerhinzufuegen <eid [int64]>")

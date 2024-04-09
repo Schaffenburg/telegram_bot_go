@@ -14,6 +14,10 @@ const (
 	CallbackSetLanguage = "set_language"
 )
 
+var (
+	FailGeneric = loc.MustTrans("fail.generic")
+)
+
 func init() {
 	bot := nyu.GetBot()
 
@@ -27,15 +31,31 @@ func init() {
 
 	bot.HandleInlineCallback(CallbackSetLanguage+"_de", func(c *tele.Callback) {})
 }
+
+var (
+	LYourLanguageIs     = loc.MustTrans("localize.yourlanguageis")
+	LYourLanguageIsAuto = loc.MustTrans("localize.yourlanguageis.auto")
+)
+
 func handleGetLang(m *tele.Message) {
 	bot := nyu.GetBot()
 
 	l, auto := loc.GetUserLanguageV(m.Sender)
-	bot.Sendf(m.Chat, "Deine Sprache ist %s%s", l.Name(), t(auto, " (auto)", ""))
+	if auto {
+		bot.Sendf(m.Chat, LYourLanguageIsAuto.Getf(l, l.Name()))
+	} else {
+		bot.Sendf(m.Chat, LYourLanguageIs.Getf(l, l.Name()))
+
+	}
 }
+
+var (
+	LSetLangageConfirm = loc.MustTrans("localize.setlanguage.confirm")
+)
 
 func handleSetLang(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) != 2 {
@@ -48,9 +68,11 @@ func handleSetLang(m *tele.Message) {
 	if args[1] == "auto" {
 		err := loc.SetUserLanguageAuto(m.Sender.ID)
 		if err != nil {
-			bot.Send(m.Chat, "Ohno, "+err.Error())
+			bot.Send(m.Chat, FailGeneric.Getf(l, err))
 		} else {
-			bot.Send(m.Chat, "Ok, me remember that")
+			l = loc.GetUserLanguage(m.Sender)
+
+			bot.Send(m.Chat, LSetLangageConfirm.Get(l))
 		}
 
 		return
@@ -65,8 +87,9 @@ func handleSetLang(m *tele.Message) {
 	}
 
 	loc.SetUserLanguage(m.Sender.ID, *lang)
+	l = lang
 
-	bot.Send(m.Chat, "Ok, me remember that")
+	bot.Send(m.Chat, LSetLangageConfirm.Get(l))
 }
 
 func t[K any](c bool, a, b K) K {
