@@ -47,7 +47,6 @@ func teleHelpEntries(l *loc.Language) (s []tele.Command) {
 				Text:        v.Text,
 				Description: v.Description.Name(),
 			}
-
 		}
 	} else {
 		for k, v := range helpEntries {
@@ -61,11 +60,15 @@ func teleHelpEntries(l *loc.Language) (s []tele.Command) {
 	return
 }
 
+var (
+	LHelpTopText = loc.MustTrans("help.topmostnotice")
+)
+
 func handleHelp(m *tele.Message) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(m.Sender)
 
-	bot.Send(m.Chat, "*Command List*:\n"+HelpText(l), tele.ModeMarkdown)
+	bot.Send(m.Chat, LHelpTopText.Getf(l, nyu.Version)+HelpText(l), tele.ModeMarkdown)
 }
 
 func AddCommand(c string) {

@@ -6,6 +6,7 @@ import (
 
 	"bufio"
 	"embed"
+	"fmt"
 	"gopkg.in/yaml.v3"
 	"log"
 	"strings"
@@ -186,6 +187,13 @@ func (t Translation) Get(l *Language) string {
 	}
 
 	return trans
+}
+
+// Gets the translation for a language
+func (t Translation) Getf(l *Language, a ...any) string {
+	trans := t.Get(l)
+
+	return fmt.Sprintf(trans, a...)
 }
 
 func SetUserLanguageAuto(u int64) error {

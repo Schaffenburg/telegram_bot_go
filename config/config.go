@@ -11,8 +11,9 @@ import (
 type Config struct {
 	Token string `yaml:"token"`
 
-	DebugLog bool `yaml:"debug.logging"`
-	DebugCmd bool `yaml:"debug.cmd"`
+	DebugLog           bool `yaml:"debug.logging"`
+	DebugCmd           bool `yaml:"debug.cmd"`
+	DebugLogInvalidCmd bool `yaml:"debug.cmd.invalidlogging"`
 
 	SetupAdmin int64 `yaml:"setup.admin"`
 

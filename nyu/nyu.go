@@ -7,6 +7,7 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/util"
 
+	_ "embed"
 	"fmt"
 	"log"
 	"strconv"
@@ -14,6 +15,8 @@ import (
 	"sync"
 	"time"
 )
+
+var Version = "b0.0.1"
 
 type Recipient int64
 
@@ -161,7 +164,42 @@ func (p *ProxyPoller) AddCh(ch chan tele.Update) {
 }
 
 func (p *ProxyPoller) Poll(b *tele.Bot, updates chan tele.Update, stop chan struct{}) {
-	p.AddCh(updates)
+	unfilter := make(chan tele.Update, 10)
+
+	go func() {
+		var updat tele.Update
+
+		for {
+			updat = <-unfilter
+			if updat.Message != nil && updat.Message.Time().Before(time.Now().Add(-time.Minute*5)) {
+				if config.Get().DebugLog {
+					log.Printf("skipping cuz too old: %s old", updat.Message.Time().Sub(time.Now()))
+				}
+
+				updat.Message = nil
+			}
+
+			if updat.EditedMessage != nil && updat.EditedMessage.Time().Before(time.Now().Add(-time.Minute*5)) {
+				if config.Get().DebugLog {
+					log.Printf("skipping cuz too old: %s old", updat.EditedMessage.Time().Sub(time.Now()))
+				}
+
+				updat.EditedMessage = nil
+			}
+
+			if updat.ChannelPost != nil && updat.ChannelPost.Time().Before(time.Now().Add(-time.Minute*5)) {
+				if config.Get().DebugLog {
+					log.Printf("skipping cuz too old: %s old", updat.ChannelPost.Time().Sub(time.Now()))
+				}
+
+				updat.ChannelPost = nil
+			}
+
+			updates <- updat
+		}
+	}()
+
+	p.AddCh(unfilter)
 
 	uch := make(chan tele.Update, 100)
 	go func() {

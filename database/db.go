@@ -195,6 +195,24 @@ func RmAllUserTag(tag string) (bool, error) {
 	return changed > 0, err
 }
 
+func GetTaggedUsers() (s []int64, err error) {
+	r, err := StmtQuery("SELECT user FROM tags")
+	if err != nil {
+		return nil, err
+	}
+
+	var buf int64
+	for r.Next() {
+		if err = r.Scan(&buf); err != nil {
+			return
+		}
+
+		s = append(s, buf)
+	}
+
+	return
+}
+
 func GetUsersWithTag(tag string) (s []int64, err error) {
 	r, err := StmtQuery("SELECT user FROM tags WHERE (tag = ?);",
 		tag,
@@ -204,6 +222,26 @@ func GetUsersWithTag(tag string) (s []int64, err error) {
 	}
 
 	var buf int64
+	for r.Next() {
+		if err = r.Scan(&buf); err != nil {
+			return
+		}
+
+		s = append(s, buf)
+	}
+
+	return
+}
+
+func GetUserTags(user int64) (s []string, err error) {
+	r, err := StmtQuery("SELECT tag FROM tags WHERE (user = ?);",
+		user,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	var buf string
 	for r.Next() {
 		if err = r.Scan(&buf); err != nil {
 			return

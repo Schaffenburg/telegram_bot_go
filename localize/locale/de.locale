@@ -14,6 +14,8 @@ perms.FailFollowing: "Folgende Anforderung wird nicht erfuellt: "
 
 fail.generic: "Ohno, es gab einen Fehler: %s"
 
+help.topmostnotice: "[Nyu](https://github.com/Schaffenburg/telegram_bot_go)-go %s\n *Command List*:\n"
+
 help.help: "Zeigt eine list an befehlen an."
 help.datum: "zeigt Uhrzeit/Datum abhängig vom Standort."
 help.hallo: "sagt dem Bot hallo."
