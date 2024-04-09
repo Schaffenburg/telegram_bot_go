@@ -20,7 +20,7 @@ type Permission interface {
 type CustomPermission interface {
 	Permission
 
-	FailText() string
+	FailText(u *tele.User) string
 }
 
 // Wraps a Permission to include a ErrorText function returning Text
@@ -37,9 +37,15 @@ func (p *PermissionFailText) FailText(u *tele.User) string {
 func (p *PermissionFailText) Check(m *tele.Message) (bool, error) { return p.Perm.Check(m) }
 func (p *PermissionFailText) String() string                      { return p.Perm.String() }
 
+var (
+	FailFollowing = loc.MustTrans("perms.FailFollowing")
+	FailGeneric   = loc.MustTrans("perms.FailGeneric")
+)
+
 func handlePermit(f func(*tele.Message), perms ...Permission) func(*tele.Message) {
 	return func(m *tele.Message) {
 		bot := GetBot()
+		lang := loc.GetUserLanguage(m.Sender)
 
 		// admin super powers!1!!
 		conf := config.Get()
@@ -57,7 +63,7 @@ func handlePermit(f func(*tele.Message), perms ...Permission) func(*tele.Message
 			if err != nil {
 				log.Printf("Permission check failed: %s", err)
 
-				bot.Send(m.Chat, "Rechte ueberpruefung fehlgeschlagen!")
+				bot.Send(m.Chat, FailGeneric.Get(lang))
 
 				return
 			}
@@ -65,9 +71,9 @@ func handlePermit(f func(*tele.Message), perms ...Permission) func(*tele.Message
 			if !ok {
 				custom, ok := perm.(CustomPermission)
 				if !ok {
-					bot.Send(m.Chat, "Folgende Anforderung wird nicht erfuellt: "+perm.String())
+					bot.Send(m.Chat, FailFollowing.Get(lang)+perm.String())
 				} else {
-					bot.Send(m.Chat, custom.FailText())
+					bot.Send(m.Chat, custom.FailText(m.Sender))
 				}
 
 				return

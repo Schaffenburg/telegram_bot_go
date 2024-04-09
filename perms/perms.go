@@ -13,13 +13,15 @@ import (
 )
 
 var (
-	GroupEV  = &PermissionGroupTag{"perm_ev"}
-	GroupCIX = &PermissionGroupTag{"perm_cix"}
+	GroupEV       = &PermissionGroupTag{"perm_ev"}
+	GroupCIX      = &PermissionGroupTag{"perm_cix"}
+	GroupVorstand = &PermissionGroupTag{"perm_vorstand"}
 
 	// if member of any space releated group
 	MemberSpaceGroup = &PermissionOr{
 		GroupCIX,
 		GroupEV,
+		GroupVorstand,
 	}
 )
 

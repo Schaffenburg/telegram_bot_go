@@ -31,6 +31,12 @@ var (
 		Text: loc.MustTrans("perms.FailGroupEV"), //"Um Befehle, die den Bot nachtichten schreiben lassen musst du Mitglied der e.V. Gruppe sein",
 	}
 
+	PermsGroupVorstand = &nyu.PermissionFailText{
+		Perm: perms.GroupVorstand,
+
+		Text: loc.MustTrans("perms.FailGroupVorstand"),
+	}
+
 	PermsDB = &nyu.PermissionFailText{
 		Perm: perms.MemberSpaceGroup,
 
@@ -42,6 +48,11 @@ var (
 
 		Text: loc.MustTrans("perms.FailInternet"),
 	}
+
+	FailGeneric = loc.MustTrans("fail.generic") // "Ohno, es gab einen Fehler: %s"
+
+	// good enough for a dice & ringedingens
+	RSource = rand.New(rand.NewSource(time.Now().UnixNano() + 42))
 )
 
 func init() {
@@ -78,8 +89,13 @@ func init() {
 	bot.ReplyCommand("ping", "pong")
 	help.AddCommand("ping")
 
+	var TheAnswerIs = loc.MustTrans("misc.TheAnswerIs")
+
 	bot.Command("wielautetdieantwort", func(m *tele.Message) {
-		bot.Send(m.Chat, "Die Antwort auf die endgültige Frage nach dem Leben, dem Universum und dem ganzen Rest lautet..")
+		bot := nyu.GetBot()
+		lang := loc.GetUserLanguage(m.Sender)
+
+		bot.Send(m.Chat, TheAnswerIs.Get(lang))
 		time.Sleep(time.Second * 3)
 
 		bot.Send(m.Chat, "*42*!", tele.ModeMarkdown)
@@ -120,8 +136,8 @@ func init() {
 	bot.Command("laden", handleLoading)
 	help.AddCommand("laden")
 
-	bot.Command("cix", handleBroadcastCIX, PermsGroupEV)
-	bot.Command("nyusletter", handleBroadcastCIX, PermsGroupEV)
+	bot.Command("cix", handleBroadcastCIX, PermsGroupVorstand)
+	bot.Command("nyusletter", handleBroadcastCIX, PermsGroupVorstand)
 }
 
 func handleLoading(m *tele.Message) {
@@ -169,8 +185,15 @@ func handleLoading(m *tele.Message) {
 	}()
 }
 
+var (
+	NoConceptTime = loc.MustTrans("misc.noconcepttime")
+
+	TimeAnswer = loc.MustTrans("misc.timeanswer")
+)
+
 func handleGetTime(m *tele.Message) {
 	bot := nyu.GetBot()
+	lang := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	var query string
@@ -182,7 +205,8 @@ func handleGetTime(m *tele.Message) {
 
 	}
 
-	var ErrText = "Es scheint so als gäbe es in " + query + " kein Konzept für Zeitrechnung."
+	//"Es scheint so als gäbe es in " + query + " kein Konzept für Zeitrechnung."
+	var ErrText = fmt.Sprintf(NoConceptTime.Get(lang), query)
 
 	res, err := tad.Search(query)
 	if err != nil {
@@ -205,15 +229,20 @@ func handleGetTime(m *tele.Message) {
 		return
 	}
 
-	bot.Sendf(m.Chat, "Die Zeit in %s (%s) betaegt grade %s\nEs ist der %d. %s %d",
+	bot.Sendf(m.Chat, TimeAnswer.Get(lang),
 		res[0].City, data.Country,
 		data.Time,
 		data.Date.Day, data.Date.Month, data.Date.Year,
 	)
 }
 
+var (
+	BroadcastCIX = loc.MustTrans("misc.broadcastcix")
+)
+
 func handleBroadcastCIX(m *tele.Message) {
 	bot := nyu.GetBot()
+	lang := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) != 2 {
@@ -226,20 +255,20 @@ func handleBroadcastCIX(m *tele.Message) {
 
 	g, err := db.GetTaggedGroups("perm_cix") // get ev group
 	if err != nil {
-		log.Printf("Failed to determin ev group: %s", err)
-		bot.Send(m.Chat, "Ohno, es gab einen Fehler")
+		log.Printf("Failed to determin cix group(s): %s", err)
+		bot.Send(m.Chat, FailGeneric.Get(lang))
 
 		return
 	}
 
 	if len(g) == 0 {
-		log.Printf("Failed to determin ev group: no gropus")
-		bot.Send(m.Chat, "Ohno, es gab einen Fehler")
+		log.Printf("Failed to determin cix group(s): no gropus")
+		bot.Send(m.Chat, FailGeneric.Get(lang))
 
 		return
 	}
 
-	bot.Sendf(m.Chat, "Ok, broadcased to group(s): %v", g)
+	bot.Sendf(m.Chat, BroadcastCIX.Get(lang), g)
 
 	for i := 0; i < len(g); i++ {
 		bot.Send(nyu.Recipient(g[i]), text)
@@ -344,8 +373,22 @@ func handleLetMeXThat(cmd, thing, qurl string) func(m *tele.Message) {
 	}
 }
 
+var (
+	rings = []loc.Translation{
+		loc.MustTrans("misc.ring1"),
+		loc.MustTrans("misc.ring2"),
+		loc.MustTrans("misc.ring3"),
+		loc.MustTrans("misc.ring4"),
+		loc.MustTrans("misc.ring5"),
+	}
+
+	Remind     = loc.MustTrans("misc.remind")
+	WillRemind = loc.MustTrans("misc.WillRemind")
+)
+
 func handleTimer(m *tele.Message) {
 	bot := nyu.GetBot()
+	lang := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) != 2 {
@@ -363,48 +406,54 @@ func handleTimer(m *tele.Message) {
 
 	//_, offset := time.Now().Zone()
 	msgtime := m.Time() //.Add(time.Second * time.Duration(offset))
-	bot.Send(m.Chat, "Ok, bis um "+msgtime.Add(d).Format("15:04:05")+"!")
+	bot.Sendf(m.Chat, WillRemind.Get(lang), msgtime.Add(d).Format("15:04:05"))
 
 	go func(dur time.Duration, chat *tele.Chat) {
 		time.Sleep(msgtime.Add(d).Sub(time.Now())) // msg send + duration - now
 
-		var Messages = []string{"Klingeling...", "Ringdingding...", "Ringkelingdeling...", "BEEP BEEP...", "Ringeding..."}
 		const Rings = 5
 
 		for i := 0; i < Rings; i++ {
-			bot.Send(chat, util.OneOf(RSource, Messages))
+			bot.Send(chat, util.OneOf(RSource, rings).Get(lang))
 			time.Sleep(time.Second / 2 / Rings) // send all in 1/2 second
 		}
 
-		bot.Send(chat, "Ich sollte dich an etwas erinnern")
+		bot.Send(chat, Remind.Get(lang))
 	}(d, m.Chat)
 }
 
 var utctime, _ = time.LoadLocation("UTC")
 
+var LWhoAmI = loc.MustTrans("misc.WhoAmI")
+
 func handleWhoAmI(m *tele.Message) {
 	bot := nyu.GetBot()
+	lang := loc.GetUserLanguage(m.Sender)
 
 	photo, err := bot.GetCurrentPFP(m.Sender)
 	if err != nil {
-		log.Printf("Faield to get current PFP of %d: %s", m.Sender.ID, err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		log.Printf("Failed to get current PFP of %d: %s", m.Sender.ID, err)
+		bot.Sendf(m.Chat, FailGeneric.Get(lang), err)
 		return
 	}
 
-	photo.Caption = fmt.Sprintf("Deine ID: %d\nName: %s %s\nUsername: %s",
+	photo.Caption = fmt.Sprintf(LWhoAmI.Get(lang),
 		m.Sender.ID, m.Sender.FirstName, m.Sender.LastName, m.Sender.Username,
 	)
 
 	bot.Send(m.Chat, photo)
 }
 
-// good enough for a dice & ringedingens
-var RSource = rand.New(rand.NewSource(time.Now().UnixNano() + 42))
+var (
+	LRollingDice   = loc.MustTrans("misc.rolling")
+	LRollingResult = loc.MustTrans("misc.RollingResult")
+)
 
 func handleDiceRoll(m *tele.Message) {
-	const Text = "Wuerfeln... "
 	bot := nyu.GetBot()
+	lang := loc.GetUserLanguage(m.Sender)
+
+	rolling := LRollingDice.Get(lang)
 
 	var Sides = 6
 	// alt num of sides:
@@ -428,7 +477,7 @@ func handleDiceRoll(m *tele.Message) {
 		return strconv.FormatInt(int64(lastnum), 10)
 	}
 
-	m, err := bot.Send(m.Chat, Text+number())
+	m, err := bot.Send(m.Chat, rolling+number())
 	if err != nil {
 		log.Printf("Failed to initialize Dice: %s", err)
 		return
@@ -439,7 +488,7 @@ func handleDiceRoll(m *tele.Message) {
 	for i := 0; i < RollTimes; i++ {
 		time.Sleep(RollTime / RollTimes)
 
-		m, err = bot.Edit(m, Text+number())
+		m, err = bot.Edit(m, rolling+number())
 		if err != nil {
 			log.Printf("Failed to roll dice: %s", err)
 			return
@@ -448,7 +497,7 @@ func handleDiceRoll(m *tele.Message) {
 
 	time.Sleep(RollTime / RollTimes)
 
-	m, err = bot.Edit(m, "Habe eine "+strconv.FormatInt(int64(lastnum), 10)+" gewuerfelt!")
+	m, err = bot.Edit(m, fmt.Sprintf(LRollingResult.Get(lang), lastnum))
 	if err != nil {
 		log.Printf("failed to set final number of diceroll: %s", err)
 	}
@@ -456,6 +505,7 @@ func handleDiceRoll(m *tele.Message) {
 
 func handleAddFeatureRequest(m *tele.Message) {
 	bot := nyu.GetBot()
+	lang := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) != 2 {
@@ -466,20 +516,24 @@ func handleAddFeatureRequest(m *tele.Message) {
 	err := db.AddLog(m.Sender.ID, time.Now(), "featurerequest", args[1])
 	if err != nil {
 		log.Printf("Failed to add featurerequest to log: %s", err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Sendf(m.Chat, FailGeneric.Get(lang), err.Error())
 		return
 	}
 
 	bot.Send(m.Chat, "Ok, schreib ich mir auf ^^")
 }
 
+var Lsling = loc.MustTrans("misc.sling")
+
 func handleSlap(text string) func(m *tele.Message) {
 	return func(m *tele.Message) {
 		bot := nyu.GetBot()
+		lang := loc.GetUserLanguage(m.Sender)
 
 		args := strings.SplitN(m.Text, " ", 2)
 		if len(args) != 2 {
-			bot.Send(m.Chat, "@"+m.Sender.Username+" tut mir Leid. Es gibt niemanden, den man rumschleudern könnte...")
+			bot.Send(m.Chat, Lsling.Get(lang))
+
 			return
 		}
 

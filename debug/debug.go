@@ -3,6 +3,7 @@ package debug
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
+	"github.com/Schaffenburg/telegram_bot_go/config"
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	loc "github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
@@ -19,73 +20,80 @@ import (
 )
 
 func init() {
-	bot := nyu.GetBot()
+	if config.Get().DebugCmd {
+		bot := nyu.GetBot()
 
-	// permissions required for debug commands:
-	permFailText := loc.MustTrans("parms.FailDebug")
-	perms := []nyu.Permission{
-		&nyu.PermissionFailText{Perm: &perms.PermissionTag{"debug"}, Text: permFailText},
-		&nyu.PermissionFailText{Perm: &perms.PermissionGroupTag{"perm_ev"}, Text: permFailText},
+		// permissions required for debug commands:
+		permFailText := loc.MustTrans("parms.FailDebug")
+		perms := []nyu.Permission{
+			&nyu.PermissionFailText{Perm: &perms.PermissionTag{"debug"}, Text: permFailText},
+			&nyu.PermissionFailText{Perm: &perms.PermissionGroupTag{"perm_ev"}, Text: permFailText},
+		}
+
+		bot.Command("debug_settagself", handleSetTagSelf, perms...)
+		bot.Command("debug_rmtagself", handleRmTagSelf, perms...)
+
+		bot.Command("debug_setgrouptagcurrent", handleSetGroupTagCurrent, perms...)
+
+		bot.Command("debug_isgroupmemberself", handleIsGroupMemberSelf, perms...)
+		bot.Command("debug_istaggedgroupmemberself", handleIsTaggedGroupMemberSelf, perms...)
+
+		bot.Command("debug_testinlinebtn", handleTestInline, perms...)
+
+		bot.Command("debug_teststatusinline", handleTestStatusInline, perms...)
+
+		bot.Command("debug_leave", handleLeave, perms...)
+
+		bot.Command("debug_importsubscriptions", handleImportSubscriptions, perms...)
+		bot.Command("debug_importlangmap", handleImportLanguageMap, perms...)
+
+		debugcallback := func(c *tele.Callback) {
+			nyu.GetBot().Reply(c.Message, strconv.Quote(c.Data))
+		}
+
+		bot.HandleInlineCallback("testinline_ok", debugcallback)
+		bot.HandleInlineCallback("testinline_nu", debugcallback)
+
+		bot.AnswerCommand("hi", "Hi to you too, %u!")
+		bot.ReplyCommand("nya", "nya")
 	}
 
-	bot.Command("debug_settagself", handleSetTagSelf, perms...)
-	bot.Command("debug_rmtagself", handleRmTagSelf, perms...)
+	if config.Get().DebugLog {
+		bot := nyu.GetBot()
 
-	bot.Command("debug_setgrouptagcurrent", handleSetGroupTagCurrent, perms...)
+		poller := nyu.Poller()
 
-	bot.Command("debug_isgroupmemberself", handleIsGroupMemberSelf, perms...)
-	bot.Command("debug_istaggedgroupmemberself", handleIsTaggedGroupMemberSelf, perms...)
+		ch := make(chan tele.Update, 100)
+		poller.AddCh(ch)
 
-	bot.Command("debug_testinlinebtn", handleTestInline, perms...)
+		go func() {
+			var u tele.Update
+			var ok bool
 
-	bot.Command("debug_teststatusinline", handleTestStatusInline, perms...)
+			for {
+				u, ok = <-ch
+				if !ok {
+					return
+				}
 
-	bot.Command("debug_leave", handleLeave, perms...)
+				if u.Message != nil {
+					nyu.LogMessage("msg <-", u.Message)
+				}
 
-	bot.Command("debug_importsubscriptions", handleImportSubscriptions, perms...)
-	bot.Command("debug_importlangmap", handleImportLanguageMap, perms...)
+				if u.Callback != nil {
+					nyu.LogCallback("cb <-", u.Callback)
+				}
+			}
+		}()
 
-	debugcallback := func(c *tele.Callback) {
-		nyu.GetBot().Reply(c.Message, strconv.Quote(c.Data))
+		// check for any unhandled commands
+
+		bot.Handle(tele.OnText, func(m *tele.Message) {
+			if len(m.Text) > 0 && m.Text[0] == '/' {
+				bot.Send(m.Chat, "Invalid Command!")
+			}
+		})
 	}
-
-	bot.HandleInlineCallback("testinline_ok", debugcallback)
-	bot.HandleInlineCallback("testinline_nu", debugcallback)
-
-	bot.AnswerCommand("hi", "Hi to you too, %u!")
-	bot.ReplyCommand("nya", "nya")
-
-	poller := nyu.Poller()
-
-	ch := make(chan tele.Update, 100)
-	poller.AddCh(ch)
-
-	go func() {
-		var u tele.Update
-		var ok bool
-
-		for {
-			u, ok = <-ch
-			if !ok {
-				return
-			}
-
-			if u.Message != nil {
-				nyu.LogMessage("msg <-", u.Message)
-			}
-
-			if u.Callback != nil {
-				nyu.LogCallback("cb <-", u.Callback)
-			}
-		}
-	}()
-
-	// check for any unhandled commands
-	bot.Handle(tele.OnText, func(m *tele.Message) {
-		if len(m.Text) > 0 && m.Text[0] == '/' {
-			bot.Send(m.Chat, "Invalid Command!")
-		}
-	})
 }
 
 func handleImportLanguageMap(m *tele.Message) {
@@ -368,8 +376,8 @@ func handleIsGroupMemberSelf(m *tele.Message) {
 func handleSetGroupTagCurrent(m *tele.Message) {
 	bot := nyu.GetBot()
 
-	if m.Chat.Type != tele.ChatGroup {
-		bot.Send(m.Chat, "grouptags are only available for Chat.Type \"ChatGroup\".")
+	if m.Chat.Type == tele.ChatPrivate {
+		bot.Send(m.Chat, "grouptags are not available for Chat.Type \"ChatPrivate\".")
 		return
 	}
 

@@ -1,12 +1,18 @@
 Deutsch,German,deutsch,german,de,DE,de-de
 hello: hallo
+perms.FailGeneric: "Rechte ueberpruefung fehlgeschlagen!"
 perms.FailGroupEV: "Fuer diesen Befehl musst du leider in der e.V. gruppe sein"
+perms.FailGroupVorstand: "Fuer diesen Befehl musst du Teil des Vorstandes sein"
 perms.fff: "Um Befehle, die den Bot nachtichten schreiben lassen musst du Mitglied der e.V. Gruppe sein"
 perms.FailDB: "Um misc Befehle, die dinge in einer Datenbank speichern musst du Mitglied einer Spaceeigenen Gruppe sein"
 perms.FailInternet: "Um misc Befehle, die mit dem Internet interaggieren, musst du mitglied in der e.V. oder CIX gruppe sein"
 perms.FailDebug: "Debugging Befehle benoetigen sowohl das debug Tag als auch eine Mitgliedschaft in der e.V. gruppe"
 perms.FailSpaceStatusEV: "Um Befehle, die den Spacestatus setzen du benutzen, musst du Mitglied der e.V. Gruppe sein"
 perms.FailDoSpaceEV: "Um Befehle, die dinge im Space bewirken musst du Mitglied in der e.V. Gruppe sein"
+
+perms.FailFollowing: "Folgende Anforderung wird nicht erfuellt: "
+
+fail.generic: "Ohno, es gab einen Fehler: %s"
 
 help.help: "Zeigt eine list an befehlen an."
 help.datum: "zeigt Uhrzeit/Datum abhängig vom Standort."
@@ -73,3 +79,24 @@ help.ring: "Manuell die Türklingel von Schaffenburg e.V. auslösen."
 help.heitzungan: "Manuell die Heizung im Space anmachen."
 help.heizungaus: "Manuell die Heizung im Space ausmachen."
 help.wiewarmistes: "Zeigt die Temperatur im Hackspace Gebaeude."
+
+misc.noconcepttime: "Es scheint so als gäbe es in %s kein Konzept für Zeitrechnung."
+misc.timeanswer: "Die Zeit in %s (%s) betaegt grade %s\nEs ist der %d. %s %d"
+
+misc.broadcastcix: "Ok, deine Meldung wurde in folgende Gruppen verbreitet: %v"
+
+misc.fail.google: "Es gab einen fehler fuer '%s' zu suchen: %s"
+
+misc.TheAnswerIs: "Die Antwort auf die endgültige Frage nach dem Leben, dem Universum und dem ganzen Rest lautet.."
+misc.ring1: "Klingeling..."
+misc.ring2: "Ringdingding..."
+misc.ring3: "Ringkelingdeling..."
+misc.ring4: "BEEP BEEP..."
+misc.ring5: "Ringeding..."
+misc.remind: "Ich sollte dich an etwas erinnern"
+misc.WillRemind: "Ok, bis um %s!"
+
+misc.WhoAmI: "Deine ID: %d\nName: %s\nund Username: %s"
+misc.rolling: "Wuerfeln... "
+misc.RollingResult: "Habe eine %d gewuerfelt!"
+misc.sling: "Tut mir Leid. Es gibt niemanden, den man rumschleudern könnte..."

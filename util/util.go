@@ -35,7 +35,7 @@ func ParseTime(t string) (newTime time.Time, err error) {
 	return newTime, nil
 }
 
-func must[A any, R any](f func(A) (R, error), a A) (r R) {
+func Must[A any, R any](f func(A) (R, error), a A) (r R) {
 	r, err := f(a)
 	if err != nil {
 		panic(err)

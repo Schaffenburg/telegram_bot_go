@@ -1,5 +1,9 @@
 token: "<telegram bot token>"
 
+# enbable or disable debugging features
+debug.logging: <true/false>
+debug.cmd:     <true/false>
+
 # can execute all commands
 setup.admin: <telegram id int>
 
