@@ -208,37 +208,50 @@ func GetUserLanguage(u *tele.User) *Language {
 	return l
 }
 
-// verbose also returns if is auto
-func GetUserLanguageV(u *tele.User) (l *Language, auto bool) {
-	code := func() string {
-		auto = false
-		r, err := db.StmtQuery("SELECT language FROM language WHERE user = ?", u.ID)
-		if err != nil {
-			return ""
-		}
-
-		if !r.Next() {
-			return ""
-		}
-
-		var lang string
-		err = r.Scan(&lang)
-		if err != nil {
-			log.Printf("Failed to scan langauge from user %d: %s", u.ID, err)
-
-			return ""
-		}
-
-		return lang
-	}()
-
-	if code == "" && u.LanguageCode != "" {
-		auto = true
-		code = u.LanguageCode
+// language can be nil (by user ID)
+func GetUserLanguageID(id int64) (l *Language) {
+	r, err := db.StmtQuery("SELECT language FROM language WHERE user = ?", id)
+	if err != nil {
+		return nil
 	}
 
-	l = GetLanguage(code)
+	if !r.Next() {
+		return nil
+	}
+
+	var lang string
+	err = r.Scan(&lang)
+	if err != nil {
+		log.Printf("Failed to scan langauge from user %d: %s", id, err)
+
+		return nil
+	}
+
+	return GetLanguage(lang)
+}
+
+// returns default language if user has nothing configured
+func MustGetUserLanguageID(id int64) (l *Language) {
+	l = GetUserLanguageID(id)
 	if l == nil {
+		return
+	}
+
+	return GetLanguage(DefaultLanguage)
+}
+
+// verbose also returns if is auto
+func GetUserLanguageV(u *tele.User) (l *Language, auto bool) {
+	auto = false
+
+	code := GetUserLanguageID(u.ID)
+
+	if code == nil && u.LanguageCode != "" {
+		auto = true
+		code = GetLanguage(u.LanguageCode)
+	}
+
+	if code == nil {
 		auto = false
 		l = GetLanguage(DefaultLanguage)
 	}

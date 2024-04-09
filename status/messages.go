@@ -4,11 +4,18 @@ package status
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
+	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 )
 
+var (
+	LReturn = loc.MustTrans("status.return")
+)
+
 func SendReminderReturn(u int64) {
-	nyu.GetBot().Send(nyu.Recipient(u), "Wider da?",
+	l := loc.MustGetUserLanguageID(u)
+
+	nyu.GetBot().Send(nyu.Recipient(u), LReturn.Get(l),
 		&tele.SendOptions{
 			ReplyMarkup: &tele.ReplyMarkup{
 				InlineKeyboard: [][]tele.InlineButton{
@@ -25,8 +32,14 @@ func SendReminderReturn(u int64) {
 	)
 }
 
+var (
+	LWelcomeSpeedDial = loc.MustTrans("status.welcomespeeddial")
+)
+
 func SendArrivalMessage(u int64) {
-	nyu.GetBot().Send(nyu.Recipient(u), "Willkommen im space.\nHier ein paar Kurzwahltasten:",
+	l := loc.MustGetUserLanguageID(u)
+
+	nyu.GetBot().Send(nyu.Recipient(u), LWelcomeSpeedDial.Get(l),
 		&tele.SendOptions{
 			ReplyMarkup: &tele.ReplyMarkup{
 				InlineKeyboard: [][]tele.InlineButton{
@@ -48,9 +61,18 @@ func SendArrivalMessage(u int64) {
 	)
 }
 
+var (
+	LAreYouHereNow      = loc.MustTrans("status.areyouherenow")
+	LAreYouHereNowYes   = loc.MustTrans("status.areyouherenow.yes")
+	LAreYouHereNow15min = loc.MustTrans("status.areyouherenow.15m")
+	LAreYouHereNowNo    = loc.MustTrans("status.areyouherenow.no")
+)
+
 // Sens the user arrival confirmation inline button thingy
 func AskUserIfArrived(u int64) {
-	nyu.GetBot().Send(nyu.Recipient(u), "Du wolltest jetzt da sein. bist du es auch?",
+	l := loc.MustGetUserLanguageID(u)
+
+	nyu.GetBot().Send(nyu.Recipient(u), LAreYouHereNow.Get(l),
 		&tele.SendOptions{
 			ReplyMarkup: &tele.ReplyMarkup{
 				InlineKeyboard: [][]tele.InlineButton{
@@ -58,19 +80,19 @@ func AskUserIfArrived(u int64) {
 						tele.InlineButton{
 							Unique: CallbackAmHere,
 
-							Text: "Ja, i bims 1 da",
+							Text: LAreYouHereNowYes.Get(l),
 						},
 					},
 					[]tele.InlineButton{
 						tele.InlineButton{
 							Unique: CallbackDelay15Mins,
 
-							Text: "In 15 minuten",
+							Text: LAreYouHereNow15min.Get(l),
 						},
 						tele.InlineButton{
 							Unique: CallbackWontCome,
 
-							Text: "Donnich",
+							Text: LAreYouHereNowNo.Get(l),
 						},
 					},
 				},

@@ -24,6 +24,10 @@ var (
 	}
 )
 
+var (
+	FailGeneric = loc.MustTrans("fail.generic")
+)
+
 func init() {
 	err := db.StartDB()
 	if err != nil {
@@ -60,25 +64,34 @@ func init() {
 	help.AddCommand("abobeenden")
 }
 
+var (
+	LSpaceChOpen  = loc.MustTrans("status.change.open")
+	LSpaceChClose = loc.MustTrans("status.change.close")
+)
+
 func handleOpen(m *tele.Message) {
+	l := loc.GetUserLanguage(m.Sender)
+
 	bot := nyu.GetBot()
 
 	err := SetStatus("open")
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Get(l)+err.Error())
 	} else {
-		bot.Send(m.Chat, "Der space ist jetzt geoeffnet!")
+		bot.Send(m.Chat, LSpaceChOpen.Get(l))
 	}
 }
 
 func handleClose(m *tele.Message) {
+	l := loc.GetUserLanguage(m.Sender)
+
 	bot := nyu.GetBot()
 
 	err := SetStatus("closed")
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Get(l)+err.Error())
 	} else {
-		bot.Send(m.Chat, "Der space ist jetzt geschlossen!")
+		bot.Send(m.Chat, LSpaceChClose.Get(l))
 	}
 }
 
@@ -140,6 +153,7 @@ func ListUsersWithTagArrivingToday(key string) (s []UserArrival, err error) {
 
 type SpaceStatus string
 
+// TODO: localize
 func (s SpaceStatus) Text() string {
 	switch string(s) {
 	case "open":
@@ -199,45 +213,54 @@ func SetStatus(status SpaceStatus) error {
 }
 
 func handleGetStatus(m *tele.Message) {
+	l := loc.GetUserLanguage(m.Sender)
 	bot := nyu.GetBot()
 
-	println("Get status now")
 	status, err := GetStatus(time.Now())
 	if err != nil {
-		println("err")
 		log.Printf("Failed to get status: %s", err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 		return
 	}
 
-	println("send status")
 	bot.Sendf(m.Chat, "Space status: %s", status)
 }
 
+var (
+	LSpaceStatusSubscribe = loc.MustTrans("status.subscribe.subscribe")
+)
+
 func handleSubscribe(m *tele.Message) {
+	l := loc.GetUserLanguage(m.Sender)
 	bot := nyu.GetBot()
 
 	err := db.SetUserTag(m.Sender.ID, SpaceStatusSubTag)
 	if err != nil {
 		log.Printf("Error adding user tag: %s", err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
-		bot.Send(m.Chat, "Gern, du wirst jetzt ueber den space status auf dem laufenden gehalten.\nWenn du keine lust mehr auf diese Nachichten hast einfach mit /abobeenden dein abonnoment beenden :).")
+		bot.Send(m.Chat, LSpaceStatusSubscribe.Get(l))
 	}
 }
 
+var (
+	LSpaceStatusUnsubscribe          = loc.MustTrans("status.subscribe.unsubscribe")
+	LSpaceStatusUnsubscribeNotChange = loc.MustTrans("status.subscribe.unsubscribe.nochange")
+)
+
 func handleUnsubscribe(m *tele.Message) {
+	l := loc.GetUserLanguage(m.Sender)
 	bot := nyu.GetBot()
 
 	ch, err := db.RmUserTag(m.Sender.ID, SpaceStatusSubTag)
 	if err != nil {
-		log.Printf("Error adding user tag: %s", err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		log.Printf("Error removing user tag: %s", err)
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		if ch {
-			bot.Send(m.Chat, "Gern, du wirst jetzt nichtmehr ueber den space status informiert.\nWenn du wieder nachichten bekommen willst einfach mit /abonnieren dein abonnoment erneuern :).")
+			bot.Send(m.Chat, LSpaceStatusUnsubscribe.Get(l))
 		} else {
-			bot.Send(m.Chat, "o.O du warst gar nicht abonniert, naja jetzt bekommst du doppelt keine nachichten ;-).")
+			bot.Send(m.Chat, LSpaceStatusUnsubscribeNotChange.Get(l))
 		}
 	}
 }
