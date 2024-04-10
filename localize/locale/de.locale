@@ -1,4 +1,4 @@
-Deutsch,German,deutsch,german,de,DE,de-de
+Deutsch,de,German,deutsch,german,DE,de-de
 hello: hallo
 perms.FailGeneric: "Rechte ueberpruefung fehlgeschlagen!"
 perms.FailGroupEV: "Fuer diesen Befehl musst du leider in der e.V. gruppe sein"
@@ -90,6 +90,7 @@ misc.broadcastcix: "Ok, deine Meldung wurde in folgende Gruppen verbreitet: %v"
 misc.fail.google: "Es gab einen fehler fuer '%s' zu suchen: %s"
 
 misc.TheAnswerIs: "Die Antwort auf die endgültige Frage nach dem Leben, dem Universum und dem ganzen Rest lautet.."
+misc.42: "*42*!"
 misc.ring1: "Klingeling..."
 misc.ring2: "Ringdingding..."
 misc.ring3: "Ringkelingdeling..."
@@ -102,6 +103,9 @@ misc.WhoAmI: "Deine ID: %d\nName: %s\nund Username: %s"
 misc.rolling: "Wuerfeln... "
 misc.RollingResult: "Habe eine %d gewuerfelt!"
 misc.sling: "Tut mir Leid. Es gibt niemanden, den man rumschleudern könnte..."
+
+misc.featurerequest.accept: "Ok, schreib ich mir auf ^^"
+misc.temperature: "Die Temperatur in %s (%s) betraegt aktuell %.2f°C\nDie akuellen Wetterbedingugen sind: "
 
 status.return: "Wider da?"
 status.welcomespeeddial: "Willkommen im space.\nHier ein paar Kurzwahltasten:"
@@ -120,3 +124,17 @@ localize.yourlanguageis: "Deine Sprache ist %s"
 localize.yourlanguageis.auto: "Deine Sprache ist %s (implizit)"
 
 localize.setlanguage.confirm: "Ok, merke ich mir"
+localize.setlanugage.languagenotfound: "Sprache nicht gefunden\nSprache := %v oder auto"
+localize.setlanugage.usage: "Usage: /setlanguage <language>\nSprace := %v oder auto"
+
+pager.notify.http: "Dein Pager %d konnte nicht benachichtigt werden: error %s"
+pager.notify.api: "Dein Pager %d konnte nicht benachichtigt werden: status %s"
+pager.eID.add.taken: "Diese eID ist bereits in Verwendung"
+pager.eID.add.confirm: "Ok, ist hinzugefuegt"
+
+pager.eID.rm.nochange: "Diese eID ist mir nicht in Verbindung mit deinem Konto bekannt"
+pager.eID.rm.confirm: "Ok, ist entfernt"
+
+pager.list.nopagers: "Du hast noch keine Pager hinzugefuegt"
+pager.list: "Du hast folgende IDs: %s"
+

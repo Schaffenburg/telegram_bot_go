@@ -50,7 +50,9 @@ func handleGetLang(m *tele.Message) {
 }
 
 var (
-	LSetLangageConfirm = loc.MustTrans("localize.setlanguage.confirm")
+	LSetLangageConfirm       = loc.MustTrans("localize.setlanguage.confirm")
+	LSetLanugageLangNotFound = loc.MustTrans("localize.setlanugage.languagenotfound")
+	LSetLanugageLangUsage    = loc.MustTrans("localize.setlanugage.usage")
 )
 
 func handleSetLang(m *tele.Message) {
@@ -59,7 +61,7 @@ func handleSetLang(m *tele.Message) {
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) != 2 {
-		bot.Sendf(m.Chat, "Usage: /setlanguage <language>\nlanguage := %v or auto",
+		bot.Sendf(m.Chat, LSetLanugageLangUsage.Get(l),
 			loc.GetLanguagesS())
 
 		return
@@ -80,7 +82,7 @@ func handleSetLang(m *tele.Message) {
 
 	lang := loc.GetLanguage(args[1])
 	if lang == nil {
-		bot.Sendf(m.Chat, "Sprache nicht gefunden\nlanguage := %v or auto",
+		bot.Sendf(m.Chat, LSetLanugageLangNotFound.Get(l),
 			loc.GetLanguagesS())
 
 		return

@@ -74,7 +74,7 @@ func initLocale() {
 				log.Fatalf("Failed to decode languagemap %s: %s", path, err)
 			}
 
-			lang := &Language{id: i, name: languages[0]}
+			lang := &Language{id: i, name: languages[0], iso: languages[1]}
 			for lI := 0; lI < len(languages); lI++ {
 				languagesLookup[languages[lI]] = lang // set language to outer i
 			}
@@ -159,11 +159,16 @@ func (t *Translation) Name() string {
 
 type Language struct {
 	name string
+	iso  string
 	id   int
 }
 
 func (t *Language) Name() string {
 	return t.name
+}
+
+func (t *Language) ISO() string {
+	return t.iso
 }
 
 func (t *Language) ID() int {

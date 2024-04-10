@@ -89,16 +89,19 @@ func init() {
 	bot.ReplyCommand("ping", "pong")
 	help.AddCommand("ping")
 
-	var TheAnswerIs = loc.MustTrans("misc.TheAnswerIs")
+	var (
+		TheAnswerIs   = loc.MustTrans("misc.TheAnswerIs")
+		TheAnswerIs42 = loc.MustTrans("misc.42")
+	)
 
 	bot.Command("wielautetdieantwort", func(m *tele.Message) {
 		bot := nyu.GetBot()
-		lang := loc.GetUserLanguage(m.Sender)
+		l := loc.GetUserLanguage(m.Sender)
 
-		bot.Send(m.Chat, TheAnswerIs.Get(lang))
+		bot.Send(m.Chat, TheAnswerIs.Get(l))
 		time.Sleep(time.Second * 3)
 
-		bot.Send(m.Chat, "*42*!", tele.ModeMarkdown)
+		bot.Send(m.Chat, TheAnswerIs42.Get(l), tele.ModeMarkdown)
 	})
 	help.AddCommand("wielautetdieantwort")
 
@@ -205,19 +208,16 @@ func handleGetTime(m *tele.Message) {
 
 	}
 
-	//"Es scheint so als gäbe es in " + query + " kein Konzept für Zeitrechnung."
-	var ErrText = fmt.Sprintf(NoConceptTime.Get(lang), query)
-
 	res, err := tad.Search(query)
 	if err != nil {
 		log.Printf("TAD: Failed to search '%s': %s", query, err)
 
-		bot.Send(m.Chat, ErrText)
+		bot.Send(m.Chat, NoConceptTime.Getf(lang, query))
 		return
 	}
 
 	if len(res) == 0 {
-		bot.Send(m.Chat, ErrText)
+		bot.Send(m.Chat, NoConceptTime.Getf(lang, query))
 		return
 	}
 
@@ -225,7 +225,7 @@ func handleGetTime(m *tele.Message) {
 	if err != nil {
 		log.Printf("TAD: Failed to get: %s", err)
 
-		bot.Send(m.Chat, ErrText)
+		bot.Send(m.Chat, NoConceptTime.Getf(lang, query))
 		return
 	}
 
@@ -253,7 +253,7 @@ func handleBroadcastCIX(m *tele.Message) {
 
 	text := args[1]
 
-	g, err := db.GetTaggedGroups("perm_cix") // get ev group
+	g, err := db.GetTaggedGroups("perm_cix") // get cix group
 	if err != nil {
 		log.Printf("Failed to determin cix group(s): %s", err)
 		bot.Send(m.Chat, FailGeneric.Get(lang))
@@ -277,6 +277,7 @@ func handleBroadcastCIX(m *tele.Message) {
 
 func handleGoogle(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	var query string
 
@@ -301,7 +302,7 @@ func handleGoogle(m *tele.Message) {
 	})
 	if err != nil {
 		log.Printf("Error searching google for '%s': %s", query, err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Get(l)+err.Error())
 
 		// doesnt return as the link and "Google ist dein Freund!" text is still better that just errors
 		// return
@@ -309,6 +310,7 @@ func handleGoogle(m *tele.Message) {
 
 	log.Printf("Google results for '%s': %v", query, r)
 
+	// no need to localize as just links german version anyways
 	b := &strings.Builder{}
 	b.WriteString("[Google](")
 	b.WriteString("https://www.google.com/search?q=")
@@ -353,6 +355,7 @@ func handleLetMeXThat(cmd, thing, qurl string) func(m *tele.Message) {
 			query = args[1]
 		}
 
+		// no need to localise, as command is allready
 		b := &strings.Builder{}
 		b.WriteString("[")
 		b.WriteString(thing)
@@ -399,7 +402,7 @@ func handleTimer(m *tele.Message) {
 
 	d, err := time.ParseDuration(strings.ReplaceAll(args[1], " ", ""))
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Get(lang)+err.Error())
 
 		return
 	}
@@ -503,6 +506,11 @@ func handleDiceRoll(m *tele.Message) {
 	}
 }
 
+var (
+	Ltemperature          = loc.MustTrans("misc.temperature")
+	LFeatureRequestAccept = loc.MustTrans("misc.featurerequest.accept")
+)
+
 func handleAddFeatureRequest(m *tele.Message) {
 	bot := nyu.GetBot()
 	lang := loc.GetUserLanguage(m.Sender)
@@ -520,7 +528,7 @@ func handleAddFeatureRequest(m *tele.Message) {
 		return
 	}
 
-	bot.Send(m.Chat, "Ok, schreib ich mir auf ^^")
+	bot.Send(m.Chat, LFeatureRequestAccept.Get(lang))
 }
 
 var Lsling = loc.MustTrans("misc.sling")
@@ -537,6 +545,7 @@ func handleSlap(text string) func(m *tele.Message) {
 			return
 		}
 
+		// no real need to localise, as is only/mostly puns
 		bot.Send(m.Chat, util.ReplaceMulti(map[string]string{
 			"@sender":   "@" + m.Sender.Username,
 			"@argument": "@" + strings.ReplaceAll(args[1], "@", ""),
@@ -546,10 +555,11 @@ func handleSlap(text string) func(m *tele.Message) {
 
 func handleWeather(m *tele.Message) {
 	conf := config.Get()
+	l := loc.GetUserLanguage(m.Sender)
 
 	args := strings.Split(m.Text, " ")
 
-	w, err := owm.NewCurrent("c", "de", conf.WeatherToken)
+	w, err := owm.NewCurrent("c", l.ISO(), conf.WeatherToken)
 	if err != nil {
 		log.Printf("Error creating current owm: %s", err)
 		return
@@ -565,13 +575,8 @@ func handleWeather(m *tele.Message) {
 
 	s := &strings.Builder{}
 
-	s.WriteString("Die Temperatur in ")
-	s.WriteString(w.Name)
-	s.WriteString(" (")
-	s.WriteString(w.Sys.Country)
-	s.WriteString(") betraegt aktuell ")
-	s.WriteString(strconv.FormatFloat(w.Main.Temp, 'g', 4, 64))
-	s.WriteString("°C\nDie aktuellen Wetterbedingungen sind: ")
+	//TODO localize
+	s.WriteString(Ltemperature.Getf(l, w.Name, w.Sys.Country, w.Main.Temp))
 
 	doComma := false
 	for i := 0; i < len(w.Weather); i++ {

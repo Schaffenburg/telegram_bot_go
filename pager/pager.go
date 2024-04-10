@@ -3,6 +3,7 @@ package pager
 import (
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/help"
+	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/status"
 	"github.com/Schaffenburg/telegram_bot_go/util"
@@ -17,6 +18,19 @@ import (
 
 var (
 	ErrNoEntries = errors.New("No entries found")
+)
+
+var (
+	LNotifyHTTP    = loc.MustTrans("pager.notify.http")
+	LNotifyAPI     = loc.MustTrans("pager.notify.api")
+	LeIDTaken      = loc.MustTrans("pager.eID.add.taken")
+	LeIDAddConfirm = loc.MustTrans("pager.eID.add.confirm")
+	LeIDrmnochange = loc.MustTrans("pager.eID.rm.nochange")
+	LeIDremoved    = loc.MustTrans("pager.eID.rm.confirm")
+	Lnopagers      = loc.MustTrans("pager.list.nopagers")
+	Lpagerlist     = loc.MustTrans("pager.list")
+
+	GenericFail = loc.MustTrans("fail.generic")
 )
 
 func init() {
@@ -53,6 +67,7 @@ func init() {
 		for {
 			status = <-updateCh
 
+			// TODO: localize status text
 			text := "[nyla] " + status.Text()
 
 			log.Printf("pager send '%s'", text)
@@ -75,11 +90,12 @@ func init() {
 						continue
 					}
 					owner := &tele.User{ID: ownerID}
+					l := loc.MustGetUserLanguageID(ownerID)
 
 					if res == nil {
-						bot.Sendf(owner, "Dein Pager %d konnte nicht benachichtigt werden: error %s", ids[i], err)
+						bot.Send(owner, LNotifyHTTP.Getf(l, ids[i], err))
 					} else {
-						bot.Sendf(owner, "Dein Pager %d konnte nicht benachichtigt werden: status %s", ids[i], res.Status)
+						bot.Send(owner, LNotifyAPI.Getf(l, ids[i], res.Status))
 					}
 				}
 			}
@@ -171,6 +187,7 @@ func ListPagers(user int64) (s []int64, err error) {
 
 func handleAddPager(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) != 2 {
@@ -187,22 +204,23 @@ func handleAddPager(m *tele.Message) {
 	ch, err := AddPagerID(m.Sender.ID, eid)
 	if err != nil {
 		log.Printf("Failed to add pager for user %d: %s", m.Sender.ID, err)
-		bot.Sendf(m.Chat, "Ohno, %s", err)
+		bot.Sendf(m.Chat, GenericFail.Getf(l, err))
 
 		return
 	}
 
 	if !ch {
-		bot.Send(m.Chat, "Diese eID ist schon in verwendung")
+		bot.Send(m.Chat, LeIDTaken.Get(l))
 
 		return
 	}
 
-	bot.Send(m.Chat, "Ok, ist hinzugefuegt")
+	bot.Send(m.Chat, LeIDAddConfirm.Get(l))
 }
 
 func handleRmPager(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) != 2 {
@@ -219,36 +237,35 @@ func handleRmPager(m *tele.Message) {
 	ch, err := RmPagerID(m.Sender.ID, eid)
 	if err != nil {
 		log.Printf("Failed to rm pager for user %d: %s", m.Sender.ID, err)
-		bot.Sendf(m.Chat, "Ohno, %s", err)
+		bot.Sendf(m.Chat, GenericFail.Getf(l, err))
 
 		return
 	}
 
 	if !ch {
-		bot.Send(m.Chat, "Wusste gar nicht, dass du diese eID hattest")
-
-		return
+		bot.Send(m.Chat, LeIDrmnochange.Get(l))
+	} else {
+		bot.Send(m.Chat, LeIDremoved.Get(l))
 	}
-
-	bot.Send(m.Chat, "Ok, ist entfernt")
 }
 
 func handleListPager(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	pagers, err := ListPagers(m.Sender.ID)
 	if err != nil {
 		log.Printf("Failed to list pager for user %d: %s", m.Sender.ID, err)
-		bot.Sendf(m.Chat, "Ohno, %s", err)
+		bot.Sendf(m.Chat, GenericFail.Getf(l, err))
 
 		return
 	}
 
 	if len(pagers) == 0 {
-		bot.Send(m.Chat, "Du hast noch keine Pager hinzugefuegt")
+		bot.Send(m.Chat, Lnopagers.Get(l))
 
 		return
 	}
 
-	bot.Send(m.Chat, "Du hast folgende IDs: "+util.Join(pagers, ", "))
+	bot.Send(m.Chat, Lpagerlist.Getf(l, util.Join(pagers, ", ")))
 }
