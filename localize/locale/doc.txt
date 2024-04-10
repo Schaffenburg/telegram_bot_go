@@ -1,0 +1,13 @@
+# documentation for .locale file format
+
+first line:
+ > gets parsed as CSV; at least 2 values
+ > first value should be the human firendly name (e.g. English)
+ > second value the ISO code, sent to APIs this bot uses (e.g. en)
+ > all other values specify aliases
+
+the rest of the file specifies translations for a given language
+parsed as yaml
+
+please excuse the absurd mix of camelcase and dots in translation names;
+feel free to fix and open a pull request
