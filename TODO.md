@@ -1,6 +1,7 @@
-TODO: rewrite zeit irgendwann; heute 0 uhr ist unschoen heute 23:59 schoener aber auch nicht gut :/
 TODO: move stuff to localization
 TODO: translate locale to english
+TODO: rewrite zeit irgendwann; heute 0 uhr ist unschoen heute 23:59 schoener aber auch nicht gut :/
+fix debug invalid command thing
 
 misc:422
 	var utctime, _ = time.LoadLocation("UTC")
