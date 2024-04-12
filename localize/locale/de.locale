@@ -130,6 +130,10 @@ status.subscribe.unsubscribe.nochange: "o.O du warst gar nicht abonniert, naja j
 
 status.key.have.confirm: "Ok, merke ich mir!"
 status.key.donthave.confirm: "Ok, merke ich mir!"
+status.key.donthave.confirm.nochange: "Wusste gar nicht, dass du einen hattest."
+status.key.status.noone: "Sieht so aus als wuerde noch niemand mit schluessel in den Space kommen."
+status.key.status.list: "Ja, es wollen kommen (%d): "
+status.key.status.sometime: "irgendwann"
 
 localize.yourlanguageis: "Deine Sprache ist %s"
 localize.yourlanguageis.auto: "Deine Sprache ist %s (implizit)"
