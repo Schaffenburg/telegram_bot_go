@@ -4,6 +4,7 @@ import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
 	"github.com/Schaffenburg/telegram_bot_go/help"
+	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 
 	"sync"
@@ -59,9 +60,9 @@ func init() {
 }
 
 func callbackKeyboard(char string) func(*tele.Callback) {
-
 	return func(c *tele.Callback) {
 		bot := nyu.GetBot()
+		l := loc.GetUserLanguage(c.Sender)
 
 		dtmfMapMu.Lock()
 		defer dtmfMapMu.Unlock()
@@ -70,7 +71,7 @@ func callbackKeyboard(char string) func(*tele.Callback) {
 		if !ok || time.Now().After(t.Timeout) {
 			es, err := bot.NewEditStreamer(c.Message.Chat, "Dialing: ")
 			if err != nil {
-				bot.Send(c.Message.Chat, "Ohno, "+err.Error())
+				bot.Send(c.Message.Chat, FailGeneric.Getf(l, err))
 
 				return
 			}

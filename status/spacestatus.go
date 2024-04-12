@@ -76,7 +76,7 @@ func handleOpen(m *tele.Message) {
 
 	err := SetStatus("open")
 	if err != nil {
-		bot.Send(m.Chat, FailGeneric.Get(l)+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		bot.Send(m.Chat, LSpaceChOpen.Get(l))
 	}

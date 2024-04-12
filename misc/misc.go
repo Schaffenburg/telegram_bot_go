@@ -49,7 +49,7 @@ var (
 		Text: loc.MustTrans("perms.FailInternet"),
 	}
 
-	FailGeneric = loc.MustTrans("fail.generic") // "Ohno, es gab einen Fehler: %s"
+	FailGeneric = loc.MustTrans("fail.generic")
 
 	// good enough for a dice & ringedingens
 	RSource = rand.New(rand.NewSource(time.Now().UnixNano() + 42))

@@ -19,6 +19,11 @@ import (
 	"time"
 )
 
+var (
+	FailGeneric      = loc.MustTrans("fail.generic")
+	FailEditstreamer = loc.MustTrans("fail.editstreamer.create")
+)
+
 func init() {
 	if config.Get().DebugCmd {
 		bot := nyu.GetBot()
@@ -99,10 +104,11 @@ func init() {
 
 func handleImportLanguageMap(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	streamer, err := bot.NewEditStreamer(m.Chat, "create editstreamer")
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, failed to create editstreamer: %s", err)
+		bot.Send(m.Chat, FailEditstreamer.Getf(l, err))
 		log.Printf("Failed to create editstreamer %s", err)
 
 		return
@@ -176,10 +182,11 @@ func handleImportLanguageMap(m *tele.Message) {
 */
 func handleImportStatus(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	streamer, err := bot.NewEditStreamer(m.Chat, "create editstreamer")
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, failed to create editstreamer: %s", err)
+		bot.Send(m.Chat, FailEditstreamer.Getf(l, err))
 		log.Printf("Failed to create editstreamer %s", err)
 
 		return
@@ -239,10 +246,11 @@ func handleImportStatus(m *tele.Message) {
 */
 func handleImportSubscriptions(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	streamer, err := bot.NewEditStreamer(m.Chat, "create editstreamer")
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, failed to create editstreamer: %s", err)
+		bot.Send(m.Chat, FailEditstreamer.Getf(l, err))
 		log.Printf("Failed to create editstreamer %s", err)
 
 		return
@@ -306,6 +314,7 @@ func handleImportSubscriptions(m *tele.Message) {
 
 func handleRmTagSelf(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) < 2 {
@@ -319,7 +328,7 @@ func handleRmTagSelf(m *tele.Message) {
 	changed, err := db.RmUserTag(m.Sender.ID, tag)
 	if err != nil {
 		log.Printf("Error removing user tag: %s", err)
-		bot.Send(m.Sender, "Ohno, "+err.Error())
+		bot.Send(m.Sender, FailGeneric.Getf(l, err))
 	} else {
 		if changed {
 			bot.Send(m.Sender, "Removed tag.")
@@ -339,6 +348,7 @@ func handleLeave(m *tele.Message) {
 
 func handleDumpUserTags(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	var users []int64
 	if len(m.Entities) > 0 {
@@ -356,7 +366,7 @@ func handleDumpUserTags(m *tele.Message) {
 		var err error
 		users, err = db.GetTaggedUsers()
 		if err != nil {
-			bot.Sendf(m.Chat, "failed to: %s", err)
+			bot.Sendf(m.Chat, FailGeneric.Getf(l, err))
 			return
 		}
 	}
@@ -364,7 +374,7 @@ func handleDumpUserTags(m *tele.Message) {
 	for _, user := range users {
 		u, err := stalk.GetUserByID(user)
 		if err != nil {
-			bot.Sendf(m.Chat, "failed to: %s", err)
+			bot.Sendf(m.Chat, FailGeneric.Getf(l, err))
 			return
 		}
 
@@ -376,7 +386,7 @@ func handleDumpUserTags(m *tele.Message) {
 
 		tags, err := db.GetUserTags(user)
 		if err != nil {
-			bot.Sendf(m.Chat, "ohno, %s", err)
+			bot.Send(m.Chat, FailGeneric.Getf(l, err))
 			return
 
 		}
@@ -393,10 +403,11 @@ func handleDumpUserTags(m *tele.Message) {
 
 func handleDumpGroupTags(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	t, err := db.StmtQuery("SELECT group_id, tag FROM group_tags")
 	if err != nil {
-		bot.Sendf(m.Chat, "Failed to Query DB: %s", err)
+		bot.Sendf(m.Chat, FailGeneric.Getf(l, err))
 
 		return
 	}
@@ -409,7 +420,7 @@ func handleDumpGroupTags(m *tele.Message) {
 	for t.Next() {
 		err = t.Scan(&group, &tag)
 		if err != nil {
-			bot.Sendf(m.Chat, "Failed to Scan DB: %s", err)
+			bot.Sendf(m.Chat, FailGeneric.Getf(l, err))
 
 			return
 		}
@@ -425,6 +436,7 @@ func handleDumpGroupTags(m *tele.Message) {
 
 func handleSetTagSelf(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) < 2 {
@@ -438,7 +450,7 @@ func handleSetTagSelf(m *tele.Message) {
 	err := db.SetUserTag(m.Sender.ID, tag)
 	if err != nil {
 		log.Printf("Error adding user tag: %s", err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		bot.Send(m.Chat, "Set tag.")
 	}
@@ -446,6 +458,7 @@ func handleSetTagSelf(m *tele.Message) {
 
 func handleIsGroupMemberSelf(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) < 2 {
@@ -456,13 +469,13 @@ func handleIsGroupMemberSelf(m *tele.Message) {
 
 	group, err := strconv.ParseInt(args[1], 10, 64)
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	}
 
 	status, err := stalk.IsMember(m.Sender.ID, group)
 	if err != nil {
 		log.Printf("Error checking membership: %s", err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		bot.Send(m.Chat, "You are"+util.T(status, "", "n't")+" a member.")
 	}
@@ -470,6 +483,7 @@ func handleIsGroupMemberSelf(m *tele.Message) {
 
 func handleSetGroupTagCurrent(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	if m.Chat.Type == tele.ChatPrivate {
 		bot.Send(m.Chat, "grouptags are not available for Chat.Type \"ChatPrivate\".")
@@ -488,7 +502,7 @@ func handleSetGroupTagCurrent(m *tele.Message) {
 	err := db.SetGroupTag(m.Chat.ID, tag)
 	if err != nil {
 		log.Printf("Error setting group tag: %s", err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		bot.Send(m.Chat, "Set tag.")
 	}
@@ -526,6 +540,7 @@ func handleTestStatusInline(m *tele.Message) {
 
 func handleIsTaggedGroupMemberSelf(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	args := strings.SplitN(m.Text, " ", 2)
 	if len(args) < 2 {
@@ -539,7 +554,7 @@ func handleIsTaggedGroupMemberSelf(m *tele.Message) {
 	status, err := stalk.IsTaggedGroupMember(m.Sender.ID, tag)
 	if err != nil {
 		log.Printf("Error getting membership status of tagged group: %s", err)
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		bot.Send(m.Chat, "You are"+util.T(status, "", "n't")+" a member.")
 	}

@@ -9,6 +9,7 @@ import (
 
 	db "github.com/Schaffenburg/telegram_bot_go/database"
 	"github.com/Schaffenburg/telegram_bot_go/help"
+	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
 	"github.com/Schaffenburg/telegram_bot_go/stalk"
@@ -31,59 +32,69 @@ func init() {
 	help.AddCommand("kommtwermitschluessel")
 }
 
+var (
+	LKeyHaveConfirm             = loc.MustTrans("status.key.have.confirm")
+	LKeyDontHaveConfirm         = loc.MustTrans("status.key.donthave.confirm")
+	LKeyDontHaveConfirmNochange = loc.MustTrans("status.key.donthave.confirm.nochange")
+	LKeyStatusNoone             = loc.MustTrans("status.key.status.noone")
+	LKeyStatusList              = loc.MustTrans("status.key.status.list")
+	LKeyStatusSometime          = loc.MustTrans("status.key.status.sometime")
+)
+
 const TagHasKey = "has_space_key"
 
 func handleHaveKey(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	err := db.SetUserTag(m.Sender.ID, TagHasKey)
 	if err != nil {
 		log.Printf("Failed to set tag %s: %s", TagHasKey, err)
-		bot.Sendf(m.Chat, "Ohno, das hat leider nicht funktioniert: %s", err)
+		bot.Sendf(m.Chat, FailGeneric.Getf(l, err))
 
 		return
 	}
 
-	bot.Send(m.Chat, "Ok, merke ich mir!")
+	bot.Send(m.Chat, LKeyHaveConfirm.Get(l))
 }
 
 func handleDontHaveKey(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	ch, err := db.RmUserTag(m.Sender.ID, TagHasKey)
 	if err != nil {
 		log.Printf("Failed to rm tag %s: %s", TagHasKey, err)
-		bot.Sendf(m.Chat, "Ohno, das hat leider nicht funktioniert: %s", err)
+		bot.Sendf(m.Chat, FailGeneric.Getf(l, err))
 
 		return
 	}
 
 	if ch {
-		bot.Send(m.Chat, "Ok, merke ich mir!")
+		bot.Send(m.Chat, LKeyDontHaveConfirm.Get(l))
 	} else {
-		bot.Send(m.Chat, "Ok, wusste gar nicht, dass du einen hattest o.O")
+		bot.Send(m.Chat, LKeyDontHaveConfirmNochange.Get(l))
 	}
 }
 
 func handleListArrivalWKey(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	users, err := ListUsersWithTagArrivingToday(TagHasKey)
 	if err != nil {
 		log.Printf("Failed to list users with key arriving today: %s", err)
-		bot.Sendf(m.Chat, "Ohno, %s", err)
+		bot.Sendf(m.Chat, FailGeneric.Getf(l, err))
 
 		return
 	}
 
 	if len(users) == 0 {
-		bot.Send(m.Chat, "Sieht so aus als wuerde noch niemand mit schluessel in den Space kommen.")
+		bot.Send(m.Chat, LKeyStatusNoone.Get(l))
 	} else {
 		b := &strings.Builder{}
 
-		b.WriteString("Ja, es wollen kommen (")
-		b.WriteString(strconv.FormatInt(int64(len(users)), 10))
-		b.WriteString("):")
+		b.WriteString(LKeyStatusList.Getf(l, len(users)))
 
 		for _, ua := range users {
 			b.WriteString("\n - ")
@@ -98,7 +109,7 @@ func handleListArrivalWKey(m *tele.Message) {
 			b.WriteString(" ")
 
 			if ua.Arrival.Equal(util.Today(0)) {
-				b.WriteString("irgendwann")
+				b.WriteString(LKeyStatusSometime.Get(l))
 			} else {
 				b.WriteString(ua.Arrival.Format("15:04"))
 			}

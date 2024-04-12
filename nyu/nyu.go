@@ -5,6 +5,7 @@ import (
 
 	"github.com/Schaffenburg/telegram_bot_go/config"
 	"github.com/Schaffenburg/telegram_bot_go/database"
+	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/util"
 
 	_ "embed"
@@ -240,10 +241,14 @@ func Run() {
 	bot.Bot.Start()
 }
 
+var (
+	LNyuStart = loc.MustTrans("nyu.start")
+)
+
 func handleStart(m *tele.Message) {
 	bot := GetBot()
 
-	bot.Send(m.Sender, "Hi, ich bin nyu, der Schaffenburg bot\nmir kannst du gerne ankuendigen, wenn du vor hast in den space zu kommen.\nich kann auch viel misc zeugs, bei interesse kannst du dir gerne mein /help durchlesen ^^")
+	bot.Send(m.Sender, LNyuStart.Get(loc.GetUserLanguage(m.Sender)))
 }
 
 var (

@@ -136,6 +136,7 @@ func init() {
 
 func handleListArrival(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 	//	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
 	//		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist es erlaubt die liste an ankuendigungen zu lesen.")
 	//		return
@@ -143,7 +144,7 @@ func handleListArrival(m *tele.Message) {
 
 	a, err := db.GetArrivals()
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 		return
 	}
 
@@ -179,6 +180,7 @@ func handleListArrival(m *tele.Message) {
 
 func handleSetArrival(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 	// is allowed to set own arrival
 	//	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
 	//		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist es erlaubt den Space zu betreten.\nFrage doch einfach mal, ob dich jemand enlaed.")
@@ -203,7 +205,7 @@ func handleSetArrival(m *tele.Message) {
 	// check for someone with keys
 	haskey, err := db.UserHasTag(m.Sender.ID, TagHasKey)
 	if err != nil {
-		bot.Send(m.Chat, "Ohno + "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 
 		return
 	}
@@ -236,7 +238,7 @@ func handleSetArrival(m *tele.Message) {
 
 	err = db.SetArrival(m.Sender.ID, t.Unix())
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		if t.Equal(util.Today(0)) {
 			bot.Send(m.Chat, "Ok, bis dann!")
@@ -293,6 +295,7 @@ func handleClean(m *tele.Message) {
 
 func handleWhoThere(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 	//	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
 	//		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist es erlaubt menschen im space zu ueberwachen.")
 	//		return
@@ -300,7 +303,7 @@ func handleWhoThere(m *tele.Message) {
 
 	list, err := db.WhoThere()
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	}
 
 	if len(list) < 1 {
@@ -316,7 +319,7 @@ func handleWhoThere(m *tele.Message) {
 	for _, s := range list {
 		u, err := stalk.GetUserByID(s.ID)
 		if err != nil {
-			bot.Send(m.Chat, "Ohno, "+err.Error())
+			bot.Send(m.Chat, FailGeneric.Getf(l, err))
 			return
 		}
 
@@ -338,7 +341,7 @@ func handleWhoThere(m *tele.Message) {
 		for _, u := range users {
 			u, err := stalk.GetUserByID(u)
 			if err != nil {
-				bot.Send(m.Chat, "Ohno, "+err.Error())
+				bot.Send(m.Chat, FailGeneric.Getf(l, err))
 				return
 			}
 
@@ -370,10 +373,11 @@ func everyoneDepart() (int64, error) {
 
 func handleDepartCallback(c *tele.Callback) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(c.Sender)
 
 	ok, err := db.SetLocationDepart(c.Sender.ID)
 	if err != nil {
-		bot.RespondText(c, "Ohno, ging nicht "+err.Error())
+		bot.RespondText(c, FailGeneric.Getf(l, err))
 	}
 
 	if !ok {
@@ -385,10 +389,11 @@ func handleDepartCallback(c *tele.Callback) {
 
 func handleBRBCallback(c *tele.Callback) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(c.Sender)
 
 	err := db.SetLocation(c.Sender.ID, time.Now().Unix(), "brb")
 	if err != nil {
-		bot.RespondText(c, "Ohno, ging nicht "+err.Error())
+		bot.RespondText(c, FailGeneric.Getf(l, err))
 	} else {
 		bot.RespondText(c, "Ok, bis gleich!\n\nWieder da? bitte mit /wiederda bestaetigen :)")
 
@@ -398,10 +403,11 @@ func handleBRBCallback(c *tele.Callback) {
 
 func handleReturnCallback(c *tele.Callback) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(c.Sender)
 
 	err := db.SetLocation(c.Sender.ID, time.Now().Unix(), "")
 	if err != nil {
-		bot.RespondText(c, "Ohno, ging nicht "+err.Error())
+		bot.RespondText(c, FailGeneric.Getf(l, err))
 	} else {
 		bot.RespondText(c, "Schoen dass du (wieder) da bist, "+c.Sender.FirstName+"!")
 	}
@@ -409,10 +415,11 @@ func handleReturnCallback(c *tele.Callback) {
 
 func handleDepart(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	ok, err := db.SetLocationDepart(m.Sender.ID)
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	}
 
 	if !ok {
@@ -430,10 +437,11 @@ func Arrive(u int64, note string) error {
 
 func handleArrivalCallback(m *tele.Callback) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	err := Arrive(m.Sender.ID, "")
 	if err != nil {
-		bot.RespondText(m, "Ohno, ging nicht "+err.Error())
+		bot.RespondText(m, FailGeneric.Getf(l, err))
 	} else {
 		bot.RespondText(m, "Hi, schoen, dass du da bist, "+m.Sender.FirstName+"!")
 	}
@@ -441,10 +449,11 @@ func handleArrivalCallback(m *tele.Callback) {
 
 func handleMoveArrivalCallback(m *tele.Callback) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	ok, err := db.MoveArrival(m.Sender.ID, 60*15) // 60s * 15min
 	if err != nil {
-		bot.RespondText(m, "Ohno, ging nicht "+err.Error())
+		bot.RespondText(m, FailGeneric.Getf(l, err))
 		return
 	}
 
@@ -457,10 +466,11 @@ func handleMoveArrivalCallback(m *tele.Callback) {
 
 func handleWontComeCallback(m *tele.Callback) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	ok, err := db.RmArrival(m.Sender.ID) // 60s * 15min
 	if err != nil {
-		bot.RespondText(m, "Ohno, ging nicht "+err.Error())
+		bot.RespondText(m, FailGeneric.Getf(l, err))
 		return
 	}
 
@@ -473,6 +483,7 @@ func handleWontComeCallback(m *tele.Callback) {
 
 func handleArrival(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	args := strings.Split(m.Text, " ")
 	var note string
@@ -483,7 +494,7 @@ func handleArrival(m *tele.Message) {
 
 	err := Arrive(m.Sender.ID, note)
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		bot.Send(m.Chat, "Hi, schoen, dass du da bist, "+m.Sender.FirstName+"!")
 	}
@@ -491,10 +502,11 @@ func handleArrival(m *tele.Message) {
 
 func handleWantArrival(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	err := db.SetUserTag(m.Sender.ID, TagWantBeThere)
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 		return
 	}
 
@@ -503,10 +515,11 @@ func handleWantArrival(m *tele.Message) {
 
 func handleDontWantArrival(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	changed, err := db.RmUserTag(m.Sender.ID, TagWantBeThere)
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 		return
 	}
 
@@ -520,10 +533,11 @@ func handleDontWantArrival(m *tele.Message) {
 
 func handleBeRightBack(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	err := db.SetLocation(m.Sender.ID, time.Now().Unix(), "brb")
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		bot.Send(m.Chat, "Ok, bis gleich!\n\nWieder da? bitte mit /wiederda bestaetigen :)")
 	}
@@ -531,10 +545,11 @@ func handleBeRightBack(m *tele.Message) {
 
 func handleReturn(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	err := db.SetLocation(m.Sender.ID, time.Now().Unix(), "")
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, ging nicht "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		bot.Send(m.Chat, "Schoen dass du (wieder) da bist, "+m.Sender.FirstName+"!")
 	}
@@ -542,10 +557,11 @@ func handleReturn(m *tele.Message) {
 
 func handleReviseArrival(m *tele.Message) {
 	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
 
 	ch, err := db.RmArrival(m.Sender.ID)
 	if err != nil {
-		bot.Send(m.Chat, "Ohno, "+err.Error())
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 		return
 	}
 

@@ -1,4 +1,6 @@
 Deutsch,de,German,deutsch,german,DE,de-de
+nyu.start: "Hi, ich bin nyu, der Schaffenburg bot\nmir kannst du gerne ankuendigen, wenn du vor hast in den space zu kommen.\nich kann auch viel misc zeugs, bei interesse kannst du dir gerne mein /help durchlesen ^^"
+
 hello: hallo
 perms.FailGeneric: "Rechte ueberpruefung fehlgeschlagen!"
 perms.FailGroupEV: "Fuer diesen Befehl musst du leider in der e.V. gruppe sein"
@@ -107,6 +109,12 @@ misc.sling: "Tut mir Leid. Es gibt niemanden, den man rumschleudern könnte..."
 misc.featurerequest.accept: "Ok, schreib ich mir auf ^^"
 misc.temperature: "Die Temperatur in %s (%s) betraegt aktuell %.2f°C\nDie akuellen Wetterbedingugen sind: "
 
+misc.food.noone: "Sieht so aus, als wuerde niemand etwas holen :("
+misc.food.listgetsth: "Futter wollen holen: "
+misc.food.get.confirm: "Ok, merke ich mir :D"
+misc.food.get.revoke: "Ok, kein problem!"
+misc.food.get.revoke.nochange: "Ok, wusste gar nicht, dass du das vor hattest o.O"
+
 status.return: "Wider da?"
 status.welcomespeeddial: "Willkommen im space.\nHier ein paar Kurzwahltasten:"
 status.areyouherenow: "Du wolltest jetzt da sein. bist du es auch?"
@@ -119,6 +127,9 @@ status.change.close: "Der space ist jetzt geschlossen!"
 status.subscribe.subscribe: "Gern, du wirst jetzt ueber den space status auf dem laufenden gehalten.\nWenn du keine lust mehr auf diese Nachichten hast einfach mit /abobeenden dein abonnoment beenden :)."
 status.subscribe.unsubscribe: "Gern, du wirst jetzt nichtmehr ueber den space status informiert.\nWenn du wieder nachichten bekommen willst einfach mit /abonnieren dein abonnoment erneuern :)."
 status.subscribe.unsubscribe.nochange: "o.O du warst gar nicht abonniert, naja jetzt bekommst du doppelt keine nachichten ;-)."
+
+status.key.have.confirm: "Ok, merke ich mir!"
+status.key.donthave.confirm: "Ok, merke ich mir!"
 
 localize.yourlanguageis: "Deine Sprache ist %s"
 localize.yourlanguageis.auto: "Deine Sprache ist %s (implizit)"
@@ -137,4 +148,3 @@ pager.eID.rm.confirm: "Ok, ist entfernt"
 
 pager.list.nopagers: "Du hast noch keine Pager hinzugefuegt"
 pager.list: "Du hast folgende IDs: %s"
-
