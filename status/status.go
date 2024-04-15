@@ -35,8 +35,40 @@ var (
 	PermsEV = &nyu.PermissionFailText{
 		Perm: &perms.PermissionGroupTag{"perm_ev"},
 
-		Text: loc.MustTrans("perms.FailGroupEV"), //,
+		Text: loc.MustTrans("perms.FailGroupEV"),
 	}
+)
+
+var (
+	LQueryNoone                   = loc.MustTrans("status.query.noone")
+	LQueryList                    = loc.MustTrans("status.query.list")
+	LSometime                     = loc.MustTrans("status.query.sometime")
+	LQueryNoKey                   = loc.MustTrans("status.query.nokey")
+	ParsetimeInvalid              = loc.MustTrans("status.parsetime.invalid")
+	LKeyNoOne                     = loc.MustTrans("status.key.noone")
+	LKeySomeoneID                 = loc.MustTrans("status.key.someoneid")
+	LKeySomeone                   = loc.MustTrans("status.key.someone")
+	LSetArrivalConfirm            = loc.MustTrans("status.setarrival.confirm")
+	LSetArrivalConfirmTime        = loc.MustTrans("status.setarrival.confirm.time")
+	LVisitingNoone                = loc.MustTrans("status.visiting.noone")
+	LVisitingList                 = loc.MustTrans("status.visiting.list")
+	LForceevictConfirm            = loc.MustTrans("status.forceevict.confirm")
+	LDepartNochange               = loc.MustTrans("status.depart.nochange")
+	LDepart                       = loc.MustTrans("status.depart")
+	LBRBConfirm                   = loc.MustTrans("status.brb.confirm")
+	LReturnConfirm                = loc.MustTrans("status.return.confirm")
+	LDepartConfirmNochange        = loc.MustTrans("status.depart.confirm.nochange")
+	LDepartConfirm                = loc.MustTrans("status.depart.confirm")
+	LArriveConfirm                = loc.MustTrans("status.arrive.confirm")
+	LMoveArrivalConfirm           = loc.MustTrans("status.movearrival.confirm")
+	LMoveArrivalSchedule          = loc.MustTrans("status.movearrival.schedule")
+	LRmArrivalConfirm             = loc.MustTrans("status.rmarrival.confirm")
+	LRmArrivalConfirmNochange     = loc.MustTrans("status.rmarrival.confirm.nochange")
+	LArrivethoughtConfirm         = loc.MustTrans("status.arrivethought.confirm")
+	LDepartThoughtConfirm         = loc.MustTrans("status.departthought.confirm")
+	LDepartThoughtConfirmNochange = loc.MustTrans("status.departthought.confirm.nochange")
+	LReviseConfirm                = loc.MustTrans("status.revise.confirm")
+	LReviseConfirmNochange        = loc.MustTrans("status.revise.confirm.nochange")
 )
 
 func init() {
@@ -114,9 +146,10 @@ func init() {
 	bot.Command("forceevict",
 		func(m *tele.Message) {
 			bot := nyu.GetBot()
+			l := loc.GetUserLanguage(m.Sender)
 
 			everyoneDepart()
-			bot.Send(m.Chat, "alle weg.")
+			bot.Send(m.Chat, LForceevictConfirm.Get(l))
 		},
 		PermsEV)
 	help.AddCommand("forceevict")
@@ -137,10 +170,6 @@ func init() {
 func handleListArrival(m *tele.Message) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(m.Sender)
-	//	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
-	//		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist es erlaubt die liste an ankuendigungen zu lesen.")
-	//		return
-	//	}
 
 	a, err := db.GetArrivals()
 	if err != nil {
@@ -149,12 +178,12 @@ func handleListArrival(m *tele.Message) {
 	}
 
 	if len(a) == 0 {
-		bot.Send(m.Chat, "Heute will (noch) niemand da sein :(,\nJetzt kannst du noch als erstes da sein :D")
+		bot.Send(m.Chat, LQueryNoone.Get(l))
 		return
 	}
 
 	b := &strings.Builder{}
-	b.WriteString("Heute wollen noch kommen:")
+	b.WriteString(LQueryList.Get(l))
 
 	for i := 0; i < len(a); i++ {
 		u, err := stalk.GetUserByID(a[i].User)
@@ -163,16 +192,17 @@ func handleListArrival(m *tele.Message) {
 		}
 
 		if time.Unix(a[i].Time, 0).Equal(util.Today(0)) {
-			fmt.Fprintf(b, "\n - %s irgendwann", u.FirstName)
-			continue
+			// w/o time information
+			fmt.Fprintf(b, "\n - %s %s", u.FirstName, LSometime.Get(l))
+		} else {
+			fmt.Fprintf(b, "\n - %s @ %s", u.FirstName, time.Unix(a[i].Time, 0).Format("15:04"))
 		}
-
-		fmt.Fprintf(b, "\n - %s um %s", u.FirstName, time.Unix(a[i].Time, 0).Format("15:04"))
 	}
 
 	uas, err := ListUsersWithTagArrivingToday(TagHasKey)
 	if uas == nil || len(uas) < 1 {
-		b.WriteString("\n\n**Noch hat sich niemand mit schluessel bereit erklaert zu kommen**")
+		b.WriteString("\n\n")
+		b.WriteString(LQueryNoKey.Get(l))
 	}
 
 	bot.Send(m.Chat, b.String())
@@ -181,11 +211,6 @@ func handleListArrival(m *tele.Message) {
 func handleSetArrival(m *tele.Message) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(m.Sender)
-	// is allowed to set own arrival
-	//	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
-	//		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist es erlaubt den Space zu betreten.\nFrage doch einfach mal, ob dich jemand enlaed.")
-	//		return
-	//	}
 
 	args := strings.Split(m.Text, " ")
 	var t time.Time
@@ -196,7 +221,7 @@ func handleSetArrival(m *tele.Message) {
 	} else {
 		t, err = util.ParseTime(args[1])
 		if err != nil {
-			bot.Send(m.Chat, "please speak more clearlier!\nValid formats: "+
+			bot.Send(m.Chat, ParsetimeInvalid.Get(l)+
 				strings.Join(util.TimeFormats(), ", "))
 			return
 		}
@@ -224,13 +249,13 @@ func handleSetArrival(m *tele.Message) {
 			}
 
 			if s == nil {
-				bot.Send(m.Chat, "Sieht so als als haettest du keinen schluessel und es wolle niemand mit einem heute da sein")
+				bot.Send(m.Chat, LKeyNoOne)
 			} else {
 				user, err := stalk.GetUserByID(s.User)
 				if err != nil {
-					bot.Sendf(m.Chat, "Die Person die kommen will und gleichzeitig einen schluessel hat ist mir unbekannt %d", s.User)
+					bot.Sendf(m.Chat, LKeySomeoneID.Getf(l, s.User))
 				} else {
-					bot.Sendf(m.Chat, "Fruehste person mit Schluessel ist %s um %s", user.FirstName, s.Arrival.Format("15:03"))
+					bot.Sendf(m.Chat, LKeySomeone.Getf(l, user.FirstName, s.Arrival.Format("15:03")))
 				}
 			}
 		}
@@ -241,9 +266,9 @@ func handleSetArrival(m *tele.Message) {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
 		if t.Equal(util.Today(0)) {
-			bot.Send(m.Chat, "Ok, bis dann!")
+			bot.Send(m.Chat, LSetArrivalConfirm.Get(l))
 		} else {
-			bot.Send(m.Chat, "Ok, bis um "+t.Format("15:04")+"!")
+			bot.Send(m.Chat, LSetArrivalConfirmTime.Getf(l, t.Format("15:04")))
 		}
 	}
 }
@@ -263,10 +288,6 @@ func updateArrivalTimers() {
 
 func handleClean(m *tele.Message) {
 	bot := nyu.GetBot()
-	//	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
-	//		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist erlaubt aufzuraeumen.")
-	//		return
-	//	}
 
 	streamer, err := bot.NewEditStreamer(m.Chat, "Cleaning...")
 	if err != nil {
@@ -296,10 +317,6 @@ func handleClean(m *tele.Message) {
 func handleWhoThere(m *tele.Message) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(m.Sender)
-	//	if member, _ := stalk.IsTaggedGroupMember(m.Sender.ID, "perm_ev"); !member {
-	//		bot.Send(m.Chat, "Sorry, nur e.V. gruppen mitgliederis ist es erlaubt menschen im space zu ueberwachen.")
-	//		return
-	//	}
 
 	list, err := db.WhoThere()
 	if err != nil {
@@ -307,14 +324,12 @@ func handleWhoThere(m *tele.Message) {
 	}
 
 	if len(list) < 1 {
-		bot.Send(m.Chat, "Es ist grade niemand da :(")
+		bot.Send(m.Chat, LVisitingNoone.Get(l))
 		return
 	}
 
 	var b = &strings.Builder{}
-	b.WriteString("Es sind grade da (")
-	b.WriteString(strconv.FormatInt(int64(len(list)), 10))
-	b.WriteString("): ")
+	b.WriteString(LVisitingList.Getf(l, len(list)))
 
 	for _, s := range list {
 		u, err := stalk.GetUserByID(s.ID)
@@ -381,9 +396,9 @@ func handleDepartCallback(c *tele.Callback) {
 	}
 
 	if !ok {
-		bot.RespondText(c, "Wusste gar nicht, dass du da wars O.o, naja trotzdem noch einen schoenen Tag!")
+		bot.RespondText(c, LDepartNochange.Get(l))
 	} else {
-		bot.RespondText(c, "Sad to see you go, have a nice day :(")
+		bot.RespondText(c, LDepart.Get(l))
 	}
 }
 
@@ -395,7 +410,7 @@ func handleBRBCallback(c *tele.Callback) {
 	if err != nil {
 		bot.RespondText(c, FailGeneric.Getf(l, err))
 	} else {
-		bot.RespondText(c, "Ok, bis gleich!\n\nWieder da? bitte mit /wiederda bestaetigen :)")
+		bot.RespondText(c, LBRBConfirm.Get(l))
 
 		SendReminderReturn(c.Sender.ID)
 	}
@@ -409,7 +424,7 @@ func handleReturnCallback(c *tele.Callback) {
 	if err != nil {
 		bot.RespondText(c, FailGeneric.Getf(l, err))
 	} else {
-		bot.RespondText(c, "Schoen dass du (wieder) da bist, "+c.Sender.FirstName+"!")
+		bot.RespondText(c, LReturnConfirm.Getf(l, c.Sender.FirstName))
 	}
 }
 
@@ -423,9 +438,9 @@ func handleDepart(m *tele.Message) {
 	}
 
 	if !ok {
-		bot.Send(m.Chat, "Wusste gar nicht, dass du da wars O.o, naja trotzdem noch einen schoenen Tag!")
+		bot.Send(m.Chat, LDepartConfirmNochange.Get(l))
 	} else {
-		bot.Send(m.Chat, "Sad to see you go, have a nice day :(")
+		bot.Send(m.Chat, LDepartConfirm.Get(l))
 	}
 }
 
@@ -443,7 +458,7 @@ func handleArrivalCallback(m *tele.Callback) {
 	if err != nil {
 		bot.RespondText(m, FailGeneric.Getf(l, err))
 	} else {
-		bot.RespondText(m, "Hi, schoen, dass du da bist, "+m.Sender.FirstName+"!")
+		bot.RespondText(m, LArriveConfirm.Getf(l, m.Sender.FirstName))
 	}
 }
 
@@ -458,9 +473,9 @@ func handleMoveArrivalCallback(m *tele.Callback) {
 	}
 
 	if ok {
-		bot.RespondText(m, "Ok, ich informiere die anderen")
+		bot.RespondText(m, LMoveArrivalConfirm.Get(l))
 	} else {
-		bot.RespondText(m, "Wusse nicht das du kommen wolltest o.O")
+		bot.RespondText(m, LMoveArrivalSchedule.Get(l))
 	}
 }
 
@@ -475,9 +490,9 @@ func handleWontComeCallback(m *tele.Callback) {
 	}
 
 	if ok {
-		bot.RespondText(m, "Ok, ich informiere die anderen")
+		bot.RespondText(m, LRmArrivalConfirm.Get(l))
 	} else {
-		bot.RespondText(m, "Wusse nicht das du kommen wolltest o.O")
+		bot.RespondText(m, LRmArrivalConfirmNochange.Get(l))
 	}
 }
 
@@ -496,7 +511,7 @@ func handleArrival(m *tele.Message) {
 	if err != nil {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
-		bot.Send(m.Chat, "Hi, schoen, dass du da bist, "+m.Sender.FirstName+"!")
+		bot.Send(m.Chat, LArriveConfirm.Get(l))
 	}
 }
 
@@ -510,7 +525,7 @@ func handleWantArrival(m *tele.Message) {
 		return
 	}
 
-	bot.Sendf(m.Chat, "Du bist jetzt in gedanken dabei, %s!", m.Sender.FirstName)
+	bot.Sendf(m.Chat, LArrivethoughtConfirm.Get(l))
 }
 
 func handleDontWantArrival(m *tele.Message) {
@@ -524,9 +539,9 @@ func handleDontWantArrival(m *tele.Message) {
 	}
 
 	if changed {
-		bot.Sendf(m.Chat, "Du bist nun nicht mehr in Gedanken dabei.")
+		bot.Sendf(m.Chat, LDepartThoughtConfirm.Get(l))
 	} else {
-		bot.Sendf(m.Chat, "Du warst gar nicht da o.O")
+		bot.Sendf(m.Chat, LDepartThoughtConfirmNochange.Get(l))
 
 	}
 }
@@ -539,7 +554,7 @@ func handleBeRightBack(m *tele.Message) {
 	if err != nil {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
-		bot.Send(m.Chat, "Ok, bis gleich!\n\nWieder da? bitte mit /wiederda bestaetigen :)")
+		bot.Send(m.Chat, LBRBConfirm.Get(l))
 	}
 }
 
@@ -551,7 +566,7 @@ func handleReturn(m *tele.Message) {
 	if err != nil {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
-		bot.Send(m.Chat, "Schoen dass du (wieder) da bist, "+m.Sender.FirstName+"!")
+		bot.Send(m.Chat, LReturnConfirm.Get(l))
 	}
 }
 
@@ -566,8 +581,8 @@ func handleReviseArrival(m *tele.Message) {
 	}
 
 	if ch {
-		bot.Send(m.Chat, "Okay, schade :(, dann halt naechstes mal.")
+		bot.Send(m.Chat, LReviseConfirm.Get(l))
 	} else {
-		bot.Send(m.Chat, "Es gibt nichts zu revidieren. Viel Spaß bei was auch immer du so treibst!")
+		bot.Send(m.Chat, LReviseConfirmNochange.Get(l))
 	}
 }

@@ -122,6 +122,22 @@ status.areyouherenow.yes: "Ja, ich bin da"
 status.areyouherenow.15m: "In 15 Minuten"
 status.areyouherenow.no: "Doch nicht"
 
+status.query.noone: "Heute will (noch) niemand da sein :(,\nJetzt kannst du noch als erstes da sein :D"
+status.query.list: "Heute wollen noch kommen:"
+status.query.sometime: "irgendwann"
+status.query.nokey: "**Noch hat sich niemand mit schluessel bereit erklaert zu kommen**"
+
+status.parsetime.invalid: "please speak more clearlier!\nValid formats: "
+status.key.noone: "Sieht so als als haettest du keinen schluessel und es wolle niemand mit einem heute da sein"
+status.key.someoneid: "Die Person die kommen will und gleichzeitig einen schluessel hat ist mir unbekannt, hat aber ID %d"
+status.key.someone: "Fruehste person mit Schluessel ist %s um %s"
+
+status.setarrival.confirm: "Ok, bis dann!"
+status.setarrival.confirm.time: "Ok, bis um %s!"
+
+status.visiting.noone: "Es ist grade niemand da :("
+status.visiting.list: "Es sind grade da (%d): "
+
 status.change.open: "Der space ist jetzt geoeffnet!"
 status.change.close: "Der space ist jetzt geschlossen!"
 status.subscribe.subscribe: "Gern, du wirst jetzt ueber den space status auf dem laufenden gehalten.\nWenn du keine lust mehr auf diese Nachichten hast einfach mit /abobeenden dein abonnoment beenden :)."
@@ -134,6 +150,29 @@ status.key.donthave.confirm.nochange: "Wusste gar nicht, dass du einen hattest."
 status.key.status.noone: "Sieht so aus als wuerde noch niemand mit schluessel in den Space kommen."
 status.key.status.list: "Ja, es wollen kommen (%d): "
 status.key.status.sometime: "irgendwann"
+
+status.forceevict.confirm: "Alle weg!"
+
+status.depart.nochange: "Wusste gar nicht, dass du da wars O.o, naja trotzdem noch einen schoenen Tag!"
+status.depart.confirm: "Ok, schaden, hab noch einen schoenen Tag!"
+
+status.brb.confirm: "Ok, bis gleich!\n\nWieder da? bitte mit /wiederda bestaetigen :)"
+status.return.confirm: "Schoen dass du (wieder) da bist, %s!"
+
+status.arrive.confirm: "Hi, schoen, dass du da bist, %s!"
+
+status.movearrival.confirm: "Ok, ich informiere die anderen"
+status.movearrival.schedule: "Wusste nicht, dass du kommen wolltest o.O; naja bis gleich ^^"
+
+status.rmarrival.confirm: "Ok, ich informiere die anderen"
+status.rmarrival.confirm.nochange: "Wusse nicht das du kommen wolltest o.O"
+
+status.revise.confirm: "Okay, schade :(, dann halt naechstes mal."
+status.revise.confirm.nochange: "Es gibt nichts zu revidieren. Viel Spaß bei was auch immer du so treibst!"
+
+status.arrivethought.confirm: "Du bist jetzt in gedanken dabei, %s!"
+status.departthought.confirm: "Du bist nun nicht mehr in Gedanken dabei."
+status.departthought.confirm.nochange: "Du warst gar nicht da o.O"
 
 localize.yourlanguageis: "Deine Sprache ist %s"
 localize.yourlanguageis.auto: "Deine Sprache ist %s (implizit)"

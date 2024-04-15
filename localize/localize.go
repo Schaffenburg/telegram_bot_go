@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"log"
+	"path/filepath"
 	"strings"
 	"sync"
 )
@@ -44,6 +45,13 @@ func SetUserLanguage(u int64, l Language) error {
 	return err
 }
 
+var (
+	// valid extentions for locale format
+	validexts = map[string]struct{}{
+		"locale": struct{}{},
+	}
+)
+
 func initLocale() {
 	translationsOnce.Do(func() {
 		d, err := localizeFS.ReadDir(localizeFSprefix)
@@ -53,6 +61,11 @@ func initLocale() {
 
 		for i := 0; i < len(d); i++ {
 			if d[i].IsDir() {
+				continue
+			}
+
+			ext := filepath.Ext(d[i].Name())
+			if _, ok := validexts[ext]; !ok {
 				continue
 			}
 
