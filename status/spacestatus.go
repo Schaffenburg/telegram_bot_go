@@ -153,13 +153,18 @@ func ListUsersWithTagArrivingToday(key string) (s []UserArrival, err error) {
 
 type SpaceStatus string
 
+var (
+	LSpaceStatusOpen   = loc.MustTrans("status.spacestatus.open")
+	LSpaceStatusClosed = loc.MustTrans("status.spacestatus.closed")
+)
+
 // TODO: localize
-func (s SpaceStatus) Text() string {
+func (s SpaceStatus) Text(l *loc.Language) string {
 	switch string(s) {
 	case "open":
-		return "Der space ist jetzt geoeffnet!"
+		return LSpaceStatusOpen.Get(l)
 	case "closed":
-		return "Der space ist jetzt geschlossen!"
+		return LSpaceStatusClosed.Get(l)
 
 	default:
 		return "Space status: " + string(s)
@@ -184,7 +189,9 @@ func updateStatus(now time.Time, status SpaceStatus) {
 	// send stuff (everyone with tag status_info gets the info)
 	users, err := db.GetUsersWithTag(SpaceStatusSubTag)
 	for _, u := range users {
-		bot.Send(&tele.User{ID: u}, status.Text())
+		l := loc.MustGetUserLanguageID(u)
+
+		bot.Send(&tele.User{ID: u}, status.Text(l))
 	}
 	if err != nil {
 		log.Printf("Failed to broadcast spacestatus update: %s", err)

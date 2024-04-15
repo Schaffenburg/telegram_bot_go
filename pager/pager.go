@@ -63,12 +63,10 @@ func init() {
 
 	go func() {
 		var status status.SpaceStatus
+		var text string
 
 		for {
 			status = <-updateCh
-
-			// TODO: localize status text
-			text := "[nyla] " + status.Text()
 
 			log.Printf("pager send '%s'", text)
 			ids, err := ListBroadcastIDs()
@@ -80,17 +78,20 @@ func init() {
 			for i := 0; i < len(ids); i++ {
 				log.Printf("Sending emsg to %d", ids[i])
 
+				// TODO: notify ownder of pager
+				ownerID, err := GetPagerIDOwner(ids[i])
+				if err != nil {
+					continue
+				}
+				l := loc.MustGetUserLanguageID(ownerID)
+
+				text = "[nyla] " + status.Text(l)
+
 				res, err := emsg.SendMessage(strconv.FormatInt(ids[i], 10), text)
 				if err != nil || res.Status != "success" {
 					log.Printf("Failed to send emsg status to %d: %s", ids[i], err)
 
-					// TODO: notify ownder of pager
-					ownerID, err := GetPagerIDOwner(ids[i])
-					if err != nil {
-						continue
-					}
-					owner := &tele.User{ID: ownerID}
-					l := loc.MustGetUserLanguageID(ownerID)
+					owner := nyu.Recipient(ownerID)
 
 					if res == nil {
 						bot.Send(owner, LNotifyHTTP.Getf(l, ids[i], err))

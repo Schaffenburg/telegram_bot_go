@@ -575,7 +575,6 @@ func handleWeather(m *tele.Message) {
 
 	s := &strings.Builder{}
 
-	//TODO localize
 	s.WriteString(Ltemperature.Getf(l, w.Name, w.Sys.Country, w.Main.Temp))
 
 	doComma := false

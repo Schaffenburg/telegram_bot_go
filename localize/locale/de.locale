@@ -115,6 +115,9 @@ misc.food.get.confirm: "Ok, merke ich mir :D"
 misc.food.get.revoke: "Ok, kein problem!"
 misc.food.get.revoke.nochange: "Ok, wusste gar nicht, dass du das vor hattest o.O"
 
+status.spacestatus.open: "Der Space ist offen"
+status.spacestatus.closed: "Der Space ist geschlossen"
+
 status.return: "Wider da?"
 status.welcomespeeddial: "Willkommen im space.\nHier ein paar Kurzwahltasten:"
 status.areyouherenow: "Du wolltest jetzt da sein. bist du es auch?"
