@@ -48,7 +48,7 @@ func SetUserLanguage(u int64, l Language) error {
 var (
 	// valid extentions for locale format
 	validexts = map[string]struct{}{
-		"locale": struct{}{},
+		".locale": struct{}{},
 	}
 )
 
@@ -112,6 +112,8 @@ func initLocale() {
 				translations[id][i] = trans // id = translation ID; i is language ID
 			}
 		}
+
+		log.Printf("Loaded languages: %v", uniqueLanguages)
 	})
 }
 
