@@ -51,9 +51,9 @@ func init() {
 
 		bot.Command("debug_importsubscriptions", handleImportSubscriptions, perms...)
 		bot.Command("debug_importlangmap", handleImportLanguageMap, perms...)
-		bot.Command("debug_importstatus", handleImportStatus, perms...)
 
 		bot.Command("debug_dumpusertags", handleDumpUserTags, perms...)
+		bot.Command("debug_importstatus", handleImportStatus, perms...)
 
 		debugcallback := func(c *tele.Callback) {
 			nyu.GetBot().Reply(c.Message, strconv.Quote(c.Data))
