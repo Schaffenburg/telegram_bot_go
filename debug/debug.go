@@ -51,6 +51,9 @@ func init() {
 
 		bot.Command("debug_importsubscriptions", handleImportSubscriptions, perms...)
 		bot.Command("debug_importlangmap", handleImportLanguageMap, perms...)
+		bot.Command("debug_importstatus", handleImportStatus, perms...)
+
+		bot.Command("debug_dumpusertags", handleDumpUserTags, perms...)
 
 		debugcallback := func(c *tele.Callback) {
 			nyu.GetBot().Reply(c.Message, strconv.Quote(c.Data))
@@ -128,8 +131,8 @@ func handleImportLanguageMap(m *tele.Message) {
 
 	// TODO: map language
 	langmap := map[int]string{ // or vice versa idunno
-		0: "Deutsch",
-		1: "English",
+		1: "Deutsch",
+		0: "English",
 	}
 
 	s, err := db.StmtQuery("SELECT (user_id, language) FROM languagemap")
@@ -201,7 +204,31 @@ func handleImportStatus(m *tele.Message) {
 
 	log("Starting spacestatus import from `spacestatus_old`")
 
-	s, err := db.StmtQuery("SELECT (status_full, status_timestamp) FROM spacestatus_old ORDER BY status_timestamp ASC")
+	ttl := func() (ttl int) {
+		s, err := db.StmtQuery("SELECT count(1) from spacestatus_old;")
+		if err != nil {
+			log("failed to get spacestatus from DB: %s", err)
+		}
+
+		defer s.Close()
+
+		if !s.Next() {
+			log("Failed to next ttl: %s", err)
+
+			return -1
+		}
+
+		err = s.Scan(&ttl)
+		if err != nil {
+			log("Failed to scan ttl: %s", err)
+
+			return -1
+		}
+
+		return ttl
+	}()
+
+	s, err := db.StmtQuery("SELECT status_full, status_timestamp FROM spacestatus_old ORDER BY status_timestamp ASC")
 	if err != nil {
 		log("failed to get spacestatus from DB: %s", err)
 	}
@@ -209,26 +236,50 @@ func handleImportStatus(m *tele.Message) {
 	defer s.Close()
 
 	var status string
+	var timestamps string
 	var timestamp time.Time
+	var errs, ii int = 0, 0
+	const batchsize = 20
+	var batch = make([][]any, 0, batchsize) //
 
 	for s.Next() {
-		err = s.Scan(&status, &timestamp)
+		if ii%batchsize == 0 || ii > ttl {
+			_, err := db.StmtExec("INSERT IGNORE INTO spacestatus (time, status) VALUES (?, ?);",
+				batch,
+			)
+
+			if err != nil {
+				log("Failed to insert: %s", err)
+				errs++
+
+				if errs > 10 {
+					log("Failed to insert too often")
+
+					return
+				}
+				continue
+			}
+			batch = make([][]any, 0, batchsize)
+
+			log("import progress (%d/%d)", ii, ttl)
+		}
+		ii++
+
+		err = s.Scan(&status, &timestamps)
 		if err != nil {
 			log("Failed to scan: %s", err)
 
 			return
 		}
 
-		_, err := db.StmtExec("INSERT INTO spacestatus (time, status) VALUES (?, ?);",
-			timestamp.Unix(), status,
-		)
-
+		timestamp, err = time.Parse(time.DateTime, timestamps)
 		if err != nil {
-			log("Failed to insert: %s", err)
+			log("Failed to parse time: %s: %s", timestamps, err)
 
-			return
+			continue
 		}
 
+		batch = append(batch, []any{timestamp.Unix(), status})
 	}
 
 	log("Döner!")
@@ -285,7 +336,7 @@ func handleImportSubscriptions(m *tele.Message) {
 
 	log("Got subscription count: %d", count)
 
-	s, err = db.StmtQuery("SELECT (user_id, type) FROM subscription")
+	s, err = db.StmtQuery("SELECT user_id, type FROM subscription")
 	if err != nil {
 		log("failed to get subscriptions: %s", err)
 
@@ -304,7 +355,9 @@ func handleImportSubscriptions(m *tele.Message) {
 			return
 		}
 
-		if sub { // TODO: figure out which value is correct
+		log("Importing %d type: !%b", user, sub)
+
+		if !sub { // TODO: figure out which value is correct
 			db.SetUserTag(user, status.SpaceStatusSubTag)
 		}
 	}

@@ -446,6 +446,7 @@ func handleDepart(m *tele.Message) {
 
 func Arrive(u int64, note string) error {
 	SendArrivalMessage(u)
+	SetStatus(StatusOpen)
 
 	return db.SetLocation(u, time.Now().Unix(), note)
 }

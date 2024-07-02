@@ -264,14 +264,14 @@ func MustGetUserLanguageID(id int64) (l *Language) {
 func GetUserLanguageV(u *tele.User) (l *Language, auto bool) {
 	auto = false
 
-	code := GetUserLanguageID(u.ID)
+	l = GetUserLanguageID(u.ID)
 
-	if code == nil && u.LanguageCode != "" {
+	if l == nil && u.LanguageCode != "" {
 		auto = true
-		code = GetLanguage(u.LanguageCode)
+		l = GetLanguage(u.LanguageCode)
 	}
 
-	if code == nil {
+	if l == nil {
 		auto = false
 		l = GetLanguage(DefaultLanguage)
 	}

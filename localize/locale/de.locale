@@ -162,7 +162,7 @@ status.depart.confirm: "Ok, schaden, hab noch einen schoenen Tag!"
 status.brb.confirm: "Ok, bis gleich!\n\nWieder da? bitte mit /wiederda bestaetigen :)"
 status.return.confirm: "Schoen dass du (wieder) da bist, %s!"
 
-status.arrive.confirm: "Hi, schoen, dass du da bist, %s!"
+status.arrive.confirm: "Hi, schoen, dass du da bist!"
 
 status.movearrival.confirm: "Ok, ich informiere die anderen"
 status.movearrival.schedule: "Wusste nicht, dass du kommen wolltest o.O; naja bis gleich ^^"

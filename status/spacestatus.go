@@ -153,6 +153,11 @@ func ListUsersWithTagArrivingToday(key string) (s []UserArrival, err error) {
 
 type SpaceStatus string
 
+const (
+	StatusOpen   SpaceStatus = "open"
+	StatusClosed             = "closed"
+)
+
 var (
 	LSpaceStatusOpen   = loc.MustTrans("status.spacestatus.open")
 	LSpaceStatusClosed = loc.MustTrans("status.spacestatus.closed")
@@ -210,11 +215,31 @@ func updateStatus(now time.Time, status SpaceStatus) {
 func SetStatus(status SpaceStatus) error {
 	now := time.Now()
 
-	updateStatus(now, status)
-
-	_, err := db.StmtExec("INSERT INTO spacestatus (time, status) VALUES (?, ?);",
-		now.Unix(), status,
+	r, err := db.StmtExec(`INSERT INTO spacestatus (time, status) 
+SELECT ?, ? 
+FROM dual
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM spacestatus 
+    WHERE time = (SELECT MAX(time) FROM spacestatus) 
+    AND status = ?
+);
+`,
+		now.Unix(), status, status,
 	)
+	if err != nil {
+		log.Printf("Failed to SetStatus: %s", err)
+		return err
+	}
+
+	c, err := r.RowsAffected()
+	if err != nil {
+		log.Printf("Failed to SetStatus: %s", err)
+	}
+
+	if err != nil || c > 0 {
+		updateStatus(now, status)
+	}
 
 	return err
 }
