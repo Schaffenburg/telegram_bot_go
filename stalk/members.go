@@ -27,7 +27,13 @@ func IsMember(user, group int64) (bool, error) {
 
 // returns if user is member of group
 func IsTaggedGroupMember(user int64, tag string) (bool, error) {
-	r, err := db.StmtQuery("SELECT 1 FROM memberships WHERE group_id = (SELECT group_id FROM group_tags WHERE tag = ?) AND user = ?",
+	log.Printf("IsgroupMembed :%d %d", user, tag)
+
+	/*
+	 */
+
+	r, err := db.StmtQuery("SELECT 1 FROM memberships WHERE group_id = (SELECT group_id FROM group_tags WHERE tag = ? LIMIT 1) AND user = ?",
+		//r, err := db.StmtQuery("SELECT 1 FROM memberships m JOIN group_tags gt ON m.group_id = gt.group_id WHERE gt.tag = ? AND m.user = ?",
 		tag, user,
 	)
 	if err != nil {
@@ -60,6 +66,15 @@ func stalkMemberships(m *tele.Message) {
 		err := UpdateMembership(m.Chat.ID, memberships...)
 		if err != nil {
 			log.Printf("Error updating memberships of %v for chat %d: %s", memberships, m.Chat.ID, err)
+		}
+	}
+
+	c := m.Chat
+	if c.Type == tele.ChatGroup || c.Type == tele.ChatSuperGroup || c.Type == tele.ChatChannel || c.Type == tele.ChatChannelPrivate {
+		err := UpdateMembership(m.Chat.ID, m.Sender.ID)
+		if err != nil {
+			log.Printf("Error updating memberships of %v for chat %d: %s",
+				m.Sender.ID, m.Chat.ID, err)
 		}
 	}
 

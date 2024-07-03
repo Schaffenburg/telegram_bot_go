@@ -43,6 +43,9 @@ func init() {
 		bot.Command("debug_isgroupmemberself", handleIsGroupMemberSelf, perms...)
 		bot.Command("debug_istaggedgroupmemberself", handleIsTaggedGroupMemberSelf, perms...)
 
+		bot.Command("debug_setmembership", handleSetMembership, perms...)
+		bot.Command("debug_rmmembership", handleRmMembership, perms...)
+
 		bot.Command("debug_testinlinebtn", handleTestInline, perms...)
 
 		bot.Command("debug_teststatusinline", handleTestStatusInline, perms...)
@@ -485,6 +488,84 @@ func handleDumpGroupTags(m *tele.Message) {
 	}
 
 	bot.Send(m.Chat, b.String())
+}
+
+func handleSetMembership(m *tele.Message) {
+	bot := nyu.GetBot()
+	//l := loc.GetUserLanguage(m.Sender)
+
+	args := strings.Split(m.Text, " ")
+	if len(args) < 2 {
+		bot.Send(m.Chat, "Usage: /debug_setmembership [tgid...] ")
+
+		return
+	}
+
+	// remove command
+	args = args[1:]
+
+	users := []int64{}
+	for _, e := range args {
+		// remove ,s from tgs formatting
+		clean := strings.ReplaceAll(e, ",", "")
+
+		u, err := strconv.ParseInt(clean, 10, 64)
+		if err != nil {
+			bot.Sendf(m.Chat, "Failed to decode userid: %s: %s", e, err)
+			return
+		}
+
+		users = append(users, u)
+	}
+
+	var err error
+	for _, u := range users {
+		err = stalk.UpdateMembership(m.Chat.ID, u)
+		if err != nil {
+			log.Printf("Failed to update membership for %d group %d: %s", u, m.Chat.ID, err)
+		}
+	}
+
+	bot.Sendf(m.Chat, "Added Group Memberships for group %d for users %v", m.Chat.ID, users)
+}
+
+func handleRmMembership(m *tele.Message) {
+	bot := nyu.GetBot()
+	//l := loc.GetUserLanguage(m.Sender)
+
+	args := strings.SplitN(m.Text, " ", 2)
+	if len(args) < 2 {
+		bot.Send(m.Chat, "Usage: /debug_rmmembership [tgid...] ")
+
+		return
+	}
+
+	// remove command
+	args = args[1:]
+
+	users := []int64{}
+	for _, e := range args {
+		// remove ,s from tgs formatting
+		clean := strings.ReplaceAll(e, ",", "")
+
+		u, err := strconv.ParseInt(clean, 10, 64)
+		if err != nil {
+			bot.Sendf(m.Chat, "Failed to decode userid: %s: %s", e, err)
+			return
+		}
+
+		users = append(users, u)
+	}
+
+	var err error
+	for _, u := range users {
+		_, err = stalk.UpdateMembershipDelete(m.Chat.ID, u)
+		if err != nil {
+			log.Printf("Failed to update membership for %d group %d: %s", u, m.Chat.ID, err)
+		}
+	}
+
+	bot.Sendf(m.Chat, "Removed Group Memberships for group %d for users %v", m.Chat.ID, users)
 }
 
 func handleSetTagSelf(m *tele.Message) {

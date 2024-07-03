@@ -11,6 +11,7 @@ import (
 	_ "github.com/Schaffenburg/telegram_bot_go/nyu"
 	_ "github.com/Schaffenburg/telegram_bot_go/pager"
 	_ "github.com/Schaffenburg/telegram_bot_go/spaceinteract"
+	_ "github.com/Schaffenburg/telegram_bot_go/spacestatus"
 	_ "github.com/Schaffenburg/telegram_bot_go/stalk"
 	_ "github.com/Schaffenburg/telegram_bot_go/status"
 )

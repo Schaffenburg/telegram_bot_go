@@ -26,6 +26,12 @@ type Config struct {
 	DefaultTimeLocation string `yaml:"misc.time.defaultlocation"`
 
 	Batschigkeit int `yaml:"misc.batschigkeit"`
+
+	SpaceStatusAPIKey  string `yaml:"spacestatus.apikey"`
+	SpaceStatusAPIName string `yaml:"spacestatus.name"`
+
+	SpaceStatusLegacyUser string `yaml:"spacestatus.legacy.user"`
+	SpaceStatusLegacyKey  string `yaml:"spacestatus.legacy.key"`
 }
 
 var config *Config
