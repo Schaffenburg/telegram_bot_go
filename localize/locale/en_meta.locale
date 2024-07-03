@@ -1,0 +1,83 @@
+en_meta,English_metamuffin,metallm
+
+status.do.status.change: "The space is now closed!"
+
+status.subscribe.subscribe: "Okay, you will now be kept informed about the space status.\nIf you
+no longer want to receive these updates, simply type /unsubscribe  :)."
+
+status.subscribe.unsubscribe: "Okay, you will no longer be kept informed about the space
+status.\nIf you want to start receiving updates again, simply type /subscribe  :)."
+
+status.subscribe.unsubscribe.nochange: "Huh? You weren't even subscribed. Oh well, you won't get
+any more updates anyway  ;-)."
+
+status.key.have.confirm: "Okay, I'll remember that!"
+
+status.key.donthave.confirm: "Okay, I'll remember that!"
+
+status.key.donthave.confirm.nochange: "I didn't know you had one."
+
+status.key.status.noone: "It looks like no one is going to show up with a key in this space."
+
+status.key.status.list: "Yes, the following people are coming (%d): "
+
+status.key.status.sometime: "Eventually"
+
+status.forceevict.confirm: "Everyone out!"
+
+status.depart.confirm: "Okay, have a good day too!"
+
+status.depart.nochange: "I didn't know you were there either... Oh well, have a great day anyway
+O.o, naja trotzdem noch einen schoenen Tag! "
+
+status.brb.confirm: "Okay, see you soon!\n\nBack again? Please confirm with /backagain  :)."
+
+status.return.confirm: "Good to have you back, %s!"
+
+status.arrive.confirm: "Hi, nice that you're here!"
+
+status.movearrival.confirm: "Okay, I'll let the others know"
+
+status.movearrival.schedule: "I didn't know you were coming either... Oh well, see you soon  ^^"
+
+status.rmarival.confirm: "Okay, I'll let the others know"
+
+status.rmarival.confirm.nochange: "I didn't know you were coming either... Oh well, see you soon
+"
+
+status.revising.confirm: "Okay, that's too bad :-(, then next time."
+
+status.revising.confirm.nochange: "There's nothing to revise. Have fun with whatever you're
+doing!"
+
+status.arrivethought.confirm: "You are now participating in thought, %s!"
+
+status.departthought.confirm: "You are no longer participating in thought."
+
+status.departthought.confirm.nochange: "You were never there either... Oh well  O.o"
+
+localize.yourlanguageis: "Your language is %s"
+
+localize.yourlanguageis.auto: "Your language is %s (implied)"
+
+localize.setlanguage.confirm: "Okay, I'll remember that"
+
+localize.setlanugage.languagenotfound: "Language not found\nLanguage  := %v or auto"
+
+localize.setlanugage.usage: "Usage: /setlanguage <language>\nLanguage  := %v or auto"
+
+pager.notify.http: "Your pager %d could not be notified: error %s"
+
+pager.notify.api: "Your pager %d could not be notified: status %s"
+
+pager.eID.add.taken: "This eID is already in use"
+
+pager.eID.add.confirm: "Okay, it's added"
+
+pager.eID.rm.nochange: "I'm not aware of this eID being associated with your account"
+
+pager.eID.rm.confirm: "Okay, it's removed"
+
+pager.list.nopagers: "You have no pagers added"
+
+pager.list: "You have the following IDs: %s"

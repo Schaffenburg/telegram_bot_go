@@ -1,4 +1,198 @@
 English,en,Englisch,english,englisch,EN,en-en,en-us,en-uk
-hello: hello
-perms.FailGroupEV: "To send Commands, that have the bot text, you have to be Member of our e.V. Group"
+hello: "hello"
+nyu.start: "Hi, I'm Nyu, the Schaffenburg bot\nyou can announce to me when you plan to come to the space.\nI can also do a lot of miscellaneous stuff, if you're interested you can read my /help ^^"
 
+perms.FailGeneric: "Permission check failed!"
+perms.FailGroupEV: "For this command, you must be in the e.V. group"
+perms.FailGroupVorstand: "For this command, you must be part of the board"
+perms.fff: "To use commands that let the bot send messages, you must be a member of the e.V. group"
+perms.FailDB: "To use miscellaneous commands that store things in a database, you must be a member of a space-specific group"
+perms.FailInternet: "To use miscellaneous commands that interact with the internet, you must be a member of the e.V. or CIX group"
+perms.FailDebug: "Debugging commands require both the debug tag and membership in the e.V. group"
+perms.FailSpaceStatusEV: "To use commands that set the space status, you must be a member of the e.V. group"
+perms.FailDoSpaceEV: "To use commands that affect things in the space, you must be a member of the e.V. group"
+
+perms.FailFollowing: "The following requirement is not met: "
+
+fail.generic: "Oh no, there was an error: %s"
+
+help.topmostnotice: "[Nyu](https://github.com/Schaffenburg/telegram_bot_go)-go %s\n *Command List*:\n"
+
+help.help: "Displays a list of commands."
+help.datum: "Displays time/date depending on location."
+help.hallo: "Says hello to the bot."
+help.hello: "Says hello to the bot."
+help.lol: "Just lol"
+help.rofl: "Just rofl"
+help.schleudern: "Throws someone around by their username"
+help.slap: "Slaps someone"
+help.forelliere: "Forellifies someone"
+help.batsche: "Bashes someone's face with a perch"
+help.mussichhaben: "Must have"
+help.ping: "Just ping"
+help.wielautetdieantwort: "Asks THE ultimate question about life, the universe, and everything."
+help.echo: "Displays text"
+help.gidf: "[Google is your friend](https://gidf.at)"
+help.wecker: "Tells Nyu to remind you in X time."
+help.werbinich: "Displays your ID, name, username, and profile picture."
+help.wuerfeln: "Rolls a dice."
+help.featurerequst: "Request a new feature for the bot."
+help.wetter: "Shows the weather in the space."
+help.dtmf: "Displays the phone keypad."
+help.laden: "Let the bot load."
+
+help.lmgt: "[Let Me Google That](https://letmegooglethat.com/) For you"
+help.lmgpt: "[Let Me ChatGPT That](https://letmegpt.com/) For you"
+
+help.werholtessen: "Displays who is getting food."
+help.ichholeessen: "Announce that you are getting food."
+help.ichholdochkeinessen: "Announce that you are not getting food after all."
+
+help.ichhabeinenschluessel: "Announce that you have a space key."
+help.ichhabkeinenschluessel: "Announce that you do not have a space key."
+help.kommtwermitschluessel: "Displays whether someone with a key is coming today."
+
+help.ichkommeheute: "Announce that you will be in the space today."
+help.ichkommdochnicht: "Revoke your announcement to come."
+help.werkommtheute: "Lists who plans to be in the space today."
+help.weristda: "Lists who is currently in the space."
+help.ichbinda: "Confirms that you are in the space."
+help.ichbinweg: "Confirms that you have left the space."
+help.ichgehjetzt: "Confirms that you have left the space."
+help.brb: "Announce that you will be right back."
+help.wiederda: "Announce that you are back."
+help.forceclean: "Cleans up the database."
+help.forceevict: "Evicts everyone from the space."
+help.ichwaeregernda: "Be there in spirit."
+help.ichwaeredochnichtgernda: "No longer be there in spirit."
+
+help.openspace: "Opens the space."
+help.closespace: "Closes the space."
+help.spacestatus: "Displays the status of the space."
+help.status: "Displays the status of the space."
+help.abonnieren: "Subscribe to space status as a private push notification."
+help.abobeenden: "Unsubscribe from private notifications about the space status."
+
+help.pagerhinzufuegen: "Add a pager"
+help.pagerentfernen: "Remove a pager"
+help.listpagers: "List pagers"
+
+help.beep: "Trigger an acoustic tone in the space."
+help.gong: "Manually trigger the doorbell of Schaffenburg e.V."
+help.ring: "Manually trigger the doorbell of Schaffenburg e.V."
+help.heitzungan: "Manually turn on the heating in the space."
+help.heizungaus: "Manually turn off the heating in the space."
+help.wiewarmistes: "Displays the temperature in the hackspace building."
+
+misc.noconcepttime: "It seems there is no concept of time in %s."
+misc.timeanswer: "The time in %s (%s) is currently %s\nIt is the %dth of %s %d"
+
+misc.broadcastcix: "Ok, your message has been broadcast to the following groups: %v"
+
+misc.fail.google: "There was an error searching for '%s': %s"
+
+misc.TheAnswerIs: "The answer to the ultimate question of life, the universe, and everything is.."
+misc.42: "*42*!"
+misc.ring1: "Ring ring..."
+misc.ring2: "Ringdingding..."
+misc.ring3: "Ringkelingdeling..."
+misc.ring4: "BEEP BEEP..."
+misc.ring5: "Ringeding..."
+misc.remind: "I should remind you of something"
+misc.WillRemind: "Ok, see you at %s!"
+
+misc.WhoAmI: "Your ID: %d\nName: %s\nand Username: %s"
+misc.rolling: "Rolling... "
+misc.RollingResult: "Rolled a %d!"
+misc.sling: "Sorry, there is no one to throw around..."
+
+misc.featurerequest.accept: "Ok, I'll note it down ^^"
+misc.temperature: "The temperature in %s (%s) is currently %.2f°C\nThe current weather conditions are: "
+
+misc.food.noone: "It seems no one is getting food :("
+misc.food.listgetsth: "Food getters: "
+misc.food.get.confirm: "Ok, I'll remember :D"
+misc.food.get.revoke: "Ok, no problem!"
+misc.food.get.revoke.nochange: "Ok, I didn't know you were planning to o.O"
+
+status.spacestatus.open: "The space is open"
+status.spacestatus.closed: "The space is closed"
+
+status.return: "Back again?"
+status.welcomespeeddial: "Welcome to the space.\nHere are some quick dial buttons:"
+status.areyouherenow: "You said you would be here now. Are you?"
+status.areyouherenow.yes: "Yes, I'm here"
+status.areyouherenow.15m: "In 15 minutes"
+status.areyouherenow.no: "Not after all"
+
+status.query.noone: "No one wants to be here today :(,\nYou can still be the first :D"
+status.query.list: "Coming today:"
+status.query.sometime: "sometime"
+status.query.nokey: "**No one with a key has committed to coming yet**"
+
+status.parsetime.invalid: "please speak more clearly!\nValid formats: "
+status.key.noone: "It looks like you don't have a key and no one with one wants to be here today"
+status.key.someoneid: "The person who wants to come and has a key is unknown to me but has ID %d"
+status.key.someone: "The earliest person with a key is %s at %s"
+
+status.setarrival.confirm: "Ok, see you then!"
+status.setarrival.confirm.time: "Ok, see you at %s!"
+
+status.visiting.noone: "No one is here right now :("
+status.visiting.list: "Currently here (%d): "
+
+status.change.open: "The space is now open!"
+status.change.close: "The space is now closed!"
+status.subscribe.subscribe: "Sure, you will now be kept up to date about the space status.\nIf you no longer want these messages, just unsubscribe with /abobeenden :)."
+status.subscribe.unsubscribe: "Sure, you will no longer be informed about the space status.\nIf you want to receive messages again, just renew your subscription with /abonnieren :)."
+status.subscribe.unsubscribe.nochange: "o.O you weren't subscribed anyway, now you'll get double no messages ;-)."
+
+status.key.have.confirm: "Ok, I'll remember!"
+status.key.donthave.confirm: "Ok, I'll remember!"
+status.key.donthave.confirm.nochange: "I didn't know you had one."
+status.key.status.noone: "It looks like no one with a key is coming to
+
+ the space yet."
+status.key.status.list: "Yes, coming (%d): "
+status.key.status.sometime: "sometime"
+
+status.forceevict.confirm: "Everyone out!"
+
+status.depart.nochange: "I didn't know you were here O.o, anyway have a nice day!"
+status.depart.confirm: "Ok, shame, have a nice day!"
+
+status.brb.confirm: "Ok, see you soon!\n\nBack? please confirm with /wiederda :)"
+status.return.confirm: "Nice to have you (back), %s!"
+
+status.arrive.confirm: "Hi, nice to have you here!"
+
+status.movearrival.confirm: "Ok, I'll inform the others"
+status.movearrival.schedule: "I didn't know you were coming o.O; anyway, see you soon ^^"
+
+status.rmarrival.confirm: "Ok, I'll inform the others"
+status.rmarrival.confirm.nochange: "I didn't know you were coming o.O"
+
+status.revise.confirm: "Okay, shame :(, maybe next time."
+status.revise.confirm.nochange: "There is nothing to revise. Have fun with whatever you are doing!"
+
+status.arrivethought.confirm: "You are now there in spirit, %s!"
+status.departthought.confirm: "You are no longer there in spirit."
+status.departthought.confirm.nochange: "You weren't there o.O"
+
+localize.yourlanguageis: "Your language is %s"
+localize.yourlanguageis.auto: "Your language is %s (implicit)"
+
+localize.setlanguage.confirm: "Ok, I'll remember"
+localize.setlanugage.languagenotfound: "Language not found\nLanguage := %v or auto"
+localize.setlanugage.usage: "Usage: /setlanguage <language>\nLanguage := %v or auto"
+
+pager.notify.http: "Your pager %d could not be notified: error %s"
+pager.notify.api: "Your pager %d could not be notified: status %s"
+pager.eID.add.taken: "This eID is already in use"
+pager.eID.add.confirm: "Ok, added"
+
+pager.eID.rm.nochange: "This eID is not known to be associated with your account"
+pager.eID.rm.confirm: "Ok, removed"
+
+pager.list.nopagers: "You haven't added any pagers yet"
+pager.list: "You have the following IDs: %s"
