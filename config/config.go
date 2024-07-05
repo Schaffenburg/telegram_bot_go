@@ -32,6 +32,8 @@ type Config struct {
 
 	SpaceStatusLegacyUser string `yaml:"spacestatus.legacy.user"`
 	SpaceStatusLegacyKey  string `yaml:"spacestatus.legacy.key"`
+
+	ThinkSpeakTemp string `yaml:"spaceinteract.thinkspeak.temp"`
 }
 
 var config *Config

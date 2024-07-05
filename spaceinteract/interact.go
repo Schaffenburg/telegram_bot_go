@@ -7,6 +7,8 @@ import (
 	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
+
+	"log"
 )
 
 var (
@@ -15,6 +17,9 @@ var (
 
 		Text: loc.MustTrans("perms.FailDoSpaceEV"),
 	}
+
+	LTemperatureIs = loc.MustTrans("spaceinteract.temperatureis")
+	FailGeneric    = loc.MustTrans("fail.generic")
 )
 
 func init() {
@@ -48,6 +53,14 @@ func handleHeatingOff(m *tele.Message) {
 }
 
 func handleGetTemperature(m *tele.Message) {
-	nyu.GetBot().Send(m.Chat, "TODO: actually interact with sensor")
+	l := loc.GetUserLanguage(m.Sender)
 
+	temp, err := GetTemp()
+	if err != nil {
+		log.Printf("Failed to get temperature: %s", err)
+
+		nyu.GetBot().Send(m.Chat, FailGeneric.Get(l))
+	} else {
+		nyu.GetBot().Send(m.Chat, LTemperatureIs.Getf(l, temp))
+	}
 }

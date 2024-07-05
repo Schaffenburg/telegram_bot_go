@@ -195,3 +195,5 @@ pager.eID.rm.confirm: "Ok, ist entfernt"
 
 pager.list.nopagers: "Du hast noch keine Pager hinzugefuegt"
 pager.list: "Du hast folgende IDs: %s"
+
+spaceinteract.temperatureis: "Die Temperatur im Space betraegt grade %.1f °C"
