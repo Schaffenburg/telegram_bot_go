@@ -150,9 +150,7 @@ status.subscribe.unsubscribe.nochange: "o.O you weren't subscribed anyway, now y
 status.key.have.confirm: "Ok, I'll remember!"
 status.key.donthave.confirm: "Ok, I'll remember!"
 status.key.donthave.confirm.nochange: "I didn't know you had one."
-status.key.status.noone: "It looks like no one with a key is coming to
-
- the space yet."
+status.key.status.noone: "It looks like no one with a key is coming to the space yet."
 status.key.status.list: "Yes, coming (%d): "
 status.key.status.sometime: "sometime"
 

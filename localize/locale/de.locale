@@ -11,6 +11,7 @@ perms.FailInternet: "Um misc Befehle, die mit dem Internet interaggieren, musst 
 perms.FailDebug: "Debugging Befehle benoetigen sowohl das debug Tag als auch eine Mitgliedschaft in der e.V. gruppe"
 perms.FailSpaceStatusEV: "Um Befehle, die den Spacestatus setzen du benutzen, musst du Mitglied der e.V. Gruppe sein"
 perms.FailDoSpaceEV: "Um Befehle, die dinge im Space bewirken musst du Mitglied in der e.V. Gruppe sein"
+perms.FailAnyGroup: "Um Diesen Befehl auszufuehren, musst du mitglied in einer Space-eigenen Gruppe sein"
 
 perms.FailFollowing: "Folgende Anforderung wird nicht erfuellt: "
 
@@ -157,7 +158,7 @@ status.key.status.sometime: "irgendwann"
 status.forceevict.confirm: "Alle weg!"
 
 status.depart.nochange: "Wusste gar nicht, dass du da wars O.o, naja trotzdem noch einen schoenen Tag!"
-status.depart.confirm: "Ok, schaden, hab noch einen schoenen Tag!"
+status.depart.confirm: "Ok, schade, hab aber noch einen schoenen Tag!"
 
 status.brb.confirm: "Ok, bis gleich!\n\nWieder da? bitte mit /wiederda bestaetigen :)"
 status.return.confirm: "Schoen dass du (wieder) da bist, %s!"
