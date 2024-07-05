@@ -253,7 +253,7 @@ func GetUserLanguageID(id int64) (l *Language) {
 // returns default language if user has nothing configured
 func MustGetUserLanguageID(id int64) (l *Language) {
 	l = GetUserLanguageID(id)
-	if l == nil {
+	if l != nil {
 		return
 	}
 

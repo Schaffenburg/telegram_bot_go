@@ -37,6 +37,12 @@ var (
 
 		Text: loc.MustTrans("perms.FailGroupEV"),
 	}
+
+	PermsVerein = &nyu.PermissionFailText{
+		Perm: perms.MemberSpaceGroup,
+
+		Text: loc.MustTrans("perms.FailAnyGroup"),
+	}
 )
 
 var (
@@ -102,20 +108,20 @@ func init() {
 	bot.HandleInlineCallback(CallbackBRB, handleBRBCallback)
 	bot.HandleInlineCallback(CallbackReturn, handleReturnCallback)
 
-	bot.Command("heikomaas", handleSetArrival, PermsEV)
-	bot.Command("eta", handleSetArrival, PermsEV)
-	bot.Command("ichkommeheute", handleSetArrival, PermsEV)
+	bot.Command("heikomaas", handleSetArrival, PermsVerein)
+	bot.Command("eta", handleSetArrival, PermsVerein)
+	bot.Command("ichkommeheute", handleSetArrival, PermsVerein)
 	help.AddCommand("ichkommeheute")
-	bot.Command("ichkommdochnicht", handleReviseArrival, PermsEV)
+	bot.Command("ichkommdochnicht", handleReviseArrival, PermsVerein)
 	help.AddCommand("ichkommdochnicht")
 
-	bot.Command("werkommtheute", handleListArrival, PermsEV)
+	bot.Command("werkommtheute", handleListArrival, PermsVerein)
 	help.AddCommand("werkommtheute")
 
-	bot.Command("weristda", handleWhoThere, PermsEV)
+	bot.Command("weristda", handleWhoThere, PermsVerein)
 	help.AddCommand("weristda")
 
-	bot.Command("ichbinda", handleArrival, PermsEV)
+	bot.Command("ichbinda", handleArrival, PermsVerein)
 	help.AddCommand("ichbinda")
 
 	bot.Command("ichwaeregernda", handleWantArrival)
@@ -124,23 +130,21 @@ func init() {
 	bot.Command("ichwaeredochnichtgernda", handleDontWantArrival)
 	help.AddCommand("ichwaeredochnichtgernda")
 
-	bot.Command("ichbinweg", handleDepart, PermsEV)
+	bot.Command("ichbinweg", handleDepart, PermsVerein)
 	help.AddCommand("ichbinweg")
 	bot.Command("ichgehjetzt", handleDepart)
 	help.AddCommand("ichgehjetzt")
 
-	bot.Command("afk", handleBeRightBack, PermsEV) // alias
+	bot.Command("afk", handleBeRightBack, PermsVerein) // alias
 	help.AddCommand("afk")
 
-	bot.Command("brb", handleBeRightBack, PermsEV)
+	bot.Command("brb", handleBeRightBack, PermsVerein)
 	help.AddCommand("brb")
 
-	bot.Command("wiederda", handleReturn, PermsEV)
+	bot.Command("wiederda", handleReturn, PermsVerein)
 	help.AddCommand("wiederda")
 
-	bot.Command("forceclean", handleClean,
-		&perms.PermissionGroupTag{GroupTag: "perm_ev"},
-	)
+	bot.Command("forceclean", handleClean, PermsEV)
 	help.AddCommand("forceclean")
 
 	bot.Command("forceevict",
@@ -281,7 +285,10 @@ func updateArrivalTimers() {
 
 	for _, a := range as {
 		if time.Now().Unix() >= a.Time { // if time is in past
-			AskUserIfArrived(a.User)
+			// check if user arrived:
+			if there, _, _ := db.IsUserThere(a.User); !there {
+				AskUserIfArrived(a.User)
+			}
 		}
 	}
 }

@@ -43,6 +43,8 @@ func init() {
 		bot.Command("debug_isgroupmemberself", handleIsGroupMemberSelf, perms...)
 		bot.Command("debug_istaggedgroupmemberself", handleIsTaggedGroupMemberSelf, perms...)
 
+		bot.Command("debug_gettrans", handleGetTrans, perms...)
+
 		bot.Command("debug_setmembership", handleSetMembership, perms...)
 		bot.Command("debug_rmmembership", handleRmMembership, perms...)
 
@@ -106,6 +108,28 @@ func init() {
 			}
 		}()
 	}
+}
+
+func handleGetTrans(m *tele.Message) {
+	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
+
+	args := strings.SplitN(m.Text, " ", 2)
+	if len(args) < 2 {
+		bot.Send(m.Sender, "Usage: /debug_gettrans <transid>")
+
+		return
+	}
+
+	trans := loc.GetTranslation(args[1])
+	if trans == nil {
+		bot.Sendf(m.Sender, "unable to get translation for %s", args[1])
+
+		return
+	}
+
+	bot.Sendf(m.Sender, "%s in language %s can be translated to %s",
+		args[1], l, trans.Get(l))
 }
 
 func handleImportLanguageMap(m *tele.Message) {

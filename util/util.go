@@ -14,6 +14,11 @@ import (
 func ParseTime(t string) (newTime time.Time, err error) {
 	now := time.Now()
 
+	unix, err := strconv.ParseInt(t, 10, 64)
+	if err == nil && unix > now.Unix() {
+		return time.Unix(unix, 0), nil
+	}
+
 	for _, fmt := range timeFormats {
 		newTime, err = time.Parse(fmt, t)
 		if err != nil {
@@ -35,7 +40,7 @@ func ParseTime(t string) (newTime time.Time, err error) {
 	return newTime, nil
 }
 
-func Must[A any, R any](f func(A) (R, error), a A) (r R) {
+func must[A any, R any](f func(A) (R, error), a A) (r R) {
 	r, err := f(a)
 	if err != nil {
 		panic(err)
@@ -57,6 +62,7 @@ var timeFormats []string = []string{
 	"15:04",
 	"15.04",
 	"1504",
+	"",
 }
 
 func TimeFormats() []string {

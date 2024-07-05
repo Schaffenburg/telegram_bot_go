@@ -385,6 +385,24 @@ type UserState struct {
 	Note string
 }
 
+func IsUserThere(u int64) (there bool, note string, err error) {
+	DoCleanArrivals()
+
+	r, err := StmtQuery("SELECT 1, note FROM location WHERE user = ?",
+		u)
+	if err != nil {
+		return false, "", err
+	}
+
+	if r.Next() {
+		err = r.Scan(&there, &note)
+
+		return
+	}
+
+	return false, "", nil
+}
+
 func WhoThere() ([]UserState, error) {
 	DoCleanArrivals()
 
