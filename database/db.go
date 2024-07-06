@@ -106,15 +106,12 @@ func StmtQuery(query string, args ...any) (r *sql.Rows, err error) {
 
 	ensureDB()
 
-	stmt, ok := stmtMap[query]
-	if !ok {
-		stmt, err = database.Prepare(query)
-		if err != nil {
-			return
-		}
-
-		stmtMap[query] = stmt
+	stmt, err := database.Prepare(query)
+	if err != nil {
+		return
 	}
+
+	defer stmt.Close()
 
 	return stmt.Query(args...)
 }
