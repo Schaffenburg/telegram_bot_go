@@ -58,6 +58,22 @@ func Today(d time.Duration) time.Time {
 	).Add(d)
 }
 
+func TodayUnknown() time.Time {
+	now := time.Now()
+
+	return time.Date(
+		now.Year(), now.Month(), now.Day(),
+		23, 59, 59, 0, now.Location(),
+	)
+}
+
+// checks if TIME part of time.Time is 23:59:59 (aka "unknown arival time")
+func IsUnknown(t time.Time) bool {
+	return t.Hour() == 59 &&
+		t.Minute() == 59 &&
+		t.Second() == 59
+}
+
 var timeFormats []string = []string{
 	"15:04",
 	"15.04",

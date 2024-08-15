@@ -54,6 +54,8 @@ var (
 	LKeyNoOne                     = loc.MustTrans("status.key.noone")
 	LKeySomeoneID                 = loc.MustTrans("status.key.someoneid")
 	LKeySomeone                   = loc.MustTrans("status.key.someone")
+	LKeySomeoneNoTimeID           = loc.MustTrans("status.key.notime.someoneid")
+	LKeySomeoneNoTime             = loc.MustTrans("status.key.notime.someone")
 	LSetArrivalConfirm            = loc.MustTrans("status.setarrival.confirm")
 	LSetArrivalConfirmTime        = loc.MustTrans("status.setarrival.confirm.time")
 	LVisitingNoone                = loc.MustTrans("status.visiting.noone")
@@ -111,17 +113,33 @@ func init() {
 	bot.Command("heikomaas", handleSetArrival, PermsVerein)
 	bot.Command("eta", handleSetArrival, PermsVerein)
 	bot.Command("ichkommeheute", handleSetArrival, PermsVerein)
+	bot.Command("ichkommeheut", handleSetArrival, PermsVerein)
+	bot.Command("ichkommheut", handleSetArrival, PermsVerein)
+	bot.Command("ichkommheute", handleSetArrival, PermsVerein)
+	bot.Command("ichkomme", handleSetArrival, PermsVerein)
+	bot.Command("ichkomm", handleSetArrival, PermsVerein)
+
 	help.AddCommand("ichkommeheute")
 	bot.Command("ichkommdochnicht", handleReviseArrival, PermsVerein)
+	bot.Command("ichkommedochnicht", handleReviseArrival, PermsVerein)
+	bot.Command("ichkommedochnich", handleReviseArrival, PermsVerein)
+	bot.Command("ichkommdochnich", handleReviseArrival, PermsVerein)
 	help.AddCommand("ichkommdochnicht")
 
 	bot.Command("werkommtheute", handleListArrival, PermsVerein)
+	bot.Command("werkommtheut", handleListArrival, PermsVerein)
+	bot.Command("werkommheut", handleListArrival, PermsVerein)
+	bot.Command("werkommheute", handleListArrival, PermsVerein)
 	help.AddCommand("werkommtheute")
 
 	bot.Command("weristda", handleWhoThere, PermsVerein)
+	bot.Command("werisda", handleWhoThere, PermsVerein)
 	help.AddCommand("weristda")
 
 	bot.Command("ichbinda", handleArrival, PermsVerein)
+	bot.Command("icame", handleArrival, PermsVerein)
+	bot.Command("ichda", handleArrival, PermsVerein)
+	bot.Command("binda", handleArrival, PermsVerein)
 	help.AddCommand("ichbinda")
 
 	bot.Command("ichwaeregernda", handleWantArrival)
@@ -131,8 +149,12 @@ func init() {
 	help.AddCommand("ichwaeredochnichtgernda")
 
 	bot.Command("ichbinweg", handleDepart, PermsVerein)
+	bot.Command("binweg", handleDepart, PermsVerein)
+	bot.Command("nixda", handleDepart, PermsVerein)
+	bot.Command("ichverziehmich", handleDepart, PermsVerein)
+	bot.Command("ichgehjetzt", handleDepart, PermsVerein)
+
 	help.AddCommand("ichbinweg")
-	bot.Command("ichgehjetzt", handleDepart)
 	help.AddCommand("ichgehjetzt")
 
 	bot.Command("afk", handleBeRightBack, PermsVerein) // alias
@@ -142,6 +164,7 @@ func init() {
 	help.AddCommand("brb")
 
 	bot.Command("wiederda", handleReturn, PermsVerein)
+	bot.Command("ichbinwiederda", handleReturn, PermsVerein)
 	help.AddCommand("wiederda")
 
 	bot.Command("forceclean", handleClean, PermsEV)
@@ -166,6 +189,8 @@ func init() {
 		} else {
 			log.Printf("Cleaned %d location entries", i)
 		}
+
+		everyoneDepart()
 	}, time.Hour*4)
 
 	cron.Every(updateArrivalTimers, time.Minute*5)
@@ -195,7 +220,7 @@ func handleListArrival(m *tele.Message) {
 			panic(err)
 		}
 
-		if time.Unix(a[i].Time, 0).Equal(util.Today(0)) {
+		if util.IsUnknown(time.Unix(a[i].Time, 0)) {
 			// w/o time information
 			fmt.Fprintf(b, "\n - %s %s", u.FirstName, LSometime.Get(l))
 		} else {
@@ -221,12 +246,13 @@ func handleSetArrival(m *tele.Message) {
 	var err error
 
 	if len(args) < 2 {
-		t = util.Today(0)
+		t = util.TodayUnknown()
 	} else {
 		t, err = util.ParseTime(args[1])
 		if err != nil {
 			bot.Send(m.Chat, ParsetimeInvalid.Get(l)+
 				strings.Join(util.TimeFormats(), ", "))
+
 			return
 		}
 	}
@@ -239,27 +265,57 @@ func handleSetArrival(m *tele.Message) {
 		return
 	}
 
+	// dbg abo
+	msg := fmt.Sprintf("dbg_abo: user %s %s (%d) wants to arrive @ %v (haskey: %T)",
+		m.Sender.FirstName, m.Sender.LastName, m.Sender.ID,
+		args, haskey,
+	)
+
+	dbgu, err := db.GetUsersWithTag(DBGStatusTag)
+	if err != nil {
+		log.Printf("failed to get users with tag %s: %s", DBGStatusTag, err)
+	} else {
+		for _, u := range dbgu {
+			bot.Send(nyu.Recipient(u), msg)
+		}
+	}
+
 	if !haskey {
 		uas, err := ListUsersWithTagArrivingToday(TagHasKey)
 		if err != nil {
 			log.Printf("Failed getting users with tag arriving today: %s", err)
 		} else {
-			var s *UserArrival
+			var unknowntime *UserArrival
+			var knowntime *UserArrival
 
 			for _, ua := range uas {
-				if s == nil || ua.Arrival.Before(s.Arrival) {
-					s = &ua
+				if util.IsUnknown(ua.Arrival) {
+					unknowntime = &ua
+				}
+
+				// earliest w/ key;; now hav one or is before now
+				if knowntime == nil || ua.Arrival.Before(knowntime.Arrival) {
+					knowntime = &ua
 				}
 			}
 
-			if s == nil {
-				bot.Send(m.Chat, LKeyNoOne)
-			} else {
-				user, err := stalk.GetUserByID(s.User)
-				if err != nil {
-					bot.Sendf(m.Chat, LKeySomeoneID.Getf(l, s.User))
+			if knowntime == nil {
+				if unknowntime == nil {
+					bot.Send(m.Chat, LKeyNoOne)
 				} else {
-					bot.Sendf(m.Chat, LKeySomeone.Getf(l, user.FirstName, s.Arrival.Format("15:03")))
+					user, err := stalk.GetUserByID(knowntime.User)
+					if err != nil {
+						bot.Sendf(m.Chat, LKeySomeoneNoTimeID.Getf(l, knowntime.User))
+					} else {
+						bot.Sendf(m.Chat, LKeySomeoneNoTime.Getf(l, user.FirstName))
+					}
+				}
+			} else {
+				user, err := stalk.GetUserByID(knowntime.User)
+				if err != nil {
+					bot.Sendf(m.Chat, LKeySomeoneID.Getf(l, knowntime.User))
+				} else {
+					bot.Sendf(m.Chat, LKeySomeone.Getf(l, user.FirstName, knowntime.Arrival.Format("15:03")))
 				}
 			}
 		}
@@ -284,7 +340,11 @@ func updateArrivalTimers() {
 	}
 
 	for _, a := range as {
-		if time.Now().Unix() >= a.Time { // if time is in past
+		t := time.Unix(a.Time, 0)
+
+		if time.Now().Unix() >= a.Time &&
+			time.Now().Add(-time.Minute*5).Unix() <= a.Time && // TODO: fix jank for single note
+			(t.Second() == 0 || t.Minute() == 0 || t.Hour() == 0) { // if time is in past
 			// check if user arrived:
 			if there, _, _ := db.IsUserThere(a.User); !there {
 				AskUserIfArrived(a.User)
@@ -402,6 +462,23 @@ func handleDepartCallback(c *tele.Callback) {
 		bot.RespondText(c, FailGeneric.Getf(l, err))
 	}
 
+	// dbg abo
+	msg := fmt.Sprintf("dbg_abo: user %s %s (%d) is gone",
+		c.Sender.FirstName, c.Sender.LastName, c.Sender.ID,
+	)
+
+	dbgu, err := db.GetUsersWithTag(DBGStatusTag)
+	if err != nil {
+		log.Printf("failed to get users with tag %s: %s", DBGStatusTag, err)
+	} else {
+		for _, u := range dbgu {
+			bot.Send(nyu.Recipient(u), msg)
+		}
+	}
+
+	// delete arrival time
+	db.RmArrival(c.Sender.ID)
+
 	if !ok {
 		bot.RespondText(c, LDepartNochange.Get(l))
 	} else {
@@ -444,6 +521,23 @@ func handleDepart(m *tele.Message) {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	}
 
+	// dbg abo
+	msg := fmt.Sprintf("dbg_abo: user %s %s (%d) is gone",
+		m.Sender.FirstName, m.Sender.LastName, m.Sender.ID,
+	)
+
+	dbgu, err := db.GetUsersWithTag(DBGStatusTag)
+	if err != nil {
+		log.Printf("failed to get users with tag %s: %s", DBGStatusTag, err)
+	} else {
+		for _, u := range dbgu {
+			bot.Send(nyu.Recipient(u), msg)
+		}
+	}
+
+	// delete arrival time
+	db.RmArrival(m.Sender.ID)
+
 	if !ok {
 		bot.Send(m.Chat, LDepartConfirmNochange.Get(l))
 	} else {
@@ -462,7 +556,21 @@ func handleArrivalCallback(m *tele.Callback) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(m.Sender)
 
-	err := Arrive(m.Sender.ID, "")
+	// dbg abo
+	msg := fmt.Sprintf("dbg_abo: user %s %s (%d) arrived",
+		m.Sender.FirstName, m.Sender.LastName, m.Sender.ID,
+	)
+
+	dbgu, err := db.GetUsersWithTag(DBGStatusTag)
+	if err != nil {
+		log.Printf("failed to get users with tag %s: %s", DBGStatusTag, err)
+	} else {
+		for _, u := range dbgu {
+			bot.Send(nyu.Recipient(u), msg)
+		}
+	}
+
+	err = Arrive(m.Sender.ID, "")
 	if err != nil {
 		bot.RespondText(m, FailGeneric.Getf(l, err))
 	} else {
@@ -515,7 +623,21 @@ func handleArrival(m *tele.Message) {
 		note = strings.Join(args[1:], " ")
 	}
 
-	err := Arrive(m.Sender.ID, note)
+	// dbg abo
+	msg := fmt.Sprintf("dbg_abo: user %s %s (%d) arrived",
+		m.Sender.FirstName, m.Sender.LastName, m.Sender.ID,
+	)
+
+	dbgu, err := db.GetUsersWithTag(DBGStatusTag)
+	if err != nil {
+		log.Printf("failed to get users with tag %s: %s", DBGStatusTag, err)
+	} else {
+		for _, u := range dbgu {
+			bot.Send(nyu.Recipient(u), msg)
+		}
+	}
+
+	err = Arrive(m.Sender.ID, note)
 	if err != nil {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
@@ -533,7 +655,7 @@ func handleWantArrival(m *tele.Message) {
 		return
 	}
 
-	bot.Sendf(m.Chat, LArrivethoughtConfirm.Get(l))
+	bot.Sendf(m.Chat, LArrivethoughtConfirm.Getf(l, m.Sender.Username))
 }
 
 func handleDontWantArrival(m *tele.Message) {
@@ -574,13 +696,27 @@ func handleReturn(m *tele.Message) {
 	if err != nil {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
-		bot.Send(m.Chat, LReturnConfirm.Get(l))
+		bot.Send(m.Chat, LReturnConfirm.Getf(l, m.Sender.Username))
 	}
 }
 
 func handleReviseArrival(m *tele.Message) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(m.Sender)
+
+	// dbg abo
+	msg := fmt.Sprintf("dbg_abo: user %s %s (%d) doesnt want to arrive anymore",
+		m.Sender.FirstName, m.Sender.LastName, m.Sender.ID,
+	)
+
+	dbgu, err := db.GetUsersWithTag(DBGStatusTag)
+	if err != nil {
+		log.Printf("failed to get users with tag %s: %s", DBGStatusTag, err)
+	} else {
+		for _, u := range dbgu {
+			bot.Send(nyu.Recipient(u), msg)
+		}
+	}
 
 	ch, err := db.RmArrival(m.Sender.ID)
 	if err != nil {

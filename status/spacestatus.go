@@ -15,6 +15,7 @@ import (
 )
 
 const SpaceStatusSubTag = "status_info"
+const DBGStatusTag = "dbg_status"
 
 var (
 	PermsSetStatus = &nyu.PermissionFailText{
@@ -62,6 +63,10 @@ func init() {
 	help.AddCommand("abonnieren")
 	bot.Command("abobeenden", handleUnsubscribe)
 	help.AddCommand("abobeenden")
+
+	// super secret thingy
+	bot.Command("dbg_abonnieren", handleSubscribeDBG, PermsEV)
+	bot.Command("dbg_abobeenden", handleUnsubscribeDBG, PermsEV)
 }
 
 var (
@@ -262,6 +267,19 @@ var (
 	LSpaceStatusSubscribe = loc.MustTrans("status.subscribe.subscribe")
 )
 
+func handleSubscribeDBG(m *tele.Message) {
+	l := loc.GetUserLanguage(m.Sender)
+	bot := nyu.GetBot()
+
+	err := db.SetUserTag(m.Sender.ID, DBGStatusTag)
+	if err != nil {
+		log.Printf("Error adding user tag: %s", err)
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
+	} else {
+		bot.Send(m.Chat, LSpaceStatusSubscribe.Get(l))
+	}
+}
+
 func handleSubscribe(m *tele.Message) {
 	l := loc.GetUserLanguage(m.Sender)
 	bot := nyu.GetBot()
@@ -285,6 +303,23 @@ func handleUnsubscribe(m *tele.Message) {
 	bot := nyu.GetBot()
 
 	ch, err := db.RmUserTag(m.Sender.ID, SpaceStatusSubTag)
+	if err != nil {
+		log.Printf("Error removing user tag: %s", err)
+		bot.Send(m.Chat, FailGeneric.Getf(l, err))
+	} else {
+		if ch {
+			bot.Send(m.Chat, LSpaceStatusUnsubscribe.Get(l))
+		} else {
+			bot.Send(m.Chat, LSpaceStatusUnsubscribeNotChange.Get(l))
+		}
+	}
+}
+
+func handleUnsubscribeDBG(m *tele.Message) {
+	l := loc.GetUserLanguage(m.Sender)
+	bot := nyu.GetBot()
+
+	ch, err := db.RmUserTag(m.Sender.ID, DBGStatusTag)
 	if err != nil {
 		log.Printf("Error removing user tag: %s", err)
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))

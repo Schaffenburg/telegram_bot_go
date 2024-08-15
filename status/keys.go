@@ -17,6 +17,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func init() {
@@ -39,6 +40,7 @@ var (
 	LKeyStatusNoone             = loc.MustTrans("status.key.status.noone")
 	LKeyStatusList              = loc.MustTrans("status.key.status.list")
 	LKeyStatusSometime          = loc.MustTrans("status.key.status.sometime")
+	LKeyStatusOpen              = loc.MustTrans("status.key.open")
 )
 
 const TagHasKey = "has_space_key"
@@ -80,6 +82,13 @@ func handleDontHaveKey(m *tele.Message) {
 func handleListArrivalWKey(m *tele.Message) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(m.Sender)
+
+	status, err := GetStatus(time.Now())
+	if err == nil && status == StatusOpen {
+		bot.Send(m.Chat, LKeyStatusOpen.Getf(l))
+
+		return
+	}
 
 	users, err := ListUsersWithTagArrivingToday(TagHasKey)
 	if err != nil {
