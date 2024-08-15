@@ -135,6 +135,9 @@ status.parsetime.invalid: "please speak more clearlier!\nValid formats: "
 status.key.noone: "Sieht so als als haettest du keinen schluessel und es wolle niemand mit einem heute da sein"
 status.key.someoneid: "Die Person die kommen will und gleichzeitig einen schluessel hat ist mir unbekannt, hat aber ID %d"
 status.key.someone: "Fruehste person mit Schluessel ist %s um %s"
+status.key.notime.someone: "Eine Person mit schluessel ist %s, diese hat mir aber keine Ankunftszeit genannt."
+status.key.notime.someoneid: "Eine Person mit schluessel truaegt ID: %d, diese hat mir aber keine Ankunftszeit genannt."
+status.key.open: "Der Space ist schon offen ^^"
 
 status.setarrival.confirm: "Ok, bis dann!"
 status.setarrival.confirm.time: "Ok, bis um %s!"
@@ -197,3 +200,4 @@ pager.list.nopagers: "Du hast noch keine Pager hinzugefuegt"
 pager.list: "Du hast folgende IDs: %s"
 
 spaceinteract.temperatureis: "Die Temperatur im Space betraegt grade %.1f °C"
+

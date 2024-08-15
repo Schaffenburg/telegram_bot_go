@@ -137,10 +137,21 @@ func GetTranslation(name string) *Translation {
 		}
 	}
 
-	return &Translation{
+	trans := &Translation{
 		name: name,
 		id:   id,
 	}
+
+	// log if string is not defined in some language
+	for _, l := range uniqueLanguages {
+		_, ok := trans.GetV(l)
+		if !ok {
+			log.Printf("[WARNING] %s does not have a translation in %s",
+				name, l.Name())
+		}
+	}
+
+	return trans
 }
 
 func GetLanguage(name string) *Language {
@@ -191,20 +202,26 @@ func (t *Language) ID() int {
 }
 
 // Gets the translation for a language
-func (t Translation) Get(l *Language) string {
+func (t Translation) GetV(l *Language) (string, bool) {
 	if l == nil {
-		return t.name
+		return t.name, false
 	}
 
 	lang, ok := translations[t.id]
 	if !ok {
-		return t.name
+		return t.name, false
 	}
 
 	trans, ok := lang[l.id]
 	if !ok {
-		return t.name
+		return t.name, false
 	}
+
+	return trans, true
+}
+
+func (t Translation) Get(l *Language) string {
+	trans, _ := t.GetV(l)
 
 	return trans
 }
