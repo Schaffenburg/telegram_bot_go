@@ -266,7 +266,7 @@ func handleSetArrival(m *tele.Message) {
 	}
 
 	// dbg abo
-	msg := fmt.Sprintf("dbg_abo: user %s %s (%d) wants to arrive @ %v (haskey: %T)",
+	msg := fmt.Sprintf("dbg_abo: user %s %s (%d) wants to arrive @ %v (haskey: %t)",
 		m.Sender.FirstName, m.Sender.LastName, m.Sender.ID,
 		args, haskey,
 	)
