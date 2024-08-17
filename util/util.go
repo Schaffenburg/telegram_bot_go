@@ -69,7 +69,7 @@ func TodayUnknown() time.Time {
 
 // checks if TIME part of time.Time is 23:59:59 (aka "unknown arival time")
 func IsUnknown(t time.Time) bool {
-	return t.Hour() == 59 &&
+	return t.Hour() == 23 &&
 		t.Minute() == 59 &&
 		t.Second() == 59
 }
