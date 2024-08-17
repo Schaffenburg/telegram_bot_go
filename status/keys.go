@@ -117,7 +117,7 @@ func handleListArrivalWKey(m *tele.Message) {
 			b.WriteString(user.FirstName)
 			b.WriteString(" ")
 
-			if ua.Arrival.Equal(util.Today(0)) {
+			if util.IsUnknown(ua.Arrival) {
 				b.WriteString(LKeyStatusSometime.Get(l))
 			} else {
 				b.WriteString(ua.Arrival.Format("15:04"))

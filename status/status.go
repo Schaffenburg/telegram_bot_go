@@ -325,7 +325,7 @@ func handleSetArrival(m *tele.Message) {
 	if err != nil {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
-		if t.Equal(util.Today(0)) {
+		if util.IsUnknown(t) {
 			bot.Send(m.Chat, LSetArrivalConfirm.Get(l))
 		} else {
 			bot.Send(m.Chat, LSetArrivalConfirmTime.Getf(l, t.Format("15:04")))
