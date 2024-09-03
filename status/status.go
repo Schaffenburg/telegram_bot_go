@@ -175,7 +175,7 @@ func init() {
 			bot := nyu.GetBot()
 			l := loc.GetUserLanguage(m.Sender)
 
-			everyoneDepart()
+			forceOff()
 			bot.Send(m.Chat, LForceevictConfirm.Get(l))
 		},
 		PermsEV)
@@ -436,6 +436,12 @@ func handleWhoThere(m *tele.Message) {
 	bot.Send(m.Chat, b.String())
 }
 
+func forceOff() {
+	everyoneDepart()
+
+	SetStatus(StatusClosed)
+}
+
 func everyoneDepart() (int64, error) {
 	log.Printf("everyone departs now!")
 
@@ -453,11 +459,30 @@ func everyoneDepart() (int64, error) {
 	return i, err
 }
 
+func Depart(id int64) (ok bool, err error) {
+	ok, err = db.SetLocationDepart(id)
+	if err != nil {
+		return
+	}
+
+	list, err := db.WhoThere()
+	if err != nil {
+		return
+	}
+
+	if len(list) <= 0 {
+		// everyone gone
+		SetStatus(StatusClosed)
+	}
+
+	return ok, err
+}
+
 func handleDepartCallback(c *tele.Callback) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(c.Sender)
 
-	ok, err := db.SetLocationDepart(c.Sender.ID)
+	ok, err := Depart(c.Sender.ID)
 	if err != nil {
 		bot.RespondText(c, FailGeneric.Getf(l, err))
 	}

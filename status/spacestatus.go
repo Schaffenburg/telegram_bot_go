@@ -102,7 +102,6 @@ func handleClose(m *tele.Message) {
 
 // returns newest status entry closest to when
 func GetStatus(when time.Time) (status SpaceStatus, err error) {
-	println("query")
 	r, err := db.StmtQuery(`SELECT status FROM spacestatus
 	WHERE time < ?
 	ORDER BY time DESC
@@ -110,7 +109,6 @@ func GetStatus(when time.Time) (status SpaceStatus, err error) {
 		when.Unix(),
 	)
 
-	println("err != nil")
 	if err != nil {
 		return
 	}
@@ -202,6 +200,17 @@ func updateStatus(now time.Time, status SpaceStatus) {
 		l := loc.MustGetUserLanguageID(u)
 
 		bot.Send(&tele.User{ID: u}, status.Text(l))
+	}
+	if err != nil {
+		log.Printf("Failed to broadcast spacestatus update: %s", err)
+	}
+
+	// broadcast to groups
+	groups, err := db.GetTaggedGroups(SpaceStatusSubTag)
+	for _, u := range groups {
+		l := loc.DefaultLang()
+
+		bot.Send(&tele.User{ID: u}, status.Text(&l))
 	}
 	if err != nil {
 		log.Printf("Failed to broadcast spacestatus update: %s", err)
