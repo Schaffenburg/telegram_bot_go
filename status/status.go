@@ -541,7 +541,7 @@ func handleDepart(m *tele.Message) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(m.Sender)
 
-	ok, err := db.SetLocationDepart(m.Sender.ID)
+	ok, err := Depart(m.Sender.ID)
 	if err != nil {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	}
