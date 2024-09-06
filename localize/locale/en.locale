@@ -199,4 +199,4 @@ pager.eID.rm.confirm: "Ok, removed"
 pager.list.nopagers: "You haven't added any pagers yet"
 pager.list: "You have the following IDs: %s"
 
-spaceinteract.temperatureis: "The temperature in space currently is %.1f °C"
+spaceinteract.temperatureis: "The temperature in space is %.1f °C (measured at %s)"

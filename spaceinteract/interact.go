@@ -55,12 +55,14 @@ func handleHeatingOff(m *tele.Message) {
 func handleGetTemperature(m *tele.Message) {
 	l := loc.GetUserLanguage(m.Sender)
 
-	temp, err := GetTemp()
+	temp, time, err := GetTemp()
 	if err != nil {
 		log.Printf("Failed to get temperature: %s", err)
 
 		nyu.GetBot().Send(m.Chat, FailGeneric.Get(l))
 	} else {
-		nyu.GetBot().Send(m.Chat, LTemperatureIs.Getf(l, temp))
+		timestr := time.Format("15:04 01.02.")
+
+		nyu.GetBot().Send(m.Chat, LTemperatureIs.Getf(l, temp, timestr))
 	}
 }
