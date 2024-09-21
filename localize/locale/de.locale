@@ -78,6 +78,11 @@ help.pagerhinzufuegen: "Fuege einen Pager hinzu"
 help.pagerentfernen: "Entfernt einen Pager"
 help.listpagers: "Listet einen pager"
 
+help.setlanguage: "Setzt die Sprache"
+help.getlanguage: "Gibt die Aktuelle Sprache aus"
+help.afk: "alias zu brb"
+help.featurerequest: "Gibt Senf zum bot ab"
+
 help.beep: "Loese einen akkustischen Ton im Space aus."
 help.gong: "Manuell die Türklingel von Schaffenburg e.V. auslösen."
 help.ring: "Manuell die Türklingel von Schaffenburg e.V. auslösen."

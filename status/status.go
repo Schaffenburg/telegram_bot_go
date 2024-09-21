@@ -65,7 +65,7 @@ var (
 	LDepart                       = loc.MustTrans("status.depart")
 	LBRBConfirm                   = loc.MustTrans("status.brb.confirm")
 	LReturnConfirm                = loc.MustTrans("status.return.confirm")
-	LDepartConfirmNochange        = loc.MustTrans("status.depart.confirm.nochange")
+	LDepartConfirmNochange        = loc.MustTrans("status.depart.nochange")
 	LDepartConfirm                = loc.MustTrans("status.depart.confirm")
 	LArriveConfirm                = loc.MustTrans("status.arrive.confirm")
 	LMoveArrivalConfirm           = loc.MustTrans("status.movearrival.confirm")
@@ -118,29 +118,38 @@ func init() {
 	bot.Command("ichkommheute", handleSetArrival, PermsVerein)
 	bot.Command("ichkomme", handleSetArrival, PermsVerein)
 	bot.Command("ichkomm", handleSetArrival, PermsVerein)
+	help.AddCommand("ichkommeheute",
+		"heikomaas", "eta", "ichkommeheute",
+		"ichkommeheut", "ichkommheut", "ichkommheute",
+		"ichkomme", "ichkomm",
+	)
 
-	help.AddCommand("ichkommeheute")
 	bot.Command("ichkommdochnicht", handleReviseArrival, PermsVerein)
 	bot.Command("ichkommedochnicht", handleReviseArrival, PermsVerein)
 	bot.Command("ichkommedochnich", handleReviseArrival, PermsVerein)
 	bot.Command("ichkommdochnich", handleReviseArrival, PermsVerein)
-	help.AddCommand("ichkommdochnicht")
+	help.AddCommand("ichkommdochnicht",
+		"ichkommedochnicht", "ichkommedochnich", "ichkommdochnich")
 
 	bot.Command("werkommtheute", handleListArrival, PermsVerein)
 	bot.Command("werkommtheut", handleListArrival, PermsVerein)
 	bot.Command("werkommheut", handleListArrival, PermsVerein)
 	bot.Command("werkommheute", handleListArrival, PermsVerein)
-	help.AddCommand("werkommtheute")
+	help.AddCommand("werkommtheute",
+		"werkommtheut", "werkommheut", "werkommheute")
 
 	bot.Command("weristda", handleWhoThere, PermsVerein)
 	bot.Command("werisda", handleWhoThere, PermsVerein)
-	help.AddCommand("weristda")
+	help.AddCommand("weristda",
+		"werisda")
 
 	bot.Command("ichbinda", handleArrival, PermsVerein)
 	bot.Command("icame", handleArrival, PermsVerein)
 	bot.Command("ichda", handleArrival, PermsVerein)
 	bot.Command("binda", handleArrival, PermsVerein)
-	help.AddCommand("ichbinda")
+	bot.Command("veni", handleArrival, PermsVerein)
+	help.AddCommand("ichbinda",
+		"icame", "ichda", "binda", "veni")
 
 	bot.Command("ichwaeregernda", handleWantArrival)
 	help.AddCommand("ichwaeregernda")
@@ -150,11 +159,21 @@ func init() {
 
 	bot.Command("ichbinweg", handleDepart, PermsVerein)
 	bot.Command("binweg", handleDepart, PermsVerein)
+	bot.Command("bin/weg", handleDepart, PermsVerein)
+	bot.Command("bin/weck", handleDepart, PermsVerein)
+	bot.Command("binbroetchen", handleDepart, PermsVerein)
+	bot.Command("binbrötchen", handleDepart, PermsVerein)
+	bot.Command("binsemmel", handleDepart, PermsVerein)
+	bot.Command("binfranz", handleDepart, PermsVerein)
 	bot.Command("nixda", handleDepart, PermsVerein)
 	bot.Command("ichverziehmich", handleDepart, PermsVerein)
 	bot.Command("ichgehjetzt", handleDepart, PermsVerein)
 
-	help.AddCommand("ichbinweg")
+	help.AddCommand("ichbinweg",
+		"binweg", "bin/weg", "bin/weck",
+		"binbroetchen", "binbrötchen", "binsemmel",
+		"binfranz", "nixda", "ichverziehmich",
+		"ichgehjetzt")
 	help.AddCommand("ichgehjetzt")
 
 	bot.Command("afk", handleBeRightBack, PermsVerein) // alias
@@ -165,7 +184,8 @@ func init() {
 
 	bot.Command("wiederda", handleReturn, PermsVerein)
 	bot.Command("ichbinwiederda", handleReturn, PermsVerein)
-	help.AddCommand("wiederda")
+	help.AddCommand("wiederda",
+		"ichbinwiederda")
 
 	bot.Command("forceclean", handleClean, PermsEV)
 	help.AddCommand("forceclean")

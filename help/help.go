@@ -5,6 +5,7 @@ import (
 	loc "github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 
+	"fmt"
 	tele "gopkg.in/tucnak/telebot.v2"
 	"log"
 	"sort"
@@ -15,6 +16,7 @@ import (
 type Command struct {
 	Text        string // command w/o slash
 	Description loc.Translation
+	Alias       []string
 }
 
 func init() {
@@ -71,13 +73,14 @@ func handleHelp(m *tele.Message) {
 	bot.Send(m.Chat, LHelpTopText.Getf(l, nyu.Version)+HelpText(l), tele.ModeMarkdown)
 }
 
-func AddCommand(c string) {
+func AddCommand(c string, alias ...string) {
 	helpEntriesMu.Lock()
 	defer helpEntriesMu.Unlock()
 
 	helpEntries = append(helpEntries, &Command{
 		Text:        c,
 		Description: loc.MustTrans("help." + c),
+		Alias:       alias,
 	})
 }
 
@@ -123,6 +126,10 @@ func genHelpText() {
 			b.WriteString(helpEntries[i].Text)
 			b.WriteString(" - ")
 			b.WriteString(helpEntries[i].Description.Get(l))
+			if len(helpEntries[i].Alias) > 0 {
+				b.WriteString("\n\talias := ")
+				fmt.Fprint(b, helpEntries[i].Alias)
+			}
 
 			first = false
 		}

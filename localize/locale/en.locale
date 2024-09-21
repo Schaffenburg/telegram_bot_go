@@ -19,6 +19,8 @@ fail.generic: "Oh no, there was an error: %s"
 
 help.topmostnotice: "[Nyu](https://github.com/Schaffenburg/telegram_bot_go)-go %s\n *Command List*:\n"
 
+help.featurerequest: "Submits feature requests"
+
 help.help: "Displays a list of commands."
 help.datum: "Displays time/date depending on location."
 help.hallo: "Says hello to the bot."
@@ -84,6 +86,10 @@ help.ring: "Manually trigger the doorbell of Schaffenburg e.V."
 help.heitzungan: "Manually turn on the heating in the space."
 help.heizungaus: "Manually turn off the heating in the space."
 help.wiewarmistes: "Displays the temperature in the hackspace building."
+
+help.setlanguage: "Sets the language"
+help.getlanguage: "Gets the current language"
+help.afk: "alias to brb"
 
 misc.noconcepttime: "It seems there is no concept of time in %s."
 misc.timeanswer: "The time in %s (%s) is currently %s\nIt is the %dth of %s %d"

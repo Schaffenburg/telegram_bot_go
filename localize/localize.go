@@ -221,7 +221,11 @@ func (t Translation) GetV(l *Language) (string, bool) {
 }
 
 func (t Translation) Get(l *Language) string {
-	trans, _ := t.GetV(l)
+	trans, ok := t.GetV(l)
+	if !ok {
+		log.Printf("[WARNING] %s does not have a translation in %s",
+			t.name, l.Name())
+	}
 
 	return trans
 }
