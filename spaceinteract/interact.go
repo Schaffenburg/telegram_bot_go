@@ -3,12 +3,14 @@ package interact
 import (
 	tele "gopkg.in/tucnak/telebot.v2"
 
+	"github.com/Schaffenburg/telegram_bot_go/config"
 	"github.com/Schaffenburg/telegram_bot_go/help"
 	"github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
 
 	"log"
+	"net/http"
 )
 
 var (
@@ -42,7 +44,18 @@ func init() {
 }
 
 func handleRing(m *tele.Message) {
-	nyu.GetBot().Send(m.Chat, "TODO: actually do gong")
+	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
+
+	resp, err := http.Get(config.Get().SpaceStatusGong)
+	if err != nil {
+		bot.Send(m.Chat, FailGeneric.Get(l)+": "+err.Error())
+		log.Printf("Failed to gong im space: %s", err)
+		return
+	}
+
+	log.Printf("Gong space got: %s", resp.Status)
+	bot.Send(m.Chat, resp.Status)
 }
 
 func handleHeatingOn(m *tele.Message) {
