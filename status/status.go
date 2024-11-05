@@ -315,7 +315,8 @@ func handleSetArrival(m *tele.Message) {
 
 				// earliest w/ key;; now hav one or is before now
 				if knowntime == nil || ua.Arrival.Before(knowntime.Arrival) {
-					knowntime = &ua
+					knowntime = new(UserArrival)
+					*knowntime = ua
 				}
 			}
 
