@@ -36,6 +36,8 @@ type Config struct {
 	SpaceStatusGong string `yaml:"spaceinteract.gong"`
 
 	ThinkSpeakTemp string `yaml:"spaceinteract.thinkspeak.temp"`
+
+	HeizungJsonPath string `yaml:"heizung.json.path"`
 }
 
 var config *Config

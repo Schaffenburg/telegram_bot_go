@@ -86,7 +86,7 @@ help.featurerequest: "Gibt Senf zum bot ab"
 help.beep: "Loese einen akkustischen Ton im Space aus."
 help.gong: "Manuell die Türklingel von Schaffenburg e.V. auslösen."
 help.ring: "Manuell die Türklingel von Schaffenburg e.V. auslösen."
-help.heitzungan: "Manuell die Heizung im Space anmachen."
+help.heizungan: "Manuell die Heizung im Space anmachen."
 help.heizungaus: "Manuell die Heizung im Space ausmachen."
 help.wiewarmistes: "Zeigt die Temperatur im Hackspace Gebaeude."
 

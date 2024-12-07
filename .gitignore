@@ -1,3 +1,4 @@
 config.yml
 *.sql
 telegram_bot_go
+telegram_bot_go.bak

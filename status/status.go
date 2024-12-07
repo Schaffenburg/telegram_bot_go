@@ -9,6 +9,7 @@ import (
 	loc "github.com/Schaffenburg/telegram_bot_go/localize"
 	"github.com/Schaffenburg/telegram_bot_go/nyu"
 	"github.com/Schaffenburg/telegram_bot_go/perms"
+	"github.com/Schaffenburg/telegram_bot_go/spaceinteract"
 	"github.com/Schaffenburg/telegram_bot_go/stalk"
 	"github.com/Schaffenburg/telegram_bot_go/util"
 
@@ -210,7 +211,7 @@ func init() {
 			log.Printf("Cleaned %d location entries", i)
 		}
 
-		everyoneDepart()
+		forceOff()
 	}, time.Hour*4)
 
 	cron.Every(updateArrivalTimers, time.Minute*5)
@@ -342,7 +343,7 @@ func handleSetArrival(m *tele.Message) {
 		}
 	}
 
-	err = db.SetArrival(m.Sender.ID, t.Unix())
+	err = SetArrival(m.Sender.ID, t)
 	if err != nil {
 		bot.Send(m.Chat, FailGeneric.Getf(l, err))
 	} else {
@@ -352,6 +353,36 @@ func handleSetArrival(m *tele.Message) {
 			bot.Send(m.Chat, LSetArrivalConfirmTime.Getf(l, t.Format("15:04")))
 		}
 	}
+}
+
+func SetArrival(user int64, t time.Time) error {
+	heatingstart := t.Add(-time.Minute * 90)
+
+	if heatingstart.Before(time.Now()) {
+		interact.WriteHeizung(true)
+	}
+
+	go func() {
+		time.Sleep(time.Until(heatingstart))
+
+		as, err := db.GetArrivals()
+		if err != nil {
+			log.Printf("Failed to get arrivals: %s", err)
+			return
+		}
+
+		now := time.Now().Add(-time.Minute * 5)
+
+		for _, a := range as {
+			heatingstart := time.Unix(a.Time, 0).Add(-time.Minute * 90)
+			if heatingstart.Before(now) {
+				interact.WriteHeizung(true)
+				return
+			}
+		}
+	}()
+
+	return db.SetArrival(user, t.Unix())
 }
 
 func updateArrivalTimers() {
@@ -459,6 +490,7 @@ func handleWhoThere(m *tele.Message) {
 
 func forceOff() {
 	everyoneDepart()
+	interact.WriteHeizung(false)
 
 	SetStatus(StatusClosed)
 }
@@ -494,6 +526,7 @@ func Depart(id int64) (ok bool, err error) {
 	if len(list) <= 0 {
 		// everyone gone
 		SetStatus(StatusClosed)
+		interact.WriteHeizung(false)
 	}
 
 	return ok, err
@@ -594,6 +627,7 @@ func handleDepart(m *tele.Message) {
 func Arrive(u int64, note string) error {
 	SendArrivalMessage(u)
 	SetStatus(StatusOpen)
+	interact.WriteHeizung(true)
 
 	return db.SetLocation(u, time.Now().Unix(), note)
 }
