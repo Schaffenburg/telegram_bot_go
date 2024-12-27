@@ -30,6 +30,9 @@ type Config struct {
 	SpaceStatusAPIKey  string `yaml:"spacestatus.apikey"`
 	SpaceStatusAPIName string `yaml:"spacestatus.name"`
 
+	SpaceStatusExtApi    string `yaml:"spacestatus.ext.listen"`
+	SpaceStatusExtApiKey string `yaml:"spacestatus.ext.key"`
+
 	SpaceStatusLegacyUser string `yaml:"spacestatus.legacy.user"`
 	SpaceStatusLegacyKey  string `yaml:"spacestatus.legacy.key"`
 

@@ -17,3 +17,6 @@ misc.weather.location: "<location>"
 misc.time.defaultlocation: "<location>"
 
 misc.batschigkeit: <number> // out of 100
+
+spacestatus.ext.listen:    "203.0.113.2:74236"
+spacestatus.ext.key:    "7ZQVO"
