@@ -37,6 +37,7 @@ type Config struct {
 	SpaceStatusLegacyKey  string `yaml:"spacestatus.legacy.key"`
 
 	SpaceStatusGong string `yaml:"spaceinteract.gong"`
+	SpaceStatusRing string `yaml:"spaceinteract.ring"`
 
 	ThinkSpeakTemp string `yaml:"spaceinteract.thinkspeak.temp"`
 

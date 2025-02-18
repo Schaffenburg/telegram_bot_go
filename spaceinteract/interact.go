@@ -32,8 +32,8 @@ var (
 func init() {
 	bot := nyu.GetBot()
 
-	bot.Command("beep", handleRing, PermsInteract)
-	bot.Command("gong", handleRing, PermsInteract)
+	bot.Command("beep", handleBeep, PermsInteract)
+	bot.Command("gong", handleBeep, PermsInteract)
 	bot.Command("ring", handleRing, PermsInteract)
 	help.AddCommand("beep")
 	help.AddCommand("gong")
@@ -89,6 +89,21 @@ func WriteHeizung(on bool) {
 }
 
 func handleRing(m *tele.Message) {
+	bot := nyu.GetBot()
+	l := loc.GetUserLanguage(m.Sender)
+
+	resp, err := http.Get(config.Get().SpaceStatusRing)
+	if err != nil {
+		bot.Send(m.Chat, FailGeneric.Get(l)+": "+err.Error())
+		log.Printf("Failed to gong im space: %s", err)
+		return
+	}
+
+	log.Printf("Gong space got: %s", resp.Status)
+	bot.Send(m.Chat, resp.Status)
+}
+
+func handleBeep(m *tele.Message) {
 	bot := nyu.GetBot()
 	l := loc.GetUserLanguage(m.Sender)
 
